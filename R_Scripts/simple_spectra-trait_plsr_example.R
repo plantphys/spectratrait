@@ -26,7 +26,8 @@ rm(list=ls(all=TRUE))   # clear workspace
 graphics.off()          # close any open graphics
 closeAllConnections()   # close any open connections to files
 
-list.of.packages <- c("devtools","readr","scales","plotrix","httr","pls","dplyr")  # packages needed for script
+list.of.packages <- c("devtools","readr","scales","plotrix","httr","pls","dplyr",
+                      "reshape2")  # packages needed for script
 # check for dependencies and install if needed
 new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
 if(length(new.packages)) install.packages(new.packages)
@@ -38,6 +39,7 @@ library(scales)   # alpha() - for applying a transparency to data points
 library(devtools)
 library(pls)
 library(dplyr)
+library(reshape2)
 
 # define function to grab PLSR model from GitHub
 #devtools::source_gist("gist.github.com/christophergandrud/4466237")
@@ -138,6 +140,28 @@ pressDFres <- melt(pressDF)
 png(paste(output_dir,inVar,"_findComponents.png",sep=""),width=6,height=5,units="in",res=200)
 boxplot(pressDFres$value~pressDFres$variable,xlab="n Components",ylab="PRESS",main=inVar)
 dev.off()
+
+# How many components? - !!automate this!!
+loc.1 <- 14
+loc.2 <- 15
+ttest <- t.test(pressDFres$value[which(pressDFres$variable==loc.1)],pressDFres$value[which(pressDFres$variable==loc.2)])
+ttest
+
+# Test components
+nComps <- 14
+#plsr.out <- plsr(as.formula(paste(inVar,"~","Spectra")),scale=FALSE,ncomp=nComps,validation="LOO",
+#                 trace=TRUE,data=cal.plsr.data)
+segs <- 100
+plsr.out <- plsr(as.formula(paste(inVar,"~","Spectra")),scale=FALSE,ncomp=nComps,validation="CV",
+                 segments=segs, segment.type="random",trace=15,data=plsr_data)
+fit1 <- plsr.out$fitted.values[,1,nComps]
+#temp <- cal.plsr.data[,inVar]
+#temp <- temp[complete.cases(temp)]
+plot(as.vector(fit1),plsr_data[,inVar],xlim=c(0,range(plsr_data[,inVar])[2]+1),
+     ylim=c(0,range(plsr_data[,inVar])[2]+1))
+abline(lm(plsr_data[,inVar]~fit1),lwd=2)
+abline(0,1,col="red",lwd=2,lty=2)
+#--------------------------------------------------------------------------------------------------#
 
 
 
