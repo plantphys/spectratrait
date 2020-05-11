@@ -1,44 +1,63 @@
-####################################################################################################
-#
-#  
-#   A simple example "How-to" script illustrating the use of basic PLSR modeling to develop a 
-#   spectra-trait algorithm to estimate leaf mass area with leaf-level spectroscopy data. The 
-#   example is built from published data source from the EcoSIS spectral database. 
-#
-#   Spectra and trait data source:
-#   https://ecosis.org/package/fresh-leaf-spectra-to-estimate-lma-over-neon-domains-in-eastern-united-states
-#
-#    Notes:
-#    * Provided as a basic example of how to apply the model to new spectra observations
-#    * The author notes the code is not the most elegant or clean, but is functional 
-#    * Questions, comments, or concerns can be sent to sserbin@bnl.gov
-#    * Code is provided under GNU General Public License v3.0 
-#
-#
-#    --- Last updated:  05.11.2020 By Shawn P. Serbin <sserbin@bnl.gov>
-####################################################################################################
+---
+html_document:
+  df_print: paged
+author: "Shawn P. Serbin"
+output:
+  pdf_document: default
+  html_notebook: default
+  html_document:
+    df_print: paged
+title: A basic PLSR example using leaf-level specrta and leaf mass per area (LMA) data from several CONUS NEON sites
+---
 
+```{r setup, include=FALSE}
+knitr::opts_hooks$set(out.maxwidth <- function(options) {
+  if (!knitr:::is_html_output()) return(options)
+  options$out.extra <- sprintf('style="max-width: %s; margin: auto; border: none; display:block;"', options$out.maxwidth)
+  options
+})
+knitr::opts_chunk$set(echo = TRUE,
+                      message = FALSE, 
+                      warning = FALSE,
+                      fig.align="center",
+                      results = "asis",
+                      out.maxwidth='100%')
+outdir <- tempdir()
+knitr::opts_knit$set(root.dir=outdir)
+#library("xtable")
+#head <- function(...) {
+#  print(xtable(utils::head(...)), type="html")
+#}
+```
 
-#---------------- Close all devices and delete all variables. -------------------------------------#
-rm(list=ls(all=TRUE))   # clear workspace
-graphics.off()          # close any open graphics
-closeAllConnections()   # close any open connections to files
+### Overview
+his is an [R Markdown](http://rmarkdown.rstudio.com) Notebook to illustrate how to conduct a basic model fit.  This example shows you how to retrieve a dataset from the EcoSIS spectral database, choose the "optimal" number of plsr components, and fit a plsr model for leaf-mass area
 
-list.of.packages <- c("readr","scales","plotrix","httr","pls","dplyr",
-                      "reshape2")  # packages needed for script
+When you click the **Knit** button in Rstudio a document will be generated that includes both content as well as the output of any embedded R code chunks within the document.
+
+### Getting Started
+### Installation
+```{r, eval=FALSE }
+list.of.packages <- c("readr","httr","pls","dplyr","reshape2")  # packages needed for script
 # check for dependencies and install if needed
 new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
 if(length(new.packages)) install.packages(new.packages)
+```
 
+
+##### Load libraries
+```{r, echo=TRUE}
 # load libraries needed for script
-library(readr)    # readr - read_csv function to pull data from EcoSIS
-library(plotrix)  # plotCI - to generate obsvered vs predicted plot with CIs
-library(scales)   # alpha() - for applying a transparency to data points
 library(pls)
+library(readr)
 library(dplyr)
 library(reshape2)
 library(ggplot2)
+library(dplyr)
+```
 
+##### Prepare helpers
+```{r, echo=TRUE}
 # define function to grab PLSR model from GitHub
 #devtools::source_gist("gist.github.com/christophergandrud/4466237")
 source_GitHubData <-function(url, sep = ",", header = TRUE) {
@@ -59,27 +78,18 @@ pls.options(plsralg = "oscorespls")
 pls.options("plsralg")
 pls.options()$parallel
 # NULL
-#--------------------------------------------------------------------------------------------------#
+```
 
-
-#--------------------------------------------------------------------------------------------------#
-### Set working directory (scratch space)
-outdir <- tempdir()
+##### Setup temporary folder
+```{r, echo=TRUE}
+print(paste0("Output temporary directory: ",outdir))
 setwd(outdir) # set working directory
 getwd()  # check wd
-#--------------------------------------------------------------------------------------------------#
+```
 
-
-#--------------------------------------------------------------------------------------------------#
-### Example datasets
-# 
-# URL:  https://ecosis.org/package/fresh-leaf-spectra-to-estimate-lma-over-neon-domains-in-eastern-united-states
-#
-#--------------------------------------------------------------------------------------------------#
-
-
-#--------------------------------------------------------------------------------------------------#
-### Grab data
+### Grab data from EcoSIS
+##### URL:  https://ecosis.org/package/fresh-leaf-spectra-to-estimate-lma-over-neon-domains-in-eastern-united-states
+```{r, echo=TRUE}
 print("**** Downloading Ecosis data ****")
 ecosis_id <- "5617da17-c925-49fb-b395-45a51291bd2d"  # NEON dataset
 ecosis_file <- sprintf(
@@ -91,11 +101,10 @@ dat_raw <- read_csv(ecosis_file)
 message("Download complete!")
 head(dat_raw)
 names(dat_raw)[1:40]
-#--------------------------------------------------------------------------------------------------#
+```
 
-
-#--------------------------------------------------------------------------------------------------#
 ### Create PLSR dataset
+```{r, echo=TRUE}
 Start.wave <- 500
 End.wave <- 2400
 wv <- seq(Start.wave,End.wave,1)
@@ -111,14 +120,12 @@ sample_info2 <- sample_info %>%
 head(sample_info2)
 
 plsr_data <- data.frame(sample_info2,Spectra=I(as.matrix(spectra)))
-str(plsr_data)
 
 inVar <- "LMA_gDW_m2"
-#--------------------------------------------------------------------------------------------------#
+```
 
-
-#--------------------------------------------------------------------------------------------------#
 ### Plot the spectra
+```{r, echo=TRUE}
 cexaxis <- 1.5
 cexlab <- 1.8
 ylim <- 75
@@ -139,39 +146,33 @@ lines(wv,spectra_quantiles[7,]*100,lwd=1.85, lty=3, col="grey40")
 legend("topright",legend=c("Mean reflectance","Min/Max", "95% CI"),lty=c(1,3,1),
        lwd=c(3,3,15),col=c("black","grey40","#99CC99"),bty="n", cex=1.7)
 box(lwd=2.2)
-#--------------------------------------------------------------------------------------------------#
+```
 
-
-#--------------------------------------------------------------------------------------------------#
-# Jackknife test to find number of components - simple example
+### Run Jackknife test to find number of components - simple example
+```{r, echo=TRUE}
 dims <- dim(plsr_data)
 nComps <- 20
-iterations <- 50
+iterations <- 20
 seg <- 5
 prop <- 0.70
 jk.out <- matrix(data=NA,nrow=iterations,ncol=nComps) 
-#if (parallel::detectCores() < 4) {
-#  pls.options(parallel = parallel::detectCores()-1) # Use mclapply
-#} else {
-#  pls.options(parallel = 4) # Use mclapply
-#}
 pls.options(parallel = parallel::detectCores()-1) # Use mclapply
-#pls.options(parallel = parallel::makeCluster(parallel::detectCores()-1, type = "PSOCK")) # PSOCK cluster
+print("*** Running jacknife permutation test.  Please hang tight, this can take awhile ***")
 start.time <- Sys.time()
 for (i in 1:iterations) {
-  print(paste("Iteration: ",i,sep=""))
   rows <- sample(1:nrow(plsr_data),floor(prop*nrow(plsr_data)))
   sub.data <- plsr_data[rows,]
   plsr.out <- plsr(as.formula(paste(inVar,"~","Spectra")), scale=FALSE, center=TRUE, ncomp=nComps, 
-                   validation="CV", segments = seg, segment.type="random", trace=FALSE, data=sub.data)
+                   validation="CV", segments = seg, segment.type="interleaved", trace=FALSE, data=sub.data)
   resPRESS <- as.vector(plsr.out$validation$PRESS)
   jk.out[i,seq(plsr.out$validation$ncomp)]=resPRESS
 }
 end.time <- Sys.time()
 end.time - start.time
-#parallel::stopCluster(pls.options()$parallel)
-#mpi.exit()
+```
 
+### PRESS plot
+```{r, echo=TRUE}
 pressDF <- as.data.frame(jk.out)
 names(pressDF) <- as.character(seq(nComps))
 pressDFres <- melt(pressDF)
@@ -182,7 +183,10 @@ bp <- ggplot(pressDFres, aes(x=variable, y=value)) + theme_bw() +
         axis.text.x = element_text(angle = 0,vjust = 0.5),
         panel.border = element_rect(linetype = "solid", fill = NA, size=1.5))
 bp
+```
 
+### Calculate optimal number of components
+```{r, echo=TRUE}
 # conduct t.test across components to identify first minimum - just one of the ways to do this
 j <-2 
 results <- as.vector(array(data="NA", dim=c(nComps-1,1)))
@@ -205,32 +209,39 @@ results
 # NOTE: Becuase the jacknife test above depends on random selection
 # the optimal components may change slightly between differe runs of this script
 # This is expected given different permutatoins and uncertainty in the data 
+```
 
-
+### Final PLSR model fit
+```{r, echo=TRUE}
 # Simple final model validated with cross-validation.  Segmented cross-validation used
 # given the very large sample size.  For models with fewer observations (e.g. <100) 
 # LOO or leave-one-out cross validation is recommended
 
-nComps <- 16
+#nComps <- 14
+first <- min(which(as.numeric(as.character(results$P.value)) > 0.05))
+nComps <- results$Component[first]
+print(paste0("*** Optimal number of components based on t.test: ", nComps))
 
 segs <- 30
 pls.options(parallel = NULL)
 plsr.out <- plsr(as.formula(paste(inVar,"~","Spectra")),scale=FALSE,ncomp=nComps,validation="CV",
                  segments=segs, segment.type="interleaved",trace=TRUE,data=plsr_data)
-fit1 <- plsr.out$fitted.values[,1,nComps]
+fit <- plsr.out$fitted.values[,1,nComps]
 
-plot_data <- data.frame(plsr_data[, which(names(plsr_data) %notin% "Spectra")], Fitted=fit1)
+plot_data <- data.frame(plsr_data[, which(names(plsr_data) %notin% "Spectra")], Fitted=fit)
 plot_data <- plot_data %>%
   mutate(Residuals = Fitted-LMA_gDW_m2)
 head(plot_data)
+```
 
-# basic scatter plot of results
+### Basic scatter plot of results
+```{r, echo=TRUE}
 scatter_plot <- ggplot(plot_data, aes(x=Fitted, y=LMA_gDW_m2)) + 
   theme_bw() + geom_point() + geom_abline(intercept = 0, slope = 1, color="dark grey", 
             linetype="dashed", size=1.5) + xlim(0, 275) + ylim(0, 275) +
   labs(x=expression(paste("Predicted LMA (",g~m^{-2},")")), 
        y=expression(paste("Observed LMA (",g~m^{-2},")"))) +
-  annotate("text", x=250, y=50, label = paste0("R^2 == ", round(pls::R2(plsr.out)[[1]][nComps],2)), parse=T) + 
+  annotate("text", x=250, y=70, label = paste0("R^2 == ", round(pls::R2(plsr.out)[[1]][nComps],2)), parse=T) + 
   annotate("text", x=250, y=40, label = paste0("RMSE == ", round(pls::RMSEP(plsr.out)[[1]][nComps],2)), parse=T) +
   theme(axis.text=element_text(size=18), legend.position="none",
         axis.title=element_text(size=20, face="bold"), 
@@ -247,15 +258,18 @@ resid_histogram <- ggplot(plot_data, aes(x=Residuals)) +
         axis.text.x = element_text(angle = 0,vjust = 0.5),
         panel.border = element_rect(linetype = "solid", fill = NA, size=1.5))
 resid_histogram
+```
 
-# scatter plot by Functional_type
+
+### Scatter plot by Functional_type
+```{r, echo=TRUE}
 scatter_plot <- ggplot(plot_data, aes(x=Fitted, y=LMA_gDW_m2)) + 
   theme_bw() + geom_point(aes(fill=Functional_type),alpha=0.6,colour="black", pch=21, size=4) + 
   geom_abline(intercept = 0, slope = 1, color="dark grey", 
               linetype="dashed", size=1.5) + xlim(0, 275) + ylim(0, 275) +
   labs(x=expression(paste("Predicted LMA (",g~m^{-2},")")), 
        y=expression(paste("Observed LMA (",g~m^{-2},")"))) +
-  annotate("text", x=250, y=50, label = paste0("R^2 == ", round(pls::R2(plsr.out)[[1]][nComps],2)), parse=T) + 
+  annotate("text", x=250, y=70, label = paste0("R^2 == ", round(pls::R2(plsr.out)[[1]][nComps],2)), parse=T) + 
   annotate("text", x=250, y=40, label = paste0("RMSE == ", round(pls::RMSEP(plsr.out)[[1]][nComps],2)), parse=T) +
   theme(axis.text=element_text(size=18), legend.position="bottom",legend.title=element_text(size=16),
         legend.text=element_text(size=14),
@@ -274,15 +288,17 @@ resid_histogram <- ggplot(plot_data, aes(x=Residuals, fill=Functional_type)) +
         axis.text.x = element_text(angle = 0,vjust = 0.5),
         panel.border = element_rect(linetype = "solid", fill = NA, size=1.5))
 resid_histogram
+```
 
-# scatter plot by Domain
+### Scatter plot by Domain
+```{r, echo=TRUE}
 scatter_plot <- ggplot(plot_data, aes(x=Fitted, y=LMA_gDW_m2)) + 
   theme_bw() + geom_point(aes(fill=Domain),alpha=0.6,colour="black", pch=21, size=4) + 
   geom_abline(intercept = 0, slope = 1, color="dark grey", 
               linetype="dashed", size=1.5) + xlim(0, 275) + ylim(0, 275) +
   labs(x=expression(paste("Predicted LMA (",g~m^{-2},")")), 
        y=expression(paste("Observed LMA (",g~m^{-2},")"))) +
-  annotate("text", x=250, y=50, label = paste0("R^2 == ", round(pls::R2(plsr.out)[[1]][nComps],2)), parse=T) + 
+  annotate("text", x=250, y=70, label = paste0("R^2 == ", round(pls::R2(plsr.out)[[1]][nComps],2)), parse=T) + 
   annotate("text", x=250, y=40, label = paste0("RMSE == ", round(pls::RMSEP(plsr.out)[[1]][nComps],2)), parse=T) +
   theme(axis.text=element_text(size=18), legend.position="bottom",legend.title=element_text(size=16),
         legend.text=element_text(size=14),
@@ -301,8 +317,6 @@ resid_histogram <- ggplot(plot_data, aes(x=Residuals, fill=Domain)) +
         axis.text.x = element_text(angle = 0,vjust = 0.5),
         panel.border = element_rect(linetype = "solid", fill = NA, size=1.5))
 resid_histogram
-#--------------------------------------------------------------------------------------------------#
+```
 
-
-#--------------------------------------------------------------------------------------------------#
-### eof
+###### eof

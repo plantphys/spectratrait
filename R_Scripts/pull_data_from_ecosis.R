@@ -112,11 +112,11 @@ png(file=file.path(outdir,'NGEE-Arctic_2016_Kougarok_leaf_spectra_summary_plot.p
 par(mfrow=c(1,1), mar=c(4.5,5.7,0.3,0.4), oma=c(0.3,0.9,0.3,0.1)) # B, L, T, R
 plot(wv,mean_spec,ylim=c(0,ylim),cex=0.00001, col="white",xlab="Wavelength (nm)",
      ylab="Reflectance (%)",cex.axis=cexaxis, cex.lab=cexlab)
-polygon(c(wv ,rev(wv)),c(spectra_quantiles[6,], rev(spectra_quantiles[2,])),
+polygon(c(wv ,rev(wv)),c(spectra_quantiles[5,], rev(spectra_quantiles[3,])),
         col="#99CC99",border=NA)
 lines(wv,mean_spec,lwd=3, lty=1, col="black")
-lines(wv,spectra_quantiles[1,]*100,lwd=1.85, lty=3, col="grey40")
-lines(wv,spectra_quantiles[7,]*100,lwd=1.85, lty=3, col="grey40")
+lines(wv,spectra_quantiles[1,],lwd=1.85, lty=3, col="grey40")
+lines(wv,spectra_quantiles[7,],lwd=1.85, lty=3, col="grey40")
 legend("topright",legend=c("Mean reflectance","Min/Max", "95% CI"),lty=c(1,3,1),
        lwd=c(3,3,15),col=c("black","grey40","#99CC99"),bty="n", cex=1.7)
 box(lwd=2.2)
