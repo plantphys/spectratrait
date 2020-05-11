@@ -22,7 +22,7 @@ rm(list=ls(all=TRUE))   # clear workspace
 graphics.off()          # close any open graphics
 closeAllConnections()   # close any open connections to files
 
-list.of.packages <- c("readr","httr","dplyr","reshape2","ggplot2")  # packages needed for script
+list.of.packages <- c("readr","httr","dplyr","reshape2","ggplot2", "magick")  # packages needed for script
 # check for dependencies and install if needed
 new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
 if(length(new.packages)) install.packages(new.packages)
@@ -51,9 +51,8 @@ source_GitHubData <-function(url, sep = ",", header = TRUE) {
 
 #--------------------------------------------------------------------------------------------------#
 ### Set working directory (scratch space)
-output_dir <- file.path("~",'scratch/')
-if (! file.exists(output_dir)) dir.create(output_dir,recursive=TRUE, showWarnings = FALSE)
-setwd(output_dir) # set working directory
+outdir <- tempdir()
+setwd(outdir) # set working directory
 getwd()  # check wd
 #--------------------------------------------------------------------------------------------------#
 
@@ -108,7 +107,7 @@ spectra_quantiles <- apply(spectra[,which(names(spectra) %in% paste0("Wave_",wv)
                            2,quantile,na.rm=T,probs=c(0,0.025,0.05,0.5,0.95,0.975,1))
 
 print("**** Plotting Ecosis specrtal data. Writing to scratch space ****")
-png(file=file.path(output_dir,'NGEE-Arctic_2016_Kougarok_leaf_spectra_summary_plot.png'),height=3000,
+png(file=file.path(outdir,'NGEE-Arctic_2016_Kougarok_leaf_spectra_summary_plot.png'),height=3000,
     width=3900, res=340)
 par(mfrow=c(1,1), mar=c(4.5,5.7,0.3,0.4), oma=c(0.3,0.9,0.3,0.1)) # B, L, T, R
 plot(wv,mean_spec,ylim=c(0,ylim),cex=0.00001, col="white",xlab="Wavelength (nm)",
@@ -147,11 +146,19 @@ head(trait_data)
 p2 <- ggplot(trait_data, aes(x=USDA_Species_Code, y=value)) + 
   geom_boxplot() +
   facet_wrap(~variable, scale="free")
-ggsave(filename = file.path(output_dir,"NGEE-Arctic_2016_Kougarok_Trait_data.png"), plot = p2,
+ggsave(filename = file.path(outdir,"NGEE-Arctic_2016_Kougarok_Trait_data.png"), plot = p2,
        width = 40, height = 20, units = "cm")
 #--------------------------------------------------------------------------------------------------#
 
 
 #--------------------------------------------------------------------------------------------------#
-rm(list=ls(all=TRUE))   # clear workspace
+print(paste0("**** Output can be found in: ", outdir))
+spec <- magick::image_read(file.path(outdir,'NGEE-Arctic_2016_Kougarok_leaf_spectra_summary_plot.png'))
+plot.new()
+plot(spec) 
+
+traits <- magick::image_read(file.path(outdir,'NGEE-Arctic_2016_Kougarok_Trait_data.png'))
+plot.new()
+plot(traits) 
+
 ### EOF
