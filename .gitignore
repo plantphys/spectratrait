@@ -18,7 +18,8 @@
 .Rproj.user/
 
 # produced vignettes
-vignettes/*.html
+## commented out to preserve html for display in GitHub
+#vignettes/*.html
 ## commented out to preserve pdf for display in GitHub
 #vignettes/*.pdf
 
