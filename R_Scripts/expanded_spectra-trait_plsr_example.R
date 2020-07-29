@@ -212,18 +212,23 @@ f.plot.spec(Z=val.plsr.data$Spectra,wv=seq(Start.wave,End.wave,1),plot_label="Va
 
 
 #--------------------------------------------------------------------------------------------------#
+### Use Jackknife permutation to determine optimal number of compoenents
+if(grepl("Windows", sessionInfo()$running)){
+  pls.options(parallel =NULL)
+} else {
+  pls.options(parallel = parallel::detectCores()-1)
+}
 dims <- dim(plsr_data)
-nComps <- 20
+nComps <- 16
 iterations <- 20
-seg <- 5
+seg <- 15
 prop <- 0.70
 jk.out <- matrix(data=NA,nrow=iterations,ncol=nComps) 
-pls.options(parallel = parallel::detectCores()-1) # Use mclapply
 print("*** Running jacknife permutation test.  Please hang tight, this can take awhile ***")
 start.time <- Sys.time()
 for (i in 1:iterations) {
-  rows <- sample(1:nrow(plsr_data),floor(prop*nrow(plsr_data)))
-  sub.data <- plsr_data[rows,]
+  rows <- sample(1:nrow(cal.plsr.data),floor(prop*nrow(cal.plsr.data)))
+  sub.data <- cal.plsr.data[rows,]
   plsr.out <- plsr(as.formula(paste(inVar,"~","Spectra")), scale=FALSE, center=TRUE, ncomp=nComps, 
                    validation="CV", segments = seg, segment.type="interleaved", trace=FALSE, data=sub.data)
   resPRESS <- as.vector(plsr.out$validation$PRESS)
@@ -231,6 +236,36 @@ for (i in 1:iterations) {
 }
 end.time <- Sys.time()
 end.time - start.time
+
+# Jackknife PRESS plot
+pressDF <- as.data.frame(jk.out)
+names(pressDF) <- as.character(seq(nComps))
+pressDFres <- melt(pressDF)
+bp <- ggplot(pressDFres, aes(x=variable, y=value)) + theme_bw() + 
+  geom_boxplot(notch=TRUE) + labs(x="Number of Components", y="PRESS") +
+  theme(axis.text=element_text(size=18), legend.position="none",
+        axis.title=element_text(size=20, face="bold"), 
+        axis.text.x = element_text(angle = 0,vjust = 0.5),
+        panel.border = element_rect(linetype = "solid", fill = NA, size=1.5))
+bp
+
+# conduct t.test across components to identify first minimum - just one of the ways to do this
+j <-2 
+results <- as.vector(array(data="NA", dim=c(nComps-1,1)))
+for (i in seq_along(1:nComps-1)) {
+  comp1 <- i; comp2 <- j
+  ttest <- t.test(pressDFres$value[which(pressDFres$variable==comp1)],
+                  pressDFres$value[which(pressDFres$variable==comp2)])
+  #print(i)
+  results[i] <- round(unlist(ttest$p.value),8)
+  j <- j+1
+  if (j > nComps) {
+    break
+  }
+}
+results <- data.frame(seq(2,nComps,1),results)
+names(results) <- c("Component", "P.value")
+results
 
 
 
