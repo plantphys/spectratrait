@@ -41,7 +41,7 @@ library(gridExtra)
 #--------------------------------------------------------------------------------------------------#
 ### Setup other functions and options
 # Source helper functions from GitHub
-devtools::source_url("")
+devtools::source_url("https://raw.githubusercontent.com/TESTgroup-BNL/How_to_PLSR/master/R_Scripts/functions.R")
 
 # not in
 `%notin%` <- Negate(`%in%`)
@@ -181,7 +181,7 @@ f.plot.spec(Z=val.plsr.data$Spectra,wv=seq(Start.wave,End.wave,1),plot_label="Va
 
 
 #--------------------------------------------------------------------------------------------------#
-### Use Jackknife permutation to determine optimal number of compoenents
+### Use Jackknife permutation to determine optimal number of components
 if(grepl("Windows", sessionInfo()$running)){
   pls.options(parallel =NULL)
 } else {
@@ -465,7 +465,7 @@ list.files(getwd())[grep(pattern = inVar, list.files(getwd()))]
 #---------------- Jackknife model evaluation ------------------------------------------------------#
 #!!  this code section needs lots of cleaning and refining.  not optimal !!
 nComps
-resamples <- 1000 #1000
+resamples <- 100 #1000
 output.jackknife.stats <- data.frame(Rsq=rep(NA,resamples),RMSEP=rep(NA,resamples),
                                      PERC_RMSEP=rep(NA,resamples), Bias=rep(NA,resamples))
 output.jackknife.coefs <- array(data=NA,dim=c(resamples,
@@ -529,3 +529,157 @@ for (i in 1:resamples) {
 #--------------------------------------------------------------------------------------------------#
 
 
+#--------------------------------------------------------------------------------------------------#
+### Histogram statistics
+head(output.jackknife.stats)
+rsqHist <- qplot(output.jackknife.stats[,"Rsq"],geom="histogram",
+                 main = "Jackknife Rsq",
+                 xlab = paste0(inVar),ylab = "Count",fill=I("grey50"),col=I("black"),alpha=I(.7))
+rmseHist <- qplot(output.jackknife.stats[,"RMSEP"],geom="histogram",
+                 main = "Jackknife RMSE",
+                 xlab = paste0(inVar),ylab = "Count",fill=I("grey50"),col=I("black"),alpha=I(.7))
+biasHist <- qplot(output.jackknife.stats[,"Bias"],geom="histogram",
+                  main = "Jackknife Bias",
+                  xlab = paste0(inVar),ylab = "Count",fill=I("grey50"),col=I("black"),alpha=I(.7))
+grid.arrange(rsqHist, rmseHist, biasHist, ncol=3)
+#--------------------------------------------------------------------------------------------------#
+
+
+#---------------- Output jackknife results --------------------------------------------------------#
+write.csv(output.jackknife.stats,file=file.path(outdir,paste0(inVar,'_Jackkife_PLSR_Resutls.csv')),
+          row.names=FALSE)
+#--------------------------------------------------------------------------------------------------#
+
+
+#--------------------------------------------------------------------------------------------------#
+### plot jackknife coefficients
+dev.off()
+dims <- dim(output.jackknife.coefs)
+plot.coefs <- output.jackknife.coefs[,2:dims[2]]
+plot.min <- min(output.jackknife.coefs[,2:dims[2]])
+plot.max <- max(output.jackknife.coefs[,2:dims[2]])
+jk.intercepts <- output.jackknife.coefs[,1]
+
+# Stats
+coef.means <- colMeans(plot.coefs)
+sd.coef <- apply(plot.coefs,MARGIN=2,FUN=function(x)sd(x))
+min.coef <- apply(plot.coefs,MARGIN=2,FUN=function(x)min(x))
+max.coef <- apply(plot.coefs,MARGIN=2,FUN=function(x)max(x))
+coef.quant <- apply(plot.coefs,2,quantile,probs=c(0.025,0.975))
+intercepts.quant <- quantile(jk.intercepts,probs=c(0.025,0.975))
+
+# T Test
+x <- resamples # From Jackknife above
+results <- apply(plot.coefs,2, function(plot.coefs) {
+  t.test(x = plot.coefs[1:x])$p.value}) 
+
+waves <- seq(Start.wave,End.wave,1)
+coefs <- as.vector(coef(plsr.out,ncomp=nComps,intercept=FALSE))
+plot(waves,coefs,type="l",lwd=4,ylim=c(plot.min,plot.max))
+# Min/Max
+polygon(c(waves ,rev(waves)),c(max.coef, rev(min.coef)),col="grey50",border=NA)
+lines(waves,min.coef,lty=1,lwd=3,col="grey50")
+lines(waves,max.coef,lty=1,lwd=3,col="grey50")
+# 95% CIs
+polygon(c(waves ,rev(waves)),c(coef.quant[2,], rev(coef.quant[1,])),col="grey70",border=NA)
+lines(waves,coef.quant[1,],lty=1,lwd=2,col="grey70")
+lines(waves,coef.quant[2,],lty=1,lwd=2,col="grey70")
+# replot the mean and zero line
+lines(waves,coefs,lwd=4)
+abline(h=0,lty=2,col="grey",lwd=1.5)
+legend("bottomright",legend=c("Mean","95% CI"),lty=c(1,1),
+       col=c("black","dark grey"),lwd=3)
+box(lwd=2.2)
+
+# P-vals
+plot(waves,results,pch=21,bg="grey80",ylab="P-value",xlab="Wavelength (nm)",
+     cex=2)
+#--------------------------------------------------------------------------------------------------#
+
+
+#---------------- Output jackknife results --------------------------------------------------------#
+# JK Coefficents
+out.jk.coefs <- data.frame(Iteration=seq(1,resamples,1),jk.intercepts,plot.coefs)
+names(out.jk.coefs) <- c("Iteration","Intercept",paste("Wave_",seq(Start.wave,End.wave,1),sep=""))
+write.csv(out.jk.coefs,file=file.path(outdir,paste0(inVar,'_Jackkife_PLSR_Coefficients.csv')),
+          row.names=FALSE)
+
+# VIPs
+out.jk.vips <- data.frame(Iteration=seq(1,resamples,1),vips)
+names(out.jk.vips) <- c("Iteration",paste("Wave_",seq(Start.wave,End.wave,1),sep=""))
+write.csv(out.jk.vips,file=file.path(outdir,paste0(inVar,'_Jackkife_PLSR_VIPs.csv')),
+          row.names=FALSE)
+
+# Coeff quantiles
+out.coef.quant <- array(data=NA,dim=c(2,dim(out.jk.coefs)[2]))
+out.coef.quant[1,1] <- "5%"
+out.coef.quant[2,1] <- "95%"
+out.coef.quant[1,2] <- intercepts.quant[[1]]
+out.coef.quant[2,2] <- intercepts.quant[[2]]
+out.coef.quant[,3:dim(out.jk.coefs)[2]] <- coef.quant
+out.coef.quant <- data.frame(out.coef.quant)
+
+names(out.coef.quant) <- c("Quantile","Intercept",paste("Wave_",seq(Start.wave,End.wave,1),sep=""))
+
+write.csv(out.coef.quant,file=file.path(outdir,paste0(inVar,'_Jackkife_PLSR_Coefficient_Quantiles.csv')),
+          row.names=TRUE)
+# P-vals
+out.pvals <- data.frame(Wavelength=paste("Wave_",seq(Start.wave,End.wave,1),sep=""),Pval=results)
+write.csv(out.pvals,file=file.path(outdir,paste0(inVar,'_Jackkife_PLSR_Coefficient_Pvals.csv')),
+          row.names=FALSE)
+#--------------------------------------------------------------------------------------------------#
+
+
+#--------------------------------------------------------------------------------------------------#
+# JK Val plot
+dims <- dim(output.jackknife.coefs)
+intercepts <- output.jackknife.coefs[,1]
+jk.coef.test.output <- array(data=NA,dim=c(dim(val.plsr.data)[1],dims[1]))
+for (i in 1:length(intercepts)){
+  coefs <- as.vector(output.jackknife.coefs[i,2:dims[2]])
+  temp <- val.plsr.data$Spectra %*% coefs  # Updated: Using matrix mult.
+  vals <- data.frame(rowSums(temp))+intercepts[i]
+  jk.coef.test.output[,i] <- vals[,1]
+}
+pred.quant <- apply(jk.coef.test.output,1,quantile,probs=c(0.025,0.975))
+pred.quant.ll <- pred.quant[1,]
+pred.quant.ul <- pred.quant[2,]
+
+jk_val_plot_data <- data.frame(val.output, LL=pred.quant.ll, UL=pred.quant.ul)
+head(jk_val_plot_data)
+
+# plot needs cleaning up. draft
+jk_val_scatterplot <- ggplot(jk_val_plot_data, aes(x=PLSR_Predicted, y=LMA_gDW_m2)) + 
+  theme_bw() + geom_point() + geom_errorbar(aes(xmin = LL,xmax = UL), width = 0.2) + 
+  geom_abline(intercept = 0, slope = 1, color="dark grey", 
+            linetype="dashed", size=1.5) + xlim(0, 275) + ylim(0, 275) +
+  labs(x=expression(paste("Predicted LMA (",g~m^{-2},")")), 
+       y=expression(paste("Observed LMA (",g~m^{-2},")"))) + 
+  theme(axis.text=element_text(size=18), legend.position="none",
+        axis.title=element_text(size=20, face="bold"), 
+        axis.text.x = element_text(angle = 0,vjust = 0.5),
+        panel.border = element_rect(linetype = "solid", fill = NA, size=1.5))
+jk_val_scatterplot
+#--------------------------------------------------------------------------------------------------#
+
+
+#--------------------------------------------------------------------------------------------------#
+# Output JK Coefficient test results
+jk.coef.test.output2 <- data.frame(jk.coef.test.output)
+names(jk.coef.test.output2) <- paste("Iteration.",seq(1,resamples,1),sep="")
+jk.coef.test.output2 <- data.frame(Observed.Values=val.output[,"LMA_gDW_m2"], 
+                                   jk.coef.test.output2)
+
+write.csv(jk.coef.test.output2,file=file.path(outdir,paste0(inVar,'_Jackkife_PLSR_Val_Data_Output.csv')),
+          row.names=FALSE)
+
+write.csv(predint,file=file.path(outdir,paste0(inVar,'_PLSR_Val_Prediction_Intervals.csv')),
+          row.names=FALSE)
+
+write.csv(confint,file=file.path(outdir,paste0(inVar,'_PLSR_Val_Confidence_Intervals.csv')),
+          row.names=FALSE)
+#--------------------------------------------------------------------------------------------------#
+
+
+#--------------------------------------------------------------------------------------------------#
+### EOF
