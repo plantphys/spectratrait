@@ -78,8 +78,7 @@ f.plot.spec=function(
 }
 
 # get VIP function from GitHub
-devtools::source_url("https://github.com/TESTgroup-BNL/How_to_PLSR/blob/expanded_plsr/R_Scripts/VIP.R")
-#source("https://github.com/TESTgroup-BNL/How_to_PLSR/blob/expanded_plsr/R_Scripts/VIP.R")
+devtools::source_url("https://raw.githubusercontent.com/TESTgroup-BNL/How_to_PLSR/expanded_plsr/R_Scripts/VIP.R")
 
 # not in
 `%notin%` <- Negate(`%in%`)
@@ -187,9 +186,9 @@ grid.arrange(cal_hist_plot, val_hist_plot, ncol=2)
 
 # !!  do we need to actually write any of this out to temp dir? !!
 full_plsr_data <- rbind(cal.plsr.data,val.plsr.data)
-write.csv(full_plsr_data,file=paste0(outdir,inVar,'_Full_PLSR_Dataset.csv',sep=""),row.names=FALSE)
-write.csv(cal.plsr.data,file=paste0(outdir,inVar,'_Cal_PLSR_Dataset.csv',sep=""),row.names=FALSE)
-write.csv(val.plsr.data,file=paste0(outdir,inVar,'_Val_PLSR_Dataset.csv',sep=""),row.names=FALSE)
+write.csv(full_plsr_data,file=file.path(outdir,paste0(inVar,'_Full_PLSR_Dataset.csv')),row.names=FALSE)
+write.csv(cal.plsr.data,file=file.path(outdir,paste0(inVar,'_Cal_PLSR_Dataset.csv')),row.names=FALSE)
+write.csv(val.plsr.data,file=file.path(outdir,paste0(inVar,'_Val_PLSR_Dataset.csv')),row.names=FALSE)
 rm(cal_data,val_data,i,j,prop,rows,domains)
 #--------------------------------------------------------------------------------------------------#
 
@@ -288,6 +287,7 @@ segs <- 30
 plsr.out <- plsr(as.formula(paste(inVar,"~","Spectra")),scale=FALSE,ncomp=nComps,validation="CV",
                  segments=segs, segment.type="interleaved",trace=TRUE,data=cal.plsr.data)
 fit <- plsr.out$fitted.values[,1,nComps]
+pls.options(parallel = NULL)
 #--------------------------------------------------------------------------------------------------#
 
 
@@ -458,11 +458,111 @@ val.output <- data.frame(val.plsr.data[,which(names(cal.plsr.data) %notin% "Spec
 head(val.output)
 rm(predicted_val,predicted_val_residuals) #cleanup
 
+coefs <- coef(plsr.out,ncomp=nComps,intercept=FALSE)
+vips <- VIP(plsr.out)[nComps,]
 
+# Coefficient and VIP plot for PLSR model !! This plotting could be improved !!
+dev.off()
+par(mfrow=c(2,1))
+plot(seq(Start.wave,End.wave,1),coefs,cex=0.01,xlab="Wavelength (nm)",ylab="REG COEF")
+lines(seq(Start.wave,End.wave,1),coefs,lwd=2.5)
+abline(h=0,lty=2,col="dark grey")
+
+plot(seq(Start.wave,End.wave,1),vips,xlab="Wavelength (nm)",ylab="VIP",cex=0.01)
+lines(seq(Start.wave,End.wave,1),vips,lwd=3)
+abline(h=0.8,lty=2,col="dark grey")
 #--------------------------------------------------------------------------------------------------#
 
 
+#---------------- Export Model Output -------------------------------------------------------------#
+print(paste("Output directory: ", getwd()))
+
+# Observed versus predicted
+write.csv(cal.output,file=file.path(outdir,paste0(inVar,'_Observed_PLSR_CV_Pred_',nComps,
+                                 'comp.csv')),row.names=FALSE)
+
+# Validation data
+write.csv(val.output,file=file.path(outdir,paste0(inVar,'_Val_PLSR_Pred_',nComps,
+                                 'comp.csv')),row.names=FALSE)
+
+# Model coefficients
+coefs <- coef(plsr.out,ncomp=nComps,intercept=TRUE)
+write.csv(coefs,file=file.path(outdir,paste0(inVar,'_PLSR_Coefficients_',nComps,'comp.csv')),
+          row.names=TRUE)
+
+# PLSR VIP
+write.csv(vips,file=file.path(outdir,paste0(inVar,'_PLSR_VIPs_',nComps,'comp.csv')))
+
+# confirm files were written to temp space
+print("**** PLSR output files: ")
+list.files(getwd())[grep(pattern = inVar, list.files(getwd()))]
+#--------------------------------------------------------------------------------------------------#
 
 
+#---------------- Jackknife model evaluation ------------------------------------------------------#
+#!!  this code section needs lots of cleaning and refining.  not optimal !!
+nComps
+resamples <- 1000 #1000
+output.jackknife.stats <- data.frame(Rsq=rep(NA,resamples),RMSEP=rep(NA,resamples),
+                                     PERC_RMSEP=rep(NA,resamples), Bias=rep(NA,resamples))
+output.jackknife.coefs <- array(data=NA,dim=c(resamples,
+                                              dim(coef(plsr.out,ncomp=nComps,intercept=TRUE))[1]))
+output.jackknife.coefs.scaled <- array(data=NA,dim=c(resamples,
+                                                     dim(coef(plsr.out,ncomp=nComps,intercept=TRUE))[1]))
+vips <- array(data=NA,dim=c(resamples,
+                            dim(coef(plsr.out,ncomp=nComps,intercept=FALSE))[1]))
+
+for (i in 1:resamples) {
+  rows <- sample(1:nrow(cal.plsr.data),floor(0.7*nrow(cal.plsr.data)))
+  cal.data.jk <- cal.plsr.data[rows,]
+  val.data.jk <- cal.plsr.data[-rows,]
+  
+  dimsCal <- dim(cal.data.jk)
+  dimsVal <- dim(val.data.jk)
+  
+  ### Build PLSR model with training data
+  if(grepl("Windows", sessionInfo()$running)){
+    pls.options(parallel =NULL)
+  } else {
+    pls.options(parallel = parallel::detectCores()-1)
+  }
+  pls.jack <- plsr(as.formula(paste0(inVar,"~","Spectra")), scale=FALSE, ncomp=nComps, validation="none", data=cal.data.jk)
+  pls.jack.scaled <- plsr(as.formula(paste0(inVar,"~","Spectra")), scale=TRUE, ncomp=nComps, validation="none", data=cal.data.jk)
+  
+  ### Estimate independent (Validation) samples
+  plsr.val <- val.data.jk[,inVar]
+  pred.val.data <- as.vector(predict(pls.jack,newdata=val.data.jk$Spectra,
+                                      ncomp=nComps,type="response")[,,1])
+  
+  ### Coefficients and VIPs
+  output.jackknife.coefs[i,] <- as.vector(coef(pls.jack,ncomp=nComps,intercept=TRUE))
+  output.jackknife.coefs.scaled[i,] <- as.vector(coef(pls.jack.scaled,ncomp=nComps,intercept=TRUE))
+  vips[i,] <- VIP(pls.jack)[nComps,]
+  
+  # Error statistics
+  n <- length(plsr.val)
+  Rsq.val <- R2(pls.jack,newdata = val.data.jk)$val[,,nComps+1] 
+  val.residuals <- pred.val.data-plsr.val
+  Val.bias <- mean(pred.val.data)-mean(plsr.val)
+  MSEP <- mean(val.residuals^2)
+  RMSEP.val <- sqrt(MSEP)
+  PERC_RMSEP <- (RMSEP.val/(max(plsr.val)-min(plsr.val)))*100
+  
+  ### Store results of iteration i
+  output.jackknife.stats[i,1] <- Rsq.val
+  output.jackknife.stats[i,2] <- RMSEP.val
+  output.jackknife.stats[i,3] <- PERC_RMSEP
+  output.jackknife.stats[i,4] <- Val.bias
+  
+  print(paste("Running Iteration",i))
+  print(paste("Stats: ","Rsq ",round(Rsq.val,2)," / RMSEP ",round(RMSEP.val,2), " / %RMSEP ",
+              round(PERC_RMSEP,2)," / Bias ",round(Val.bias,2),sep="" ) )
+  flush.console()  # force the output
+  
+  # Remove temp objects
+  rm(cal.data.jk,val.data.jk,n,pls.jack,plsr.val,Rsq.val,pred.val.data,RMSEP.val,PERC_RMSEP,
+     val.residuals,Val.bias)
+}
+#--------------------------------------------------------------------------------------------------#
 
 
