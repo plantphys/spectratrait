@@ -23,7 +23,7 @@ source_GitHubData <-function(url, sep = ",", header = TRUE) {
 
 #--------------------------------------------------------------------------------------------------#
 #' @title f.plot.spec
-#' @param Z Spectra matrix with each row corresponding to a spectra and wavelenght in columns
+#' @param Z Spectra matrix with each row corresponding to a spectra and wavelength in columns
 #' @param wv vector of wavelengths corresponding to the column of the spectra matrix Z
 #' @param xlim vector to change the default xlim of the plots (ex xlim = c(500, 2400))
 #' @param position Position of the legend (see base function legend for help)
