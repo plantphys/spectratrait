@@ -21,12 +21,14 @@
 
 #--------------------------------------------------------------------------------------------------#
 ### Install and load required R packages
-list.of.packages <- c("readr","httr","pls","dplyr","reshape2","ggplot2","gridExtra")  # packages needed for script
+list.of.packages <- c("devtools","readr","RCurl","httr","pls","dplyr","reshape2",
+                      "ggplot2","gridExtra")  # packages needed for script
 # check for dependencies and install if needed
 new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
 if(length(new.packages)) install.packages(new.packages)
 
 # Load libraries
+#library(httr) #!! may not actually need this package
 library(pls)
 library(readr)
 library(dplyr)
@@ -75,10 +77,9 @@ f.plot.spec=function(
          lwd=c(2,1,10),col=c("black","grey40","#99CC99"),bty="n")
 }
 
-vip_script_url <- 
-script <- getURL("https://raw.githubusercontent.com/opetchey/RREEBES/Beninca_development/Beninca_etal_2008_Nature/report/functions/indirect_method_functions.R", ssl.verifypeer = FALSE)
-
-
+# get VIP function from GitHub
+devtools::source_url("https://github.com/TESTgroup-BNL/How_to_PLSR/blob/expanded_plsr/R_Scripts/VIP.R")
+#source("https://github.com/TESTgroup-BNL/How_to_PLSR/blob/expanded_plsr/R_Scripts/VIP.R")
 
 # not in
 `%notin%` <- Negate(`%in%`)
