@@ -1,7 +1,4 @@
 
-#--------------------------------------------------------------------------------------------------#
-## VIP returns all VIP values for all variables and all number of components,
-## as a ncomp x nvars matrix.
 VIP <- function(object) {
     if (object$method != "oscorespls")
         stop("Only implemented for orthogonal scores algorithm.  Refit with 'method = \"oscorespls\"'")
@@ -13,11 +10,7 @@ VIP <- function(object) {
     SSW <- sweep(object$loading.weights^2, 2, SS / Wnorm2, "*") # Replace with matrix mult.
     sqrt(nrow(SSW) * apply(SSW, 1, cumsum) / cumsum(SS))
 }
-#--------------------------------------------------------------------------------------------------#
 
-
-#--------------------------------------------------------------------------------------------------#
-## VIPjh returns the VIP of variable j with h components
 VIPjh <- function(object, j, h) {
     if (object$method != "oscorespls")
         stop("Only implemented for orthogonal scores algorithm.  Refit with 'method = \"oscorespls\"'")
@@ -31,4 +24,3 @@ VIPjh <- function(object, j, h) {
     Wnorm2 <- colSums(W^2)
     sqrt(nrow(W) * sum(SS * W[j,]^2 / Wnorm2) / sum(SS))
 }
-#--------------------------------------------------------------------------------------------------#
