@@ -40,15 +40,16 @@ library(gridExtra)
 ### Setup other functions and options
 
 # define function to grab PLSR model from GitHub
+# !! since we are pulling from EcoSIS I dont think we ened this. !!
 #devtools::source_gist("gist.github.com/christophergandrud/4466237")
-source_GitHubData <-function(url, sep = ",", header = TRUE) {
-  require(httr)
-  request <- GET(url)
-  stop_for_status(request)
-  handle <- textConnection(content(request, as = 'text'))
-  on.exit(close(handle))
-  read.table(handle, sep = sep, header = header)
-}
+# source_GitHubData <-function(url, sep = ",", header = TRUE) {
+#   require(httr)
+#   request <- GET(url)
+#   stop_for_status(request)
+#   handle <- textConnection(content(request, as = 'text'))
+#   on.exit(close(handle))
+#   read.table(handle, sep = sep, header = header)
+# }
 
 f.plot.spec=function(
   Z,                  ## Spectra matrix with each row corresponding to a spectra and wavelength in columns
@@ -73,6 +74,11 @@ f.plot.spec=function(
   legend(position,legend=c(paste("Mean",type),"Min/Max", "95% CI"),lty=c(1,3,1),
          lwd=c(2,1,10),col=c("black","grey40","#99CC99"),bty="n")
 }
+
+vip_script_url <- 
+script <- getURL("https://raw.githubusercontent.com/opetchey/RREEBES/Beninca_development/Beninca_etal_2008_Nature/report/functions/indirect_method_functions.R", ssl.verifypeer = FALSE)
+
+
 
 # not in
 `%notin%` <- Negate(`%in%`)
@@ -242,7 +248,7 @@ pressDF <- as.data.frame(jk.out)
 names(pressDF) <- as.character(seq(nComps))
 pressDFres <- melt(pressDF)
 bp <- ggplot(pressDFres, aes(x=variable, y=value)) + theme_bw() + 
-  geom_boxplot(notch=TRUE) + labs(x="Number of Components", y="PRESS") +
+  geom_boxplot(notch=FALSE) + labs(x="Number of Components", y="PRESS") +
   theme(axis.text=element_text(size=18), legend.position="none",
         axis.title=element_text(size=20, face="bold"), 
         axis.text.x = element_text(angle = 0,vjust = 0.5),
@@ -267,11 +273,195 @@ results <- data.frame(seq(2,nComps,1),results)
 names(results) <- c("Component", "P.value")
 results
 
+# Simple final model validated with cross-validation.  Segmented cross-validation used
+# given the very large sample size.  For models with fewer observations (e.g. <100) 
+# LOO or leave-one-out cross validation is recommended
 
+#nComps <- 15
+first <- min(which(as.numeric(as.character(results$P.value)) > 0.05))
+nComps <- results$Component[first]
+print(paste0("*** Optimal number of components based on t.test: ", nComps))
 
+segs <- 30
+#pls.options(parallel = NULL)
+plsr.out <- plsr(as.formula(paste(inVar,"~","Spectra")),scale=FALSE,ncomp=nComps,validation="CV",
+                 segments=segs, segment.type="interleaved",trace=TRUE,data=cal.plsr.data)
+fit <- plsr.out$fitted.values[,1,nComps]
+#--------------------------------------------------------------------------------------------------#
 
 
 #--------------------------------------------------------------------------------------------------#
+### Generate some initial PLSR results
+# External validation
+par(mfrow=c(1,2)) # B, L, T, R
+RMSEP(plsr.out, newdata = val.plsr.data)
+plot(RMSEP(plsr.out,estimate=c("test"),newdata = val.plsr.data), main="MODEL RMSEP",
+     xlab="Number of Components",ylab="Model Validation RMSEP",lty=1,col="black",cex=1.5,lwd=2)
+box(lwd=2.2)
+
+R2(plsr.out, newdata = val.plsr.data)
+plot(R2(plsr.out,estimate=c("test"),newdata = val.plsr.data), main="MODEL R2",
+     xlab="Number of Components",ylab="Model Validation R2",lty=1,col="black",cex=1.5,lwd=2)
+box(lwd=2.2)
+
+
+#calibration
+cal_plot_data <- data.frame(cal.plsr.data[, which(names(cal.plsr.data) %notin% "Spectra")], Fitted=fit)
+cal_plot_data <- cal_plot_data %>%
+  mutate(Residuals = Fitted-LMA_gDW_m2)
+head(cal_plot_data)
+
+# validation
+val_plot_data <- data.frame(val.plsr.data[, which(names(val.plsr.data) %notin% "Spectra")], 
+                            Fitted=as.vector(predict(plsr.out, newdata = val.plsr.data, ncomp=nComps, 
+                                                     type="response")[,,1]))
+val_plot_data <- val_plot_data %>%
+  mutate(Residuals = Fitted-LMA_gDW_m2)
+head(val_plot_data)
+
+# cal
+cal_scatter_plot <- ggplot(cal_plot_data, aes(x=Fitted, y=LMA_gDW_m2)) + 
+  theme_bw() + geom_point() + geom_abline(intercept = 0, slope = 1, color="dark grey", 
+                                          linetype="dashed", size=1.5) + xlim(0, 275) + ylim(0, 275) +
+  labs(x=expression(paste("Predicted LMA (",g~m^{-2},")")), 
+       y=expression(paste("Observed LMA (",g~m^{-2},")"))) +
+  annotate("text", x=250, y=70, label = paste0("R^2 == ", round(pls::R2(plsr.out)[[1]][nComps],2)), parse=T) + 
+  annotate("text", x=250, y=40, label = paste0("RMSE == ", round(pls::RMSEP(plsr.out)[[1]][nComps],2)), parse=T) +
+  annotate("text",x=20,y=220,label="Calibration") + 
+  theme(axis.text=element_text(size=18), legend.position="none",
+        axis.title=element_text(size=20, face="bold"), 
+        axis.text.x = element_text(angle = 0,vjust = 0.5),
+        panel.border = element_rect(linetype = "solid", fill = NA, size=1.5))
+
+cal_resid_histogram <- ggplot(cal_plot_data, aes(x=Residuals)) +
+  geom_histogram(binwidth=.5, alpha=.5, position="identity") + 
+  geom_vline(xintercept = 0, color="black", 
+             linetype="dashed", size=1) + theme_bw() + 
+  theme(axis.text=element_text(size=18), legend.position="none",
+        axis.title=element_text(size=20, face="bold"), 
+        axis.text.x = element_text(angle = 0,vjust = 0.5),
+        panel.border = element_rect(linetype = "solid", fill = NA, size=1.5))
+
+# val
+val_scatter_plot <- ggplot(val_plot_data, aes(x=Fitted, y=LMA_gDW_m2)) + 
+  theme_bw() + geom_point() + geom_abline(intercept = 0, slope = 1, color="dark grey", 
+                                          linetype="dashed", size=1.5) + xlim(0, 275) + ylim(0, 275) +
+  labs(x=expression(paste("Predicted LMA (",g~m^{-2},")")), 
+       y=expression(paste("Observed LMA (",g~m^{-2},")"))) +
+  annotate("text", x=250, y=70, label = paste0("R^2 == ", 
+                                               round(pls::R2(plsr.out, newdata = val.plsr.data)[[1]][nComps],2)), parse=T) + 
+  annotate("text", x=250, y=40, label = paste0("RMSE == ", 
+                                               round(pls::RMSEP(plsr.out, newdata = val.plsr.data)[[1]][nComps],2)), parse=T) +
+  annotate("text",x=20,y=220,label="Validation") + 
+  theme(axis.text=element_text(size=18), legend.position="none",
+        axis.title=element_text(size=20, face="bold"), 
+        axis.text.x = element_text(angle = 0,vjust = 0.5),
+        panel.border = element_rect(linetype = "solid", fill = NA, size=1.5))
+
+val_resid_histogram <- ggplot(val_plot_data, aes(x=Residuals)) +
+  geom_histogram(binwidth=.5, alpha=.5, position="identity") + 
+  geom_vline(xintercept = 0, color="black", 
+             linetype="dashed", size=1) + theme_bw() + 
+  theme(axis.text=element_text(size=18), legend.position="none",
+        axis.title=element_text(size=20, face="bold"), 
+        axis.text.x = element_text(angle = 0,vjust = 0.5),
+        panel.border = element_rect(linetype = "solid", fill = NA, size=1.5))
+
+# plot cal/val side-by-side
+grid.arrange(cal_scatter_plot, val_scatter_plot, cal_resid_histogram, val_resid_histogram, 
+             nrow=2,ncol=2)
+#--------------------------------------------------------------------------------------------------#
+
+
+#--------------------------------------------------------------------------------------------------#
+### results by functional type and domain
+# validation by functional type
+scatter_plot <- ggplot(val_plot_data, aes(x=Fitted, y=LMA_gDW_m2)) + 
+  theme_bw() + geom_point(aes(fill=Functional_type),alpha=0.6,colour="black", pch=21, size=4) + 
+  geom_abline(intercept = 0, slope = 1, color="dark grey", 
+              linetype="dashed", size=1.5) + xlim(0, 275) + ylim(0, 275) +
+  labs(x=expression(paste("Predicted LMA (",g~m^{-2},")")), 
+       y=expression(paste("Observed LMA (",g~m^{-2},")"))) +
+  annotate("text", x=250, y=70, label = paste0("R^2 == ", 
+                                               round(pls::R2(plsr.out, newdata = val.plsr.data)[[1]][nComps],2)), 
+           parse=T) + 
+  annotate("text", x=250, y=40, label = paste0("RMSE == ", 
+                                               round(pls::RMSEP(plsr.out, newdata = val.plsr.data)[[1]][nComps],2)), 
+           parse=T) +
+  theme(axis.text=element_text(size=18), legend.position="bottom",legend.title=element_text(size=16),
+        legend.text=element_text(size=14),
+        axis.title=element_text(size=20, face="bold"), 
+        axis.text.x = element_text(angle = 0,vjust = 0.5),
+        panel.border = element_rect(linetype = "solid", fill = NA, size=1.5))
+scatter_plot
+
+resid_histogram <- ggplot(val_plot_data, aes(x=Residuals, fill=Functional_type)) +
+  geom_histogram(binwidth=.5, alpha=.5, position="identity") + 
+  geom_vline(xintercept = 0, color="black", alpha=0.6,
+             linetype="dashed", size=1) + theme_bw() + 
+  theme(axis.text=element_text(size=18), legend.position="bottom",legend.title=element_text(size=16),
+        legend.text=element_text(size=14),
+        axis.title=element_text(size=20, face="bold"), 
+        axis.text.x = element_text(angle = 0,vjust = 0.5),
+        panel.border = element_rect(linetype = "solid", fill = NA, size=1.5))
+resid_histogram
+
+# NEON domain
+scatter_plot <- ggplot(val_plot_data, aes(x=Fitted, y=LMA_gDW_m2)) + 
+  theme_bw() + geom_point(aes(fill=Domain),alpha=0.6,colour="black", pch=21, size=4) + 
+  geom_abline(intercept = 0, slope = 1, color="dark grey", 
+              linetype="dashed", size=1.5) + xlim(0, 275) + ylim(0, 275) +
+  labs(x=expression(paste("Predicted LMA (",g~m^{-2},")")), 
+       y=expression(paste("Observed LMA (",g~m^{-2},")"))) +
+  annotate("text", x=250, y=70, label = paste0("R^2 == ", 
+                                               round(pls::R2(plsr.out, newdata = val.plsr.data)[[1]][nComps],2)), 
+           parse=T) + 
+  annotate("text", x=250, y=40, label = paste0("RMSE == ", 
+                                               round(pls::RMSEP(plsr.out, newdata = val.plsr.data)[[1]][nComps],2)), 
+           parse=T) +
+  theme(axis.text=element_text(size=18), legend.position="bottom",legend.title=element_text(size=16),
+        legend.text=element_text(size=14),
+        axis.title=element_text(size=20, face="bold"), 
+        axis.text.x = element_text(angle = 0,vjust = 0.5),
+        panel.border = element_rect(linetype = "solid", fill = NA, size=1.5))
+scatter_plot
+
+resid_histogram <- ggplot(val_plot_data, aes(x=Residuals, fill=Domain)) +
+  geom_histogram(binwidth=.5, alpha=.5, position="identity") + 
+  geom_vline(xintercept = 0, color="black", alpha=0.6,
+             linetype="dashed", size=1) + theme_bw() + 
+  theme(axis.text=element_text(size=18), legend.position="bottom",legend.title=element_text(size=16),
+        legend.text=element_text(size=14),
+        axis.title=element_text(size=20, face="bold"), 
+        axis.text.x = element_text(angle = 0,vjust = 0.5),
+        panel.border = element_rect(linetype = "solid", fill = NA, size=1.5))
+resid_histogram
+#--------------------------------------------------------------------------------------------------#
+
+
+#--------------------------------------------------------------------------------------------------#
+### Generate some useful outputs
+cal.plsr.pred <- as.vector(plsr.out$fitted.values[,,nComps]) # Model fitted values. Predicted values
+cal.plsr.CVpred <- as.vector(plsr.out$validation$pred[,,nComps]) # CV pred values
+cal.CVresiduals <- as.vector(plsr.out$residuals[,,nComps]) # CV pred residuals
+cal.output <- data.frame(cal.plsr.data[,which(names(cal.plsr.data) %notin% "Spectra")],
+                         PLSR_Predicted=cal.plsr.pred, PLSR_CV_Predicted=cal.plsr.CVpred,
+                         PLSR_CV_Residuals=cal.CVresiduals)
+head(cal.output)
+rm(cal.plsr.pred,cal.plsr.CVpred,cal.CVresiduals) #cleanup
+
+predicted_val <- as.vector(predict(plsr.out, newdata = val.plsr.data, ncomp=nComps, type="response")[,,1])
+predicted_val_residuals <- predicted_val-val.plsr.data[,inVar]
+val.output <- data.frame(val.plsr.data[,which(names(cal.plsr.data) %notin% "Spectra")],
+                         PLSR_Predicted=predicted_val,PLSR_Residuals=predicted_val_residuals)
+head(val.output)
+rm(predicted_val,predicted_val_residuals) #cleanup
+
+
+#--------------------------------------------------------------------------------------------------#
+
+
+
 
 
 
