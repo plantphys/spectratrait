@@ -465,7 +465,7 @@ list.files(getwd())[grep(pattern = inVar, list.files(getwd()))]
 ### Jackknife Model Evaluation - !!!This section needs work!!!
 ```{r, echo=TRUE}
 nComps
-resamples <- 10 #1000 !! this should be more like 100 or 1000, just set to 10 for now for testing !!!
+resamples <- 100 #1000 !! this should be more like 100 or 1000, just set to 10 for now for testing !!!
 output.jackknife.stats <- data.frame(Rsq=rep(NA,resamples),RMSEP=rep(NA,resamples),
                                      PERC_RMSEP=rep(NA,resamples), Bias=rep(NA,resamples))
 output.jackknife.coefs <- array(data=NA,dim=c(resamples,
