@@ -26,13 +26,7 @@ new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"
 if(length(new.packages)) install.packages(new.packages)
 
 # Load libraries
-#library(httr) #!! may not actually need this package
-library(pls)
-library(readr)
-library(dplyr)
-library(reshape2)
-library(ggplot2)
-library(gridExtra)
+lapply(list.of.packages, require,character.only = TRUE)
 #--------------------------------------------------------------------------------------------------#
 
 
@@ -85,9 +79,10 @@ names(dat_raw)[1:40]
 Start.wave <- 500
 End.wave <- 2400
 wv <- seq(Start.wave,End.wave,1)
-spectra <- data.frame(dat_raw[,names(dat_raw) %in% wv])
-names(spectra) <- c(paste0("Wave_",wv))
-head(spectra)[1:6,1:10]
+## Majuscul to be consitent everywhere
+Spectra <- as.matrix(dat_raw[,names(dat_raw) %in% wv])
+colnames(Spectra) <- c(paste0("Wave_",wv))
+head(Spectra)[1:6,1:10]
 sample_info <- dat_raw[,names(dat_raw) %notin% seq(350,2500,1)] ## Or sample_info <- dat_raw[,!names(dat_raw) %in% seq(350,2500,1)] so you dont have to define %notin% earlier
 head(sample_info)
 
@@ -95,9 +90,8 @@ sample_info2 <- sample_info %>%
   select(Domain,Functional_type,Sample_ID,USDA_Species_Code=`USDA Symbol`,LMA_gDW_m2=LMA)
 head(sample_info2)
 
-plsr_data <- data.frame(sample_info2,spectra)
-head(plsr_data)[,1:10]
-rm(sample_info,sample_info2,spectra)
+plsr_data <- data.frame(sample_info2,Spectra=I(Spectra))
+rm(sample_info,sample_info2,Spectra)
 #--------------------------------------------------------------------------------------------------#
 
 
@@ -106,48 +100,15 @@ rm(sample_info,sample_info2,spectra)
 set.seed(2356812)
 
 ## See the proportion of samples per species and Domain
-table(plsr_data$USDA_Species_Code,plsr_data$Domain) %>% prop.table()
+table(plsr_data$USDA_Species_Code,plsr_data$Domain)
 
 ## Make a stratified random sampling in the strata USDA_Species_Code and Domain
-plsr_data$id=1:nrow(plsr_data)
 prop=0.8
-cal.plsr.data <- plsr_data %>% group_by(USDA_Species_Code,Domain) %>% slice(sample(1:n(), prop*n())) 
-val.plsr.data <- plsr_data[!plsr_data$id %in% cal.plsr.data$id,]
+cal.plsr.data <- plsr_data %>% group_by(USDA_Species_Code,Domain) %>% slice(sample(1:n(), prop*n())) %>% data.frame()
+val.plsr.data <- plsr_data[!plsr_data$Sample_ID %in% cal.plsr.data$Sample_ID,]
 
 ## Verification of the stratified sampling, are the proportion similar with the plsr_data dataset?
-table(cal.plsr.data$USDA_Species_Code,cal.plsr.data$Domain) %>% prop.table()
-
-## Remove ID fields
-cal.plsr.data <- cal.plsr.data[,which(names(cal.plsr.data) %notin% "id")]
-val.plsr.data <- val.plsr.data[,which(names(val.plsr.data) %notin% "id")]
-cal.plsr.data <- data.frame(cal.plsr.data)
-val.plsr.data <- data.frame(val.plsr.data)
-
-# !!! this is messy and could likely be streamlined !!!
-# !!! also we may want to split data by both domain and functional type or species !!!
-#domains <- unique(plsr_data$Domain)
-#cal.plsr.data <- 0
-#val.plsr.data <- 0
-#prop <- 0.80
-#j <- 1
-#for (i in domains){
-#  print(paste("Domain: ",i,sep=""))
-#  temp.data <- plsr_data[which(plsr_data$Domain==i),]
-#  rows <- sample(1:nrow(temp.data),floor(prop*nrow(temp.data)))
-#  cal_data = droplevels(temp.data[rows,])
-#  val_data = droplevels(temp.data[-rows,])
-#  
-#  if(j==1){
-#    cal.plsr.data <- cal_data
-#    val.plsr.data <- val_data
-#  } else {
-#    cal.plsr.data <- rbind(cal.plsr.data,cal_data)
-#    val.plsr.data <- rbind(val.plsr.data,val_data)
-#  }
-#  
-#  j <- j+1
-#}
-#rm(temp.data)
+table(cal.plsr.data$USDA_Species_Code,cal.plsr.data$Domain)
 
 # Datasets:
 print(paste("Cal observations: ",dim(cal.plsr.data)[1],sep=""))
@@ -162,30 +123,15 @@ val_hist_plot <- qplot(val.plsr.data[,paste0(inVar)],geom="histogram",binwidth =
 grid.arrange(cal_hist_plot, val_hist_plot, ncol=2)
 
 # !!  do we need to actually write any of this out to temp dir? !!
-full_plsr_data <- rbind(cal.plsr.data,val.plsr.data)
-write.csv(full_plsr_data,file=file.path(outdir,paste0(inVar,'_Full_PLSR_Dataset.csv')),row.names=FALSE)
-write.csv(cal.plsr.data,file=file.path(outdir,paste0(inVar,'_Cal_PLSR_Dataset.csv')),row.names=FALSE)
-write.csv(val.plsr.data,file=file.path(outdir,paste0(inVar,'_Val_PLSR_Dataset.csv')),row.names=FALSE)
-rm(cal_data,val_data,i,j,prop,rows,domains)
+## For me the answer is no!
+## I dont really like when a script write files on my computer. I feel that it is intrusive ^^
+
 #--------------------------------------------------------------------------------------------------#
 
 
 #--------------------------------------------------------------------------------------------------#
 ### Create calibration and validation PLSR datasets
-
-spec_start <- which(names(cal.plsr.data)==paste0("Wave_",Start.wave))
-cal.spec <- as.matrix(droplevels(cal.plsr.data[,spec_start:dim(cal.plsr.data)[2]]))
-cal.plsr.data.2 <- data.frame(cal.plsr.data[,1:spec_start-1],Spectra=I(cal.spec))
-cal.plsr.data <- cal.plsr.data.2
-head(cal.plsr.data)[,1:5]
-rm(cal.plsr.data.2,cal.spec,spec_start)
-
-spec_start <- which(names(val.plsr.data)==paste0("Wave_",Start.wave))
-val.spec <- as.matrix(droplevels(val.plsr.data[,spec_start:dim(val.plsr.data)[2]]))
-val.plsr.data.2 <- data.frame(val.plsr.data[,1:spec_start-1],Spectra=I(val.spec))
-val.plsr.data <- val.plsr.data.2
-head(val.plsr.data)[,1:5]
-rm(val.plsr.data.2,val.spec,spec_start)
+# Already done earlier?
 
 # plot cal and val spectra
 par(mfrow=c(1,2)) # B, L, T, R
@@ -195,92 +141,31 @@ f.plot.spec(Z=val.plsr.data$Spectra,wv=seq(Start.wave,End.wave,1),plot_label="Va
 
 
 #--------------------------------------------------------------------------------------------------#
-### Use Jackknife permutation to determine optimal number of components
+
+### Use permutation to determine the optimal number of components
+
 if(grepl("Windows", sessionInfo()$running)){
   pls.options(parallel =NULL)
 } else {
   pls.options(parallel = parallel::detectCores()-1)
 }
 dims <- dim(plsr_data)
-nComps <- 16
+nComps <- 20
 iterations <- 20
 seg <- 15
-prop <- 0.70
-jk.out <- matrix(data=NA,nrow=iterations,ncol=nComps) 
-print("*** Running jacknife permutation test.  Please hang tight, this can take awhile ***")
-start.time <- Sys.time()
-for (i in 1:iterations) {
-  rows <- sample(1:nrow(cal.plsr.data),floor(prop*nrow(cal.plsr.data)))
-  sub.data <- cal.plsr.data[rows,]
-  plsr.out <- plsr(as.formula(paste(inVar,"~","Spectra")), scale=FALSE, center=TRUE, ncomp=nComps, 
-                   validation="CV", segments = seg, segment.type="interleaved", trace=FALSE, data=sub.data)
-  resPRESS <- as.vector(plsr.out$validation$PRESS)
-  jk.out[i,seq(plsr.out$validation$ncomp)]=resPRESS
-}
-end.time <- Sys.time()
-end.time - start.time
 
-# Jackknife PRESS plot
-pressDF <- as.data.frame(jk.out)
-names(pressDF) <- as.character(seq(nComps))
-pressDFres <- melt(pressDF)
-bp <- ggplot(pressDFres, aes(x=variable, y=value)) + theme_bw() + 
-  geom_boxplot(notch=FALSE) + labs(x="Number of Components", y="PRESS") +
-  theme(axis.text=element_text(size=18), legend.position="none",
-        axis.title=element_text(size=20, face="bold"), 
-        axis.text.x = element_text(angle = 0,vjust = 0.5),
-        panel.border = element_rect(linetype = "solid", fill = NA, size=1.5))
-bp
+plsr.out=plsr(as.formula(paste(inVar,"~","Spectra")), scale=FALSE, center=TRUE, ncomp=nComps, 
+     validation="CV", segments = seg, segment.type="interleaved", trace=FALSE, data=cal.plsr.data)
 
-# conduct t.test across components to identify first minimum - just one of the ways to do this
-j <-2 
-results <- as.vector(array(data="NA", dim=c(nComps-1,1)))
-for (i in seq_along(1:nComps-1)) {
-  comp1 <- i; comp2 <- j
-  ttest <- t.test(pressDFres$value[which(pressDFres$variable==comp1)],
-                  pressDFres$value[which(pressDFres$variable==comp2)])
-  #print(i)
-  results[i] <- round(unlist(ttest$p.value),8)
-  j <- j+1
-  if (j > nComps) {
-    break
-  }
-}
-results <- data.frame(seq(2,nComps,1),results)
-names(results) <- c("Component", "P.value")
-results
+nComps=selectNcomp(plsr.out, method = "onesigma", plot = TRUE)
 
-# Simple final model validated with cross-validation.  Segmented cross-validation used
-# given the very large sample size.  For models with fewer observations (e.g. <100) 
-# LOO or leave-one-out cross validation is recommended
-
-#nComps <- 15
-first <- min(which(as.numeric(as.character(results$P.value)) > 0.05))
-nComps <- results$Component[first]
-print(paste0("*** Optimal number of components based on t.test: ", nComps))
-
-segs <- 30
-#pls.options(parallel = NULL)
-plsr.out <- plsr(as.formula(paste(inVar,"~","Spectra")),scale=FALSE,ncomp=nComps,validation="CV",
-                 segments=segs, segment.type="interleaved",trace=TRUE,data=cal.plsr.data)
 fit <- plsr.out$fitted.values[,1,nComps]
 pls.options(parallel = NULL)
 #--------------------------------------------------------------------------------------------------#
 
 
 #--------------------------------------------------------------------------------------------------#
-### Generate some initial PLSR results
-# External validation
-par(mfrow=c(1,2)) # B, L, T, R
-RMSEP(plsr.out, newdata = val.plsr.data)
-plot(RMSEP(plsr.out,estimate=c("test"),newdata = val.plsr.data), main="MODEL RMSEP",
-     xlab="Number of Components",ylab="Model Validation RMSEP",lty=1,col="black",cex=1.5,lwd=2)
-box(lwd=2.2)
-
-R2(plsr.out, newdata = val.plsr.data)
-plot(R2(plsr.out,estimate=c("test"),newdata = val.plsr.data), main="MODEL R2",
-     xlab="Number of Components",ylab="Model Validation R2",lty=1,col="black",cex=1.5,lwd=2)
-box(lwd=2.2)
+#ALready done for using selectNcomp
 
 
 #calibration
