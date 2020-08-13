@@ -14,8 +14,6 @@
 #    * Questions, comments, or concerns can be sent to sserbin@bnl.gov
 #    * Code is provided under GNU General Public License v3.0 
 #
-#
-#    --- Last updated:  07.29.2020 By Shawn P. Serbin <sserbin@bnl.gov>
 ####################################################################################################
 
 
@@ -113,12 +111,17 @@ table(plsr_data$USDA_Species_Code,plsr_data$Domain) %>% prop.table()
 ## Make a stratified random sampling in the strata USDA_Species_Code and Domain
 plsr_data$id=1:nrow(plsr_data)
 prop=0.8
-cal.plsr.data<-plsr_data %>% group_by(USDA_Species_Code,Domain)  %>% slice(sample(1:n(), prop*n())) 
-val.pls.data<-plsr_data[!plsr_data$id %in% cal.plsr.data$id,]
+cal.plsr.data <- plsr_data %>% group_by(USDA_Species_Code,Domain) %>% slice(sample(1:n(), prop*n())) 
+val.plsr.data <- plsr_data[!plsr_data$id %in% cal.plsr.data$id,]
 
 ## Verification of the stratified sampling, are the proportion similar with the plsr_data dataset?
 table(cal.plsr.data$USDA_Species_Code,cal.plsr.data$Domain) %>% prop.table()
 
+## Remove ID fields
+cal.plsr.data <- cal.plsr.data[,which(names(cal.plsr.data) %notin% "id")]
+val.plsr.data <- val.plsr.data[,which(names(val.plsr.data) %notin% "id")]
+cal.plsr.data <- data.frame(cal.plsr.data)
+val.plsr.data <- data.frame(val.plsr.data)
 
 # !!! this is messy and could likely be streamlined !!!
 # !!! also we may want to split data by both domain and functional type or species !!!
