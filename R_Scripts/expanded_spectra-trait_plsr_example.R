@@ -90,7 +90,7 @@ wv <- seq(Start.wave,End.wave,1)
 spectra <- data.frame(dat_raw[,names(dat_raw) %in% wv])
 names(spectra) <- c(paste0("Wave_",wv))
 head(spectra)[1:6,1:10]
-sample_info <- dat_raw[,names(dat_raw) %notin% seq(350,2500,1)]
+sample_info <- dat_raw[,names(dat_raw) %notin% seq(350,2500,1)] ## Or sample_info <- dat_raw[,!names(dat_raw) %in% seq(350,2500,1)] so you dont have to define %notin% earlier
 head(sample_info)
 
 sample_info2 <- sample_info %>%
@@ -107,33 +107,44 @@ rm(sample_info,sample_info2,spectra)
 ### Create cal/val datasets
 set.seed(2356812)
 
-unique(plsr_data$USDA_Species_Code)
-unique(plsr_data$Domain)
+## See the proportion of samples per species and Domain
+table(plsr_data$USDA_Species_Code,plsr_data$Domain) %>% prop.table()
+
+## Make a stratified random sampling in the strata USDA_Species_Code and Domain
+plsr_data$id=1:nrow(plsr_data)
+prop=0.8
+cal.plsr.data<-plsr_data %>% group_by(USDA_Species_Code,Domain)  %>% slice(sample(1:n(), prop*n())) 
+val.pls.data<-plsr_data[!plsr_data$id %in% cal.plsr.data$id,]
+
+## Verification of the stratified sampling, are the proportion similar with the plsr_data dataset?
+table(cal.plsr.data$USDA_Species_Code,cal.plsr.data$Domain) %>% prop.table()
+
+
 # !!! this is messy and could likely be streamlined !!!
 # !!! also we may want to split data by both domain and functional type or species !!!
-domains <- unique(plsr_data$Domain)
-cal.plsr.data <- 0
-val.plsr.data <- 0
-prop <- 0.80
-j <- 1
-for (i in domains){
-  print(paste("Domain: ",i,sep=""))
-  temp.data <- plsr_data[which(plsr_data$Domain==i),]
-  rows <- sample(1:nrow(temp.data),floor(prop*nrow(temp.data)))
-  cal_data = droplevels(temp.data[rows,])
-  val_data = droplevels(temp.data[-rows,])
-  
-  if(j==1){
-    cal.plsr.data <- cal_data
-    val.plsr.data <- val_data
-  } else {
-    cal.plsr.data <- rbind(cal.plsr.data,cal_data)
-    val.plsr.data <- rbind(val.plsr.data,val_data)
-  }
-  
-  j <- j+1
-}
-rm(temp.data)
+#domains <- unique(plsr_data$Domain)
+#cal.plsr.data <- 0
+#val.plsr.data <- 0
+#prop <- 0.80
+#j <- 1
+#for (i in domains){
+#  print(paste("Domain: ",i,sep=""))
+#  temp.data <- plsr_data[which(plsr_data$Domain==i),]
+#  rows <- sample(1:nrow(temp.data),floor(prop*nrow(temp.data)))
+#  cal_data = droplevels(temp.data[rows,])
+#  val_data = droplevels(temp.data[-rows,])
+#  
+#  if(j==1){
+#    cal.plsr.data <- cal_data
+#    val.plsr.data <- val_data
+#  } else {
+#    cal.plsr.data <- rbind(cal.plsr.data,cal_data)
+#    val.plsr.data <- rbind(val.plsr.data,val_data)
+#  }
+#  
+#  j <- j+1
+#}
+#rm(temp.data)
 
 # Datasets:
 print(paste("Cal observations: ",dim(cal.plsr.data)[1],sep=""))
