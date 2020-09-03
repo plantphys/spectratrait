@@ -42,7 +42,7 @@ devtools::source_url("https://raw.githubusercontent.com/TESTgroup-BNL/How_to_PLS
 pls.options(plsralg = "oscorespls")
 pls.options("plsralg")
 pls.options()$parallel
-# NULL
+
 
 # What is the target variable?
 inVar <- "LMA_gDW_m2"
@@ -122,21 +122,16 @@ val_hist_plot <- qplot(val.plsr.data[,paste0(inVar)],geom="histogram",binwidth =
       xlab = paste0(inVar),ylab = "Count",fill=I("grey50"),col=I("black"),alpha=I(.7))
 grid.arrange(cal_hist_plot, val_hist_plot, ncol=2)
 
-# !!  do we need to actually write any of this out to temp dir? !!
-## For me the answer is no!
-## I dont really like when a script write files on my computer. I feel that it is intrusive ^^
-
 #--------------------------------------------------------------------------------------------------#
 
 
 #--------------------------------------------------------------------------------------------------#
-### Create calibration and validation PLSR datasets
-# Already done earlier?
 
 # plot cal and val spectra
 par(mfrow=c(1,2)) # B, L, T, R
 f.plot.spec(Z=cal.plsr.data$Spectra,wv=seq(Start.wave,End.wave,1),plot_label="Calibration")
 f.plot.spec(Z=val.plsr.data$Spectra,wv=seq(Start.wave,End.wave,1),plot_label="Validation")
+par(mfrow=c(1,1))
 #--------------------------------------------------------------------------------------------------#
 
 
@@ -151,16 +146,24 @@ if(grepl("Windows", sessionInfo()$running)){
 }
 dims <- dim(plsr_data)
 nComps <- 20
-iterations <- 20
-seg <- 15
+seg <- 100
 
 plsr.out=plsr(as.formula(paste(inVar,"~","Spectra")), scale=FALSE, center=TRUE, ncomp=nComps, 
-     validation="CV", segments = seg, segment.type="interleaved", trace=FALSE, data=cal.plsr.data)
-
+     validation="CV", segments = seg, segment.type="interleaved", trace=TRUE,jackknife=TRUE, data=cal.plsr.data)
+summary(plsr.out)
 nComps=selectNcomp(plsr.out, method = "onesigma", plot = TRUE)
 
-fit <- plsr.out$fitted.values[,1,nComps]
-pls.options(parallel = NULL)
+cal.plsr.data$Fitted <- plsr.out$fitted.values[,1,nComps]
+cal.plsr.data$Residuals <-plsr.out$residuals[,1,nComps]
+cal.R2<-round(pls::R2(plsr.out)[[1]][nComps],2)
+cal.RMSEP<-round(pls::RMSEP(plsr.out)[[1]][nComps],2)
+
+val.plsr.data$Fitted <- predict(plsr.out, newdata = val.plsr.data, ncomp=nComps, 
+                               type="response")[,,1]
+val.plsr.data$Residuals <-val.plsr.data[,inVar]-val.plsr.data$Fitted 
+val.R2<-round(pls::R2(plsr.out,newdata=val.plsr.data)[[1]][nComps],2)
+val.RMSEP<-round(pls::RMSEP(plsr.out,newdata=val.plsr.data)[[1]][nComps],2)
+#pls.options(parallel = NULL)
 #--------------------------------------------------------------------------------------------------#
 
 
@@ -168,35 +171,21 @@ pls.options(parallel = NULL)
 #ALready done for using selectNcomp
 
 
-#calibration
-cal_plot_data <- data.frame(cal.plsr.data[, which(names(cal.plsr.data) %notin% "Spectra")], Fitted=fit)
-cal_plot_data <- cal_plot_data %>%
-  mutate(Residuals = Fitted-LMA_gDW_m2)
-head(cal_plot_data)
-
-# validation
-val_plot_data <- data.frame(val.plsr.data[, which(names(val.plsr.data) %notin% "Spectra")], 
-                            Fitted=as.vector(predict(plsr.out, newdata = val.plsr.data, ncomp=nComps, 
-                                                     type="response")[,,1]))
-val_plot_data <- val_plot_data %>%
-  mutate(Residuals = Fitted-LMA_gDW_m2)
-head(val_plot_data)
-
 # cal
-cal_scatter_plot <- ggplot(cal_plot_data, aes(x=Fitted, y=LMA_gDW_m2)) + 
+cal_scatter_plot <- ggplot(cal.plsr.data, aes(x=Fitted, y=get(inVar))) + 
   theme_bw() + geom_point() + geom_abline(intercept = 0, slope = 1, color="dark grey", 
                                           linetype="dashed", size=1.5) + xlim(0, 275) + ylim(0, 275) +
   labs(x=expression(paste("Predicted LMA (",g~m^{-2},")")), 
        y=expression(paste("Observed LMA (",g~m^{-2},")"))) +
-  annotate("text", x=250, y=70, label = paste0("R^2 == ", round(pls::R2(plsr.out)[[1]][nComps],2)), parse=T) + 
-  annotate("text", x=250, y=40, label = paste0("RMSE == ", round(pls::RMSEP(plsr.out)[[1]][nComps],2)), parse=T) +
+  annotate("text", x=250, y=70, label = paste0("R^2 == ", cal.R2), parse=T) + 
+  annotate("text", x=250, y=40, label = paste0("RMSE == ", cal.RMSEP), parse=T) +
   annotate("text",x=20,y=220,label="Calibration") + 
   theme(axis.text=element_text(size=18), legend.position="none",
         axis.title=element_text(size=20, face="bold"), 
         axis.text.x = element_text(angle = 0,vjust = 0.5),
         panel.border = element_rect(linetype = "solid", fill = NA, size=1.5))
 
-cal_resid_histogram <- ggplot(cal_plot_data, aes(x=Residuals)) +
+cal_resid_histogram <- ggplot(cal.plsr.data, aes(x=Residuals)) +
   geom_histogram(binwidth=.5, alpha=.5, position="identity") + 
   geom_vline(xintercept = 0, color="black", 
              linetype="dashed", size=1) + theme_bw() + 
@@ -206,22 +195,20 @@ cal_resid_histogram <- ggplot(cal_plot_data, aes(x=Residuals)) +
         panel.border = element_rect(linetype = "solid", fill = NA, size=1.5))
 
 # val
-val_scatter_plot <- ggplot(val_plot_data, aes(x=Fitted, y=LMA_gDW_m2)) + 
+val_scatter_plot <- ggplot(val.plsr.data, aes(x=Fitted, y=get(inVar))) + 
   theme_bw() + geom_point() + geom_abline(intercept = 0, slope = 1, color="dark grey", 
                                           linetype="dashed", size=1.5) + xlim(0, 275) + ylim(0, 275) +
   labs(x=expression(paste("Predicted LMA (",g~m^{-2},")")), 
        y=expression(paste("Observed LMA (",g~m^{-2},")"))) +
-  annotate("text", x=250, y=70, label = paste0("R^2 == ", 
-                                               round(pls::R2(plsr.out, newdata = val.plsr.data)[[1]][nComps],2)), parse=T) + 
-  annotate("text", x=250, y=40, label = paste0("RMSE == ", 
-                                               round(pls::RMSEP(plsr.out, newdata = val.plsr.data)[[1]][nComps],2)), parse=T) +
+  annotate("text", x=250, y=70, label = paste0("R^2 == ", val.R2), parse=T) + 
+  annotate("text", x=250, y=40, label = paste0("RMSE == ",val.RMSEP), parse=T) +
   annotate("text",x=20,y=220,label="Validation") + 
   theme(axis.text=element_text(size=18), legend.position="none",
         axis.title=element_text(size=20, face="bold"), 
         axis.text.x = element_text(angle = 0,vjust = 0.5),
         panel.border = element_rect(linetype = "solid", fill = NA, size=1.5))
 
-val_resid_histogram <- ggplot(val_plot_data, aes(x=Residuals)) +
+val_resid_histogram <- ggplot(val.plsr.data, aes(x=Residuals)) +
   geom_histogram(binwidth=.5, alpha=.5, position="identity") + 
   geom_vline(xintercept = 0, color="black", 
              linetype="dashed", size=1) + theme_bw() + 
@@ -239,7 +226,7 @@ grid.arrange(cal_scatter_plot, val_scatter_plot, cal_resid_histogram, val_resid_
 #--------------------------------------------------------------------------------------------------#
 ### results by functional type and domain
 # validation by functional type
-scatter_plot <- ggplot(val_plot_data, aes(x=Fitted, y=LMA_gDW_m2)) + 
+scatter_plot <- ggplot(val.plsr.data, aes(x=Fitted, y=get(inVar))) + 
   theme_bw() + geom_point(aes(fill=Functional_type),alpha=0.6,colour="black", pch=21, size=4) + 
   geom_abline(intercept = 0, slope = 1, color="dark grey", 
               linetype="dashed", size=1.5) + xlim(0, 275) + ylim(0, 275) +
@@ -258,7 +245,7 @@ scatter_plot <- ggplot(val_plot_data, aes(x=Fitted, y=LMA_gDW_m2)) +
         panel.border = element_rect(linetype = "solid", fill = NA, size=1.5))
 scatter_plot
 
-resid_histogram <- ggplot(val_plot_data, aes(x=Residuals, fill=Functional_type)) +
+resid_histogram <- ggplot(val.plsr.data, aes(x=Residuals, fill=Functional_type)) +
   geom_histogram(binwidth=.5, alpha=.5, position="identity") + 
   geom_vline(xintercept = 0, color="black", alpha=0.6,
              linetype="dashed", size=1) + theme_bw() + 
@@ -270,7 +257,7 @@ resid_histogram <- ggplot(val_plot_data, aes(x=Residuals, fill=Functional_type))
 resid_histogram
 
 # NEON domain
-scatter_plot <- ggplot(val_plot_data, aes(x=Fitted, y=LMA_gDW_m2)) + 
+scatter_plot <- ggplot(val.plsr.data, aes(x=Fitted, y=get(inVar))) + 
   theme_bw() + geom_point(aes(fill=Domain),alpha=0.6,colour="black", pch=21, size=4) + 
   geom_abline(intercept = 0, slope = 1, color="dark grey", 
               linetype="dashed", size=1.5) + xlim(0, 275) + ylim(0, 275) +
@@ -289,7 +276,7 @@ scatter_plot <- ggplot(val_plot_data, aes(x=Fitted, y=LMA_gDW_m2)) +
         panel.border = element_rect(linetype = "solid", fill = NA, size=1.5))
 scatter_plot
 
-resid_histogram <- ggplot(val_plot_data, aes(x=Residuals, fill=Domain)) +
+resid_histogram <- ggplot(val.plsr.data, aes(x=Residuals, fill=Domain)) +
   geom_histogram(binwidth=.5, alpha=.5, position="identity") + 
   geom_vline(xintercept = 0, color="black", alpha=0.6,
              linetype="dashed", size=1) + theme_bw() + 
@@ -303,32 +290,13 @@ resid_histogram
 
 
 #--------------------------------------------------------------------------------------------------#
-### Generate some useful outputs
-cal.plsr.pred <- as.vector(plsr.out$fitted.values[,,nComps]) # Model fitted values. Predicted values
-cal.plsr.CVpred <- as.vector(plsr.out$validation$pred[,,nComps]) # CV pred values
-cal.CVresiduals <- as.vector(plsr.out$residuals[,,nComps]) # CV pred residuals
-cal.output <- data.frame(cal.plsr.data[,which(names(cal.plsr.data) %notin% "Spectra")],
-                         PLSR_Predicted=cal.plsr.pred, PLSR_CV_Predicted=cal.plsr.CVpred,
-                         PLSR_CV_Residuals=cal.CVresiduals)
-head(cal.output)
-rm(cal.plsr.pred,cal.plsr.CVpred,cal.CVresiduals) #cleanup
 
-predicted_val <- as.vector(predict(plsr.out, newdata = val.plsr.data, ncomp=nComps, type="response")[,,1])
-predicted_val_residuals <- predicted_val-val.plsr.data[,inVar]
-val.output <- data.frame(val.plsr.data[,which(names(cal.plsr.data) %notin% "Spectra")],
-                         PLSR_Predicted=predicted_val,PLSR_Residuals=predicted_val_residuals)
-head(val.output)
-rm(predicted_val,predicted_val_residuals) #cleanup
-
-coefs <- coef(plsr.out,ncomp=nComps,intercept=FALSE)
 vips <- VIP(plsr.out)[nComps,]
 
 # Coefficient and VIP plot for PLSR model !! This plotting could be improved !!
 dev.off()
 par(mfrow=c(2,1))
-plot(seq(Start.wave,End.wave,1),coefs,cex=0.01,xlab="Wavelength (nm)",ylab="REG COEF")
-lines(seq(Start.wave,End.wave,1),coefs,lwd=2.5)
-abline(h=0,lty=2,col="dark grey")
+plot(plsr.out, plottype = "coef",xlab="Wavelength (nm)",ylab="Regression coefficients",legendpos = "bottomright",ncomp=nComps)
 
 plot(seq(Start.wave,End.wave,1),vips,xlab="Wavelength (nm)",ylab="VIP",cex=0.01)
 lines(seq(Start.wave,End.wave,1),vips,lwd=3)
@@ -336,33 +304,40 @@ abline(h=0.8,lty=2,col="dark grey")
 #--------------------------------------------------------------------------------------------------#
 
 
-#---------------- Export Model Output -------------------------------------------------------------#
-print(paste("Output directory: ", getwd()))
-
-# Observed versus predicted
-write.csv(cal.output,file=file.path(outdir,paste0(inVar,'_Observed_PLSR_CV_Pred_',nComps,
-                                 'comp.csv')),row.names=FALSE)
-
-# Validation data
-write.csv(val.output,file=file.path(outdir,paste0(inVar,'_Val_PLSR_Pred_',nComps,
-                                 'comp.csv')),row.names=FALSE)
-
-# Model coefficients
-coefs <- coef(plsr.out,ncomp=nComps,intercept=TRUE)
-write.csv(coefs,file=file.path(outdir,paste0(inVar,'_PLSR_Coefficients_',nComps,'comp.csv')),
-          row.names=TRUE)
-
-# PLSR VIP
-write.csv(vips,file=file.path(outdir,paste0(inVar,'_PLSR_VIPs_',nComps,'comp.csv')))
-
-# confirm files were written to temp space
-print("**** PLSR output files: ")
-list.files(getwd())[grep(pattern = inVar, list.files(getwd()))]
-#--------------------------------------------------------------------------------------------------#
-
-
 #---------------- Jackknife model evaluation ------------------------------------------------------#
 #!!  this code section needs lots of cleaning and refining.  not optimal !!
+Intercept=coef(plsr.out,ncomp = nComps,intercept = TRUE)[1]
+Jackknife_coef=plsr.out$validation$coefficients[,,nComps,]
+Jackknife_Pred=val.plsr.data$Spectra%*%plsr.out$validation$coefficients[,,nComps,]+Intercept
+Interval_Conf=apply(X = Jackknife_Pred,MARGIN = 1,FUN = quantile,probs=c(0.025,0.975))
+Interval_Pred=apply(X = Jackknife_Pred,MARGIN = 1,FUN = quantile,probs=c(0.025,0.975))
+sd_mean=apply(X = Jackknife_Pred,MARGIN = 1,FUN =sd)
+sd_res=sd(val.plsr.data$Residuals)
+sd_tot=sqrt(sd_mean^2+sd_res^2)
+val.plsr.data$Conf_0.025=Interval_Pred[1,]
+val.plsr.data$Conf_0.975=Interval_Pred[2,]
+val.plsr.data$Pred_0.025=val.plsr.data$Fitted+1.96*sd_tot
+val.plsr.data$Pred_0.975=val.plsr.data$Fitted-1.96*sd_tot
+
+
+f.plot.coef(Z = t(Jackknife_coef),wv = seq(Start.wave,End.wave,1),plot_label="Jackknife regression coefficients",position = 'bottomleft')
+
+jk_val_scatterplot <- ggplot(val.plsr.data, aes(x=Fitted, y=get(inVar))) + 
+  theme_bw()+ geom_errorbar(aes(xmin = Pred_0.025,xmax = Pred_0.975),color='grey',width=0.2) + geom_errorbar(aes(xmin = Conf_0.025,xmax = Conf_0.975),color='blue',width=0.2)+ geom_point(size=0.3)  + 
+  geom_abline(intercept = 0, slope = 1, color="dark grey", 
+              linetype="dashed", size=1.5) + xlim(10, 230) + ylim(10, 230) +
+  labs(x=expression(paste("Predicted LMA (",g~m^{-2},")")), 
+       y=expression(paste("Observed LMA (",g~m^{-2},")"))) + 
+  theme(axis.text=element_text(size=18),legend.position = 'right',
+        axis.title=element_text(size=20, face="bold"), 
+        axis.text.x = element_text(angle = 0,vjust = 0.5),
+        panel.border = element_rect(linetype = "solid", fill = NA, size=1.5))
+jk_val_scatterplot
+
+#### I stopped here (JL)
+
+
+
 nComps
 resamples <- 100 #1000
 output.jackknife.stats <- data.frame(Rsq=rep(NA,resamples),RMSEP=rep(NA,resamples),
@@ -548,7 +523,7 @@ jk_val_plot_data <- data.frame(val.output, LL=pred.quant.ll, UL=pred.quant.ul)
 head(jk_val_plot_data)
 
 # plot needs cleaning up. draft
-jk_val_scatterplot <- ggplot(jk_val_plot_data, aes(x=PLSR_Predicted, y=LMA_gDW_m2)) + 
+jk_val_scatterplot <- ggplot(jk_val_plot_data, aes(x=PLSR_Predicted, y=get(inVar))) + 
   theme_bw() + geom_point() + geom_errorbar(aes(xmin = LL,xmax = UL), width = 0.2) + 
   geom_abline(intercept = 0, slope = 1, color="dark grey", 
             linetype="dashed", size=1.5) + xlim(0, 275) + ylim(0, 275) +
