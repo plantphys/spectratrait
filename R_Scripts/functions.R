@@ -96,7 +96,7 @@ VIP <- function(object) {
 #--------------------------------------------------------------------------------------------------#
 ## Return the intercept and the coefficients of the jackknife validation
 ## Only work in the case where center=TRUE in the plsr model
-coef.valid<-function(plsr.out, ## plsr model with center = TRUE
+f.coef.valid<-function(plsr.out, ## plsr model with center = TRUE
                      data_plsr, ## data used for the plsr model
                      ncomp ## number of component choosen
                      ){

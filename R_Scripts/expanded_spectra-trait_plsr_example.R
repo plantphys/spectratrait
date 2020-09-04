@@ -306,9 +306,11 @@ abline(h=0.8,lty=2,col="dark grey")
 
 #---------------- Jackknife model evaluation ------------------------------------------------------#
 #!!  this code section needs lots of cleaning and refining.  not optimal !!
-Intercept=coef(plsr.out,ncomp = nComps,intercept = TRUE)[1]
-Jackknife_coef=plsr.out$validation$coefficients[,,nComps,]
-Jackknife_Pred=val.plsr.data$Spectra%*%plsr.out$validation$coefficients[,,nComps,]+Intercept
+Jackknife_coef=f.coef.valid(plsr.out = plsr.out,data_plsr = cal.plsr.data,ncomp = nComps)
+Jackknife_intercept=Jackknife_coef[1,,,]
+Jackknife_coef=Jackknife_coef[2:dim(Jackknife_coef)[1],,,]
+
+Jackknife_Pred=val.plsr.data$Spectra%*%Jackknife_coef+Jackknife_intercept
 Interval_Conf=apply(X = Jackknife_Pred,MARGIN = 1,FUN = quantile,probs=c(0.025,0.975))
 Interval_Pred=apply(X = Jackknife_Pred,MARGIN = 1,FUN = quantile,probs=c(0.025,0.975))
 sd_mean=apply(X = Jackknife_Pred,MARGIN = 1,FUN =sd)
