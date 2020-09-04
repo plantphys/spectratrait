@@ -56,11 +56,11 @@ f.plot.spec=function(
 }
 #--------------------------------------------------------------------------------------------------#
 f.plot.coef=function(
-  Z,                  ## Spectra matrix with each row corresponding to a spectra and wavelength in columns
-  wv,                 ## vector of wavelengths corresponding to the column of the spectra matrix Z
+  Z,                  ## Coefficient matrix with each row corresponding to the coefficients and wavelength in columns
+  wv,                 ## vector of wavelengths 
   xlim=NULL,          ## vector to change the default xlim of the plots (ex xlim = c(500, 2400))
   position='topright',## Position of the legend (see base function legend for help)
-  type='Reflectance', ## Name of the y axis and of the legend
+  type='Coefficient', ## Name of the y axis and of the legend
   plot_label=NULL     ## optional label for plot
 ){
   
@@ -94,7 +94,32 @@ VIP <- function(object) {
   sqrt(nrow(SSW) * apply(SSW, 1, cumsum) / cumsum(SS))
 }
 #--------------------------------------------------------------------------------------------------#
-
+## Return the intercept and the coefficients of the jackknife validation
+## Only work in the case where center=TRUE in the plsr model
+coef.valid<-function(plsr.out, ## plsr model with center = TRUE
+                     data_plsr, ## data used for the plsr model
+                     ncomp ## number of component choosen
+                     ){
+  B <- plsr.out$validation$coefficients[, , ncomp,, drop = FALSE]
+  dB <- dim(B)
+  dB[1] <- dB[1] + 1
+  dnB <- dimnames(B)
+  dnB[[1]] <- c("(Intercept)", dnB[[1]])
+  BInt <- array(dim = dB, dimnames = dnB)
+  BInt[-1, , ,] <- B
+  nseg=dB[[4]]
+  for (i in 1:nseg){
+    Y<-data_plsr[,inVar]
+    Y<-Y[-plsr.out$validation$segments[[i]]]
+    Ymeans<-mean(Y)
+    X<-data_plsr$Spectra
+    X<-X[-plsr.out$validation$segments[[i]],]
+    Xmeans<-colMeans(X)
+    BInt[1, , ,i] <- Ymeans - Xmeans %*% B[, , , i]
+  } 
+  B <- BInt
+  return(B)
+}
 
 #--------------------------------------------------------------------------------------------------#
 ## VIPjh returns the VIP of variable j with h components
