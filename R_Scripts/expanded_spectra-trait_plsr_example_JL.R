@@ -33,7 +33,7 @@ lapply(list.of.packages, require,character.only = TRUE)
 #--------------------------------------------------------------------------------------------------#
 ### Setup other functions and options
 # Source helper functions from GitHub
-devtools::source_url("https://raw.githubusercontent.com/TESTgroup-BNL/How_to_PLSR/master/R_Scripts/functions.R")
+devtools::source_url("https://raw.githubusercontent.com/TESTgroup-BNL/PLSR_for_plant_trait_prediction/master/R_Scripts/functions.R")
 
 # not in
 `%notin%` <- Negate(`%in%`)
