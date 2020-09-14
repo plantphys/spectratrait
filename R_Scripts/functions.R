@@ -10,7 +10,7 @@
 #--------------------------------------------------------------------------------------------------#
 # define function to grab PLSR model from GitHub
 #devtools::source_gist("gist.github.com/christophergandrud/4466237")
-source_GitHubData <-function(url, sep = ",", header = TRUE) {
+source_GitHubData <- function(url, sep = ",", header = TRUE) {
   require(httr)
   request <- GET(url)
   stop_for_status(request)
@@ -20,6 +20,22 @@ source_GitHubData <-function(url, sep = ",", header = TRUE) {
 }
 #--------------------------------------------------------------------------------------------------#
 
+#--------------------------------------------------------------------------------------------------#
+get_ecosis_data <- function(ecosis_id = NULL) {
+  if(!is.null(ecosis_id)) {
+    print("**** Downloading Ecosis data ****")
+    ecosis_id <- ecosis_id
+    ecosis_file <- sprintf(
+      "https://ecosis.org/api/package/%s/export?metadata=true",
+      ecosis_id)
+    message("Downloading data...")
+    dat_raw <- read_csv(ecosis_file)
+    message("Download complete!")
+  } else {
+    stop("**** No EcoSIS ID provided.  Please provide a valid ID before proceeding ****")
+  }
+}
+#--------------------------------------------------------------------------------------------------#
 
 #--------------------------------------------------------------------------------------------------#
 #' @title f.plot.spec
@@ -31,7 +47,7 @@ source_GitHubData <-function(url, sep = ",", header = TRUE) {
 #' @param plot_label option plot label
 #' @author Julien Lamour
 #' 
-f.plot.spec=function(
+f.plot.spec <- function(
   Z,                  ## Spectra matrix with each row corresponding to a spectra and wavelength in columns
   wv,                 ## vector of wavelengths corresponding to the column of the spectra matrix Z
   xlim=NULL,          ## vector to change the default xlim of the plots (ex xlim = c(500, 2400))
@@ -55,7 +71,9 @@ f.plot.spec=function(
          lwd=c(2,1,10),col=c("black","grey40","#99CC99"),bty="n")
 }
 #--------------------------------------------------------------------------------------------------#
-f.plot.coef=function(
+
+#--------------------------------------------------------------------------------------------------#
+f.plot.coef <- function(
   Z,                  ## Coefficient matrix with each row corresponding to the coefficients and wavelength in columns
   wv,                 ## vector of wavelengths 
   xlim=NULL,          ## vector to change the default xlim of the plots (ex xlim = c(500, 2400))
@@ -78,28 +96,15 @@ f.plot.coef=function(
   legend(position,legend=c(paste("Mean",type),"Min/Max", "95% CI"),lty=c(1,3,1),
          lwd=c(2,1,10),col=c("black","grey40","#99CC99"),bty="n")
 }
-
 #--------------------------------------------------------------------------------------------------#
-## VIP returns all VIP values for all variables and all number of components,
-## as a ncomp x nvars matrix.
-VIP <- function(object) {
-  if (object$method != "oscorespls")
-    stop("Only implemented for orthogonal scores algorithm.  Refit with 'method = \"oscorespls\"'")
-  if (nrow(object$Yloadings) > 1)
-    stop("Only implemented for single-response models")
-  
-  SS <- c(object$Yloadings)^2 * colSums(object$scores^2)
-  Wnorm2 <- colSums(object$loading.weights^2)
-  SSW <- sweep(object$loading.weights^2, 2, SS / Wnorm2, "*") # Replace with matrix mult.
-  sqrt(nrow(SSW) * apply(SSW, 1, cumsum) / cumsum(SS))
-}
+
 #--------------------------------------------------------------------------------------------------#
 ## Return the intercept and the coefficients of the jackknife validation
 ## Only work in the case where center=TRUE in the plsr model
-f.coef.valid<-function(plsr.out, ## plsr model with center = TRUE
-                     data_plsr, ## data used for the plsr model
-                     ncomp ## number of component choosen
-                     ){
+f.coef.valid <- function(plsr.out, ## plsr model with center = TRUE
+                       data_plsr, ## data used for the plsr model
+                       ncomp ## number of component choosen
+){
   B <- plsr.out$validation$coefficients[, , ncomp,, drop = FALSE]
   dB <- dim(B)
   dB[1] <- dB[1] + 1
@@ -120,6 +125,23 @@ f.coef.valid<-function(plsr.out, ## plsr model with center = TRUE
   B <- BInt
   return(B)
 }
+#--------------------------------------------------------------------------------------------------#
+
+#--------------------------------------------------------------------------------------------------#
+## VIP returns all VIP values for all variables and all number of components,
+## as a ncomp x nvars matrix.
+VIP <- function(object) {
+  if (object$method != "oscorespls")
+    stop("Only implemented for orthogonal scores algorithm.  Refit with 'method = \"oscorespls\"'")
+  if (nrow(object$Yloadings) > 1)
+    stop("Only implemented for single-response models")
+  
+  SS <- c(object$Yloadings)^2 * colSums(object$scores^2)
+  Wnorm2 <- colSums(object$loading.weights^2)
+  SSW <- sweep(object$loading.weights^2, 2, SS / Wnorm2, "*") # Replace with matrix mult.
+  sqrt(nrow(SSW) * apply(SSW, 1, cumsum) / cumsum(SS))
+}
+#--------------------------------------------------------------------------------------------------#
 
 #--------------------------------------------------------------------------------------------------#
 ## VIPjh returns the VIP of variable j with h components
@@ -137,3 +159,6 @@ VIPjh <- function(object, j, h) {
   sqrt(nrow(W) * sum(SS * W[j,]^2 / Wnorm2) / sum(SS))
 }
 #--------------------------------------------------------------------------------------------------#
+
+#--------------------------------------------------------------------------------------------------#
+### EOF

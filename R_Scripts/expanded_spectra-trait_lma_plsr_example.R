@@ -32,14 +32,48 @@ invisible(lapply(list.of.packages, library, character.only = TRUE))
 
 #--------------------------------------------------------------------------------------------------#
 ### Setup other functions and options
-source_from_gh <- TRUE
+github_dir <- file.path("~/Data/GitHub/PLSR_for_plant_trait_prediction/R_Scripts/")
+source_from_gh <- FALSE
 if (source_from_gh) {
   # Source helper functions from GitHub
   devtools::source_url("https://raw.githubusercontent.com/TESTgroup-BNL/PLSR_for_plant_trait_prediction/master/R_Scripts/functions.R")
 } else {
-  functions <- file.path("functions.R")
+  functions <- file.path(github_dir,"functions.R")
   source(functions)
 }
+
+# not in
+`%notin%` <- Negate(`%in%`)
+
+# Script options
+pls.options(plsralg = "oscorespls")
+pls.options("plsralg")
+pls.options()$parallel
+
+# Default par options
+opar <- par(no.readonly = T)
+
+
+# What is the target variable?
+inVar <- "LMA_gDW_m2"
+
+# What is the source dataset from EcoSIS?
+ecosis_id <- "5617da17-c925-49fb-b395-45a51291bd2d"
+#--------------------------------------------------------------------------------------------------#
+
+
+#--------------------------------------------------------------------------------------------------#
+### Set working directory (scratch space)
+outdir <- tempdir()
+setwd(outdir) # set working directory
+getwd()  # check wd
+#--------------------------------------------------------------------------------------------------#
+
+
+#--------------------------------------------------------------------------------------------------#
+### Get source dataset from EcoSIS
+get_ecosis_data(ecosis_id = ecosis_id)
+#--------------------------------------------------------------------------------------------------#
 
 
 
