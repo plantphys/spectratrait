@@ -21,6 +21,7 @@ source_GitHubData <- function(url, sep = ",", header = TRUE) {
 #--------------------------------------------------------------------------------------------------#
 
 #--------------------------------------------------------------------------------------------------#
+#' @author Shawn P. Serbin
 get_ecosis_data <- function(ecosis_id = NULL) {
   if(!is.null(ecosis_id)) {
     print("**** Downloading Ecosis data ****")
@@ -31,9 +32,55 @@ get_ecosis_data <- function(ecosis_id = NULL) {
     message("Downloading data...")
     dat_raw <- read_csv(ecosis_file)
     message("Download complete!")
+    return(dat_raw)
   } else {
     stop("**** No EcoSIS ID provided.  Please provide a valid ID before proceeding ****")
   }
+}
+#--------------------------------------------------------------------------------------------------#
+
+#--------------------------------------------------------------------------------------------------#
+#' @author Shawn P. Serbin, Jeremiah Anderson, Julien Lamour
+create_data_split <- function(approach=NULL, split_seed=123456789, prop=0.8,
+                              group_variables=NULL) {
+  if(!is.null(approach)) {
+    if (approach=="base") {
+      plsr_data$CalVal <- NA
+      split_var <- group_variables
+      plsr_data$ID <- apply(plsr_data[, split_var], MARGIN = 1, FUN = function(x) paste(x, collapse = " "))
+      split_var_list <- unique(plsr_data$ID)
+      split_var_list <- split_var_list[ -grep("NA", split_var_list)]
+      for(i in 1:length(split_var_list)){
+        temp <- row.names(plsr_data[ plsr_data$ID == split_var_list[i], ])
+        ## there should probably be more than 4 obs I'm guessing, so this may need adjusting
+        if(length(temp) > 3){
+          Cal <- sample(temp,round(prop*length(temp)))
+          Val <- temp[!temp %in% Cal]
+          plsr_data$CalVal[ row.names(plsr_data) %in% Cal ] <- "Cal"
+          plsr_data$CalVal[ row.names(plsr_data) %in% Val ] <- "Val"
+          p_cal <- length(Cal)/length(temp) * 100
+          message(paste0(split_var_list[i], "   ", "Cal", ": ", p_cal, "%"))
+        } else {
+          message(paste(split_var_list[i], "Not enough observations"))
+        }
+      }
+      plsr_data$ID <- NULL
+      # drop NA's  Not all observations had a species associated with it
+      plsr_data <- plsr_data[!is.na(plsr_data$CalVal), ]
+      cal.plsr.data <- plsr_data[plsr_data$CalVal== "Cal",]
+      val.plsr.data <- plsr_data[plsr_data$CalVal== "Val",]
+    } else if (approach=="dplyr")
+      cal.plsr.data <- plsr_data %>% 
+        group_by_at(vars(group_variables)) %>% 
+        slice(sample(1:n(), prop*n())) %>% 
+        data.frame()
+      val.plsr.data <- plsr_data[!plsr_data$Sample_ID %in% cal.plsr.data$Sample_ID,]
+    
+  } else {
+    stop("**** Please choose either base R or dplyr data split ****")
+  }
+  output_list <- list(cal_data=cal.plsr.data, val_data=val.plsr.data)
+  return(output_list)
 }
 #--------------------------------------------------------------------------------------------------#
 
