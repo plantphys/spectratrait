@@ -1,39 +1,26 @@
----
-html_document:
-  df_print: paged
-author: "Shawn P. Serbin, Julien Lamour, & Jeremiah Anderson"
-output:
-  html_notebook: default
-  pdf_document: default
-  html_document:
-    df_print: paged
-title: Spectra-trait PLSR example using leaf-level spectra and leaf mass per area (LMA) data from several CONUS NEON sites
----
+####################################################################################################
+#
+#  
+#   An expanded example "How-to" script illustrating the use of PLSR modeling to develop a 
+#   spectra-trait algorithm to estimate leaf mass area with leaf-level spectroscopy data. The 
+#   example is built from published data source from the EcoSIS spectral database. This examples
+#   illustrates an approach to quantify model prediction uncertainty based on a jackknife analysis
+#
+#   Spectra and trait data source:
+#   https://ecosis.org/package/fresh-leaf-spectra-to-estimate-lma-over-neon-domains-in-eastern-united-states
+#
+#    Notes:
+#    * The author notes the code is not the most elegant or clean, but is functional 
+#    * Questions, comments, or concerns can be sent to sserbin@bnl.gov
+#    * Code is provided under GNU General Public License v3.0 
+#
+####################################################################################################
 
-#### Knitr options
-```{r setup, include=FALSE}
-#knitr::opts_hooks$set(out.maxwidth <- function(options) {
-#  if (!knitr:::is_html_output()) return(options)
-#  options$out.extra <- sprintf('style="max-width: %s; margin: auto; border: none; display:block;"', options$out.maxwidth)
-#  options
-#})
-#knitr::opts_chunk$set(echo = TRUE,
-#                      message = FALSE, 
-#                      warning = FALSE,
-#                      fig.align="center",
-#                      results = "asis",
-#                      out.maxwidth='80%')
-knitr::opts_chunk$set(echo = TRUE)
-#outdir <- tempdir()
-#knitr::opts_knit$set(root.dir=outdir)
-```
+rm(list=ls(all=TRUE))   # clear workspace
+graphics.off()          # close any open graphics
+closeAllConnections()   # close any open connections to files
 
-### Overview
-This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook to illustrate how to retrieve a dataset from the EcoSIS spectral database, choose the "optimal" number of plsr components, and fit a plsr model for leaf-mass area (LMA)
-
-### Getting Started
-### Installation
-```{r, eval=FALSE}
+#--------------------------------------------------------------------------------------------------#
 ### Install and load required R packages
 list.of.packages <- c("devtools","readr","RCurl","httr","pls","dplyr","reshape2","here",
                       "ggplot2","gridExtra")  # packages needed for script
@@ -43,10 +30,10 @@ if(length(new.packages)) install.packages(new.packages)
 
 # Load libraries
 invisible(lapply(list.of.packages, library, character.only = TRUE))
-```
+#--------------------------------------------------------------------------------------------------#
 
-### Setup other functions and options
-```{r, echo=TRUE}
+
+#--------------------------------------------------------------------------------------------------#
 ### Setup other functions and options
 github_dir <- file.path(here(),"R_Scripts")
 source_from_gh <- FALSE
@@ -73,32 +60,33 @@ inVar <- "LMA_gDW_m2"
 
 # What is the source dataset from EcoSIS?
 ecosis_id <- "5617da17-c925-49fb-b395-45a51291bd2d"
-```
+#--------------------------------------------------------------------------------------------------#
+
+
+#--------------------------------------------------------------------------------------------------#
 ### Set working directory (scratch space)
-```{r, echo=FALSE}
 outdir <- tempdir()
 setwd(outdir) # set working directory
-print(paste0("Output directory: ",getwd()))
-```
+getwd()  # check wd
+#--------------------------------------------------------------------------------------------------#
 
-### Grab data from EcoSIS
-##### URL:  https://ecosis.org/package/fresh-leaf-spectra-to-estimate-lma-over-neon-domains-in-eastern-united-states
-```{r, echo=TRUE}
-print(paste0("Output directory: ",getwd()))  # check wd
+
+#--------------------------------------------------------------------------------------------------#
 ### Get source dataset from EcoSIS
 dat_raw <- get_ecosis_data(ecosis_id = ecosis_id)
 head(dat_raw)
 names(dat_raw)[1:40]
-```
+#--------------------------------------------------------------------------------------------------#
 
-### Create full plsr dataset
-```{r, echo=TRUE}
+
+#--------------------------------------------------------------------------------------------------#
 ### Create plsr dataset
 Start.wave <- 500
 End.wave <- 2400
 wv <- seq(Start.wave,End.wave,1)
 Spectra <- as.matrix(dat_raw[,names(dat_raw) %in% wv])
 colnames(Spectra) <- c(paste0("Wave_",wv))
+head(Spectra)[1:6,1:10]
 sample_info <- dat_raw[,names(dat_raw) %notin% seq(350,2500,1)]
 head(sample_info)
 
@@ -108,10 +96,10 @@ head(sample_info2)
 
 plsr_data <- data.frame(sample_info2,Spectra)
 rm(sample_info,sample_info2,Spectra)
-```
+#--------------------------------------------------------------------------------------------------#
 
-### Create cal/val datasets
-```{r, echo=TRUE}
+
+#--------------------------------------------------------------------------------------------------#
 ### Create cal/val datasets
 ## Make a stratified random sampling in the strata USDA_Species_Code and Domain
 
@@ -138,10 +126,10 @@ val_hist_plot <- qplot(val.plsr.data[,paste0(inVar)],geom="histogram",
                        main = paste0("Val. Histogram for ",inVar),
                        xlab = paste0(inVar),ylab = "Count",fill=I("grey50"),col=I("black"),alpha=I(.7))
 grid.arrange(cal_hist_plot, val_hist_plot, ncol=2)
-```
+#--------------------------------------------------------------------------------------------------#
 
-### Create calibration and validation PLSR datasets
-```{r, echo=TRUE}
+
+#--------------------------------------------------------------------------------------------------#
 ### Format PLSR data for model fitting 
 cal_spec <- as.matrix(cal.plsr.data[, which(names(cal.plsr.data) %in% paste0("Wave_",wv))])
 cal.plsr.data <- data.frame(cal.plsr.data[, which(names(cal.plsr.data) %notin% paste0("Wave_",wv))],
@@ -152,18 +140,19 @@ val_spec <- as.matrix(val.plsr.data[, which(names(val.plsr.data) %in% paste0("Wa
 val.plsr.data <- data.frame(val.plsr.data[, which(names(val.plsr.data) %notin% paste0("Wave_",wv))],
                             Spectra=I(val_spec))
 head(val.plsr.data)[1:5]
-```
+#--------------------------------------------------------------------------------------------------#
 
-### plot cal and val spectra
-```{r, echo=TRUE}
+
+#--------------------------------------------------------------------------------------------------#
+# plot cal and val spectra
 par(mfrow=c(1,2)) # B, L, T, R
 f.plot.spec(Z=cal.plsr.data$Spectra,wv=seq(Start.wave,End.wave,1),plot_label="Calibration")
 f.plot.spec(Z=val.plsr.data$Spectra,wv=seq(Start.wave,End.wave,1),plot_label="Validation")
 par(mfrow=c(1,1))
-```
+#--------------------------------------------------------------------------------------------------#
 
-### Use Jackknife permutation to determine optimal number of components
-```{r, fig.height = 5, fig.width = 12, echo=TRUE}
+
+#--------------------------------------------------------------------------------------------------#
 ### Use permutation to determine the optimal number of components
 if(grepl("Windows", sessionInfo()$running)){
   pls.options(parallel = NULL)
@@ -186,10 +175,10 @@ if (method=="pls") {
                                     seg=seg, prop=0.70, 
                                     random_seed=random_seed)
 }
-```
+#--------------------------------------------------------------------------------------------------#
 
-### Fit final model
-```{r, fig.height = 5, fig.width = 12, echo=TRUE}
+
+#--------------------------------------------------------------------------------------------------#
 ### Fit final model
 segs <- 100
 plsr.out <- plsr(as.formula(paste(inVar,"~","Spectra")),scale=FALSE,ncomp=nComps,validation="CV",
@@ -209,9 +198,11 @@ plot(R2(plsr.out,estimate=c("test"),newdata = val.plsr.data), main="MODEL R2",
      xlab="Number of Components",ylab="Model Validation R2",lty=1,col="black",cex=1.5,lwd=2)
 box(lwd=2.2)
 par(opar)
-```
+#--------------------------------------------------------------------------------------------------#
+
+
+#--------------------------------------------------------------------------------------------------#
 ### PLSR fit observed vs. predicted plot data
-```{r, fig.height = 15, fig.width = 15, echo=TRUE}
 #calibration
 cal.plsr.output <- data.frame(cal.plsr.data[, which(names(cal.plsr.data) %notin% "Spectra")], PLSR_Predicted=fit,
                               PLSR_CV_Predicted=as.vector(plsr.out$validation$pred[,,nComps]))
@@ -278,11 +269,14 @@ val_resid_histogram <- ggplot(val.plsr.output, aes(x=PLSR_Residuals)) +
 # plot cal/val side-by-side
 grid.arrange(cal_scatter_plot, val_scatter_plot, cal_resid_histogram, val_resid_histogram, 
              nrow=2,ncol=2)
-```
+#--------------------------------------------------------------------------------------------------#
 
+
+#--------------------------------------------------------------------------------------------------#
 ### Generate some useful outputs
-```{r, fig.height = 9, fig.width = 10, echo=TRUE}
 vips <- VIP(plsr.out)[nComps,]
+
+dev.off()
 par(mfrow=c(2,1))
 plot(plsr.out, plottype = "coef",xlab="Wavelength (nm)",
      ylab="Regression coefficients",legendpos = "bottomright",ncomp=nComps)
@@ -290,10 +284,11 @@ plot(plsr.out, plottype = "coef",xlab="Wavelength (nm)",
 plot(seq(Start.wave,End.wave,1),vips,xlab="Wavelength (nm)",ylab="VIP",cex=0.01)
 lines(seq(Start.wave,End.wave,1),vips,lwd=3)
 abline(h=0.8,lty=2,col="dark grey")
-```
+#--------------------------------------------------------------------------------------------------#
 
-### Jackknife validation plot
-```{r, fig.height = 9, fig.width = 10, echo=TRUE}
+
+#--------------------------------------------------------------------------------------------------#
+dev.off()
 if(grepl("Windows", sessionInfo()$running)){
   pls.options(parallel =NULL)
 } else {
@@ -345,5 +340,42 @@ jk_val_scatterplot <- ggplot(val.plsr.output, aes(x=PLSR_Predicted, y=get(inVar)
         axis.text.x = element_text(angle = 0,vjust = 0.5),
         panel.border = element_rect(linetype = "solid", fill = NA, size=1.5))
 jk_val_scatterplot
-```
+#--------------------------------------------------------------------------------------------------#
 
+
+#---------------- Output jackknife results --------------------------------------------------------#
+# JK Coefficents
+out.jk.coefs <- data.frame(Iteration=seq(1,seg,1),Intercept=Jackknife_intercept,t(Jackknife_coef))
+head(out.jk.coefs)[1:6]
+write.csv(out.jk.coefs,file=file.path(outdir,paste0(inVar,'_Jackkife_PLSR_Coefficients.csv')),
+          row.names=FALSE)
+#--------------------------------------------------------------------------------------------------#
+
+
+#---------------- Export Model Output -------------------------------------------------------------#
+print(paste("Output directory: ", getwd()))
+
+# Observed versus predicted
+write.csv(cal.plsr.output,file=file.path(outdir,paste0(inVar,'_Observed_PLSR_CV_Pred_',nComps,
+                                                       'comp.csv')),row.names=FALSE)
+
+# Validation data
+write.csv(val.plsr.output,file=file.path(outdir,paste0(inVar,'_Validation_PLSR_Pred_',nComps,
+                                                       'comp.csv')),row.names=FALSE)
+
+# Model coefficients
+coefs <- coef(plsr.out,ncomp=nComps,intercept=TRUE)
+write.csv(coefs,file=file.path(outdir,paste0(inVar,'_PLSR_Coefficients_',nComps,'comp.csv')),
+          row.names=TRUE)
+
+# PLSR VIP
+write.csv(vips,file=file.path(outdir,paste0(inVar,'_PLSR_VIPs_',nComps,'comp.csv')))
+
+# confirm files were written to temp space
+print("**** PLSR output files: ")
+list.files(getwd())[grep(pattern = inVar, list.files(getwd()))]
+#--------------------------------------------------------------------------------------------------#
+
+
+#--------------------------------------------------------------------------------------------------#
+### EOF
