@@ -36,7 +36,7 @@ invisible(lapply(list.of.packages, library, character.only = TRUE))
 #--------------------------------------------------------------------------------------------------#
 ### Setup other functions and options
 github_dir <- file.path(here(),"R_Scripts")
-source_from_gh <- TRUE
+source_from_gh <- FALSE
 if (source_from_gh) {
   # Source helper functions from GitHub
   devtools::source_url("https://raw.githubusercontent.com/TESTgroup-BNL/PLSR_for_plant_trait_prediction/master/R_Scripts/functions.R")
@@ -56,7 +56,7 @@ pls.options("plsralg")
 opar <- par(no.readonly = T)
 
 # What is the target variable?
-inVar <- "LMA_gDW_m2"
+inVar <- "SLA_g_cm"
 
 # What is the source dataset from EcoSIS?
 ecosis_id <- "3cf6b27e-d80e-4bc7-b214-c95506e46daa"
@@ -103,11 +103,11 @@ rm(sample_info,sample_info2,Spectra)
 ### Create cal/val datasets
 ## Make a stratified random sampling in the strata USDA_Species_Code and Domain
 
-method <- "base" #base/dplyr
+method <- "dplyr" #base/dplyr
 # base R - a bit slow
 # dplyr - much faster
 split_data <- create_data_split(approach=method, split_seed=2356812, prop=0.8, 
-                                group_variables=c("Plant_Species"))
+                                group_variables="Plant_Species")
 names(split_data)
 cal.plsr.data <- split_data$cal_data
 head(cal.plsr.data)[1:8]

@@ -75,7 +75,8 @@ create_data_split <- function(approach=NULL, split_seed=123456789, prop=0.8,
         group_by_at(vars(all_of(group_variables))) %>% 
         slice(sample(1:n(), prop*n())) %>% 
         data.frame()
-      val.plsr.data <- plsr_data[!plsr_data$Sample_ID %in% cal.plsr.data$Sample_ID,]
+      #val.plsr.data <- plsr_data[!plsr_data$Sample_ID %in% cal.plsr.data$Sample_ID,]
+      val.plsr.data <-plsr_data[!row.names(plsr_data) %in% row.names(cal.plsr.data),]
     
   } else {
     stop("**** Please choose either base R or dplyr data split ****")
