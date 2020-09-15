@@ -111,7 +111,7 @@ rm(sample_info,sample_info2,Spectra)
 ```
 
 ### Create cal/val datasets
-```{r, echo=TRUE}
+```{r, fig.height = 5, fig.width = 12, echo=TRUE}
 ### Create cal/val datasets
 ## Make a stratified random sampling in the strata USDA_Species_Code and Domain
 
@@ -155,13 +155,12 @@ head(val.plsr.data)[1:5]
 ```
 
 ### plot cal and val spectra
-```{r, echo=TRUE}
+```{r, fig.height = 5, fig.width = 12, echo=TRUE}
 par(mfrow=c(1,2)) # B, L, T, R
 f.plot.spec(Z=cal.plsr.data$Spectra,wv=seq(Start.wave,End.wave,1),plot_label="Calibration")
 f.plot.spec(Z=val.plsr.data$Spectra,wv=seq(Start.wave,End.wave,1),plot_label="Validation")
 par(mfrow=c(1,1))
 ```
-
 ### Use Jackknife permutation to determine optimal number of components
 ```{r, fig.height = 5, fig.width = 12, echo=TRUE}
 ### Use permutation to determine the optimal number of components
@@ -211,7 +210,7 @@ box(lwd=2.2)
 par(opar)
 ```
 ### PLSR fit observed vs. predicted plot data
-```{r, fig.height = 15, fig.width = 15, echo=TRUE}
+```{r, fig.height = 15, fig.width = 15, echo=TRUE}  
 #calibration
 cal.plsr.output <- data.frame(cal.plsr.data[, which(names(cal.plsr.data) %notin% "Spectra")], PLSR_Predicted=fit,
                               PLSR_CV_Predicted=as.vector(plsr.out$validation$pred[,,nComps]))
@@ -280,7 +279,7 @@ grid.arrange(cal_scatter_plot, val_scatter_plot, cal_resid_histogram, val_resid_
              nrow=2,ncol=2)
 ```
 
-### Generate some useful outputs
+### Generate Coefficient and VIP plots
 ```{r, fig.height = 9, fig.width = 10, echo=TRUE}
 vips <- VIP(plsr.out)[nComps,]
 par(mfrow=c(2,1))
@@ -292,8 +291,8 @@ lines(seq(Start.wave,End.wave,1),vips,lwd=3)
 abline(h=0.8,lty=2,col="dark grey")
 ```
 
-### Jackknife validation plot
-```{r, fig.height = 9, fig.width = 10, echo=TRUE}
+### Jackknife validation
+```{r, echo=TRUE}
 if(grepl("Windows", sessionInfo()$running)){
   pls.options(parallel =NULL)
 } else {
@@ -323,12 +322,15 @@ val.plsr.output$UCI <- Interval_Pred[2,]
 val.plsr.output$LPI <- val.plsr.output$PLSR_Predicted+1.96*sd_tot
 val.plsr.output$UPI <- val.plsr.output$PLSR_Predicted-1.96*sd_tot
 head(val.plsr.output)
+```
 
-# JK regression coefficient plot
+### Jackknife coefficient plot
+```{r, fig.height = 6, fig.width = 9, echo=TRUE}
 f.plot.coef(Z = t(Jackknife_coef), wv = seq(Start.wave,End.wave,1), 
             plot_label="Jackknife regression coefficients",position = 'bottomleft')
-
-# JK validation plot
+```
+### Jackknife validation plot
+```{r, fig.height = 7, fig.width = 8, echo=TRUE}
 rng_quant <- quantile(val.plsr.output[,inVar], probs = c(0.001, 0.999))
 jk_val_scatterplot <- ggplot(val.plsr.output, aes(x=PLSR_Predicted, y=get(inVar))) + 
   theme_bw()+ geom_errorbar(aes(xmin = LPI,xmax = UPI),color='grey',width=0.2) + 
@@ -339,7 +341,7 @@ jk_val_scatterplot <- ggplot(val.plsr.output, aes(x=PLSR_Predicted, y=get(inVar)
   ylim(rng_quant[1], rng_quant[2]) +
   labs(x=paste0("Predicted ", paste(inVar), " (units)"),
        y=paste0("Observed ", paste(inVar), " (units)"),
-       title=paste0("Confidence Interval: Blue;   Prediction_Interval: grey")) + 
+       title=paste0("Confidence Interval: Blue;   Prediction Interval: grey")) + 
   theme(axis.text=element_text(size=18),legend.position = 'right',
         axis.title=element_text(size=20, face="bold"), 
         axis.text.x = element_text(angle = 0,vjust = 0.5),
@@ -347,3 +349,34 @@ jk_val_scatterplot <- ggplot(val.plsr.output, aes(x=PLSR_Predicted, y=get(inVar)
 jk_val_scatterplot
 ```
 
+### Output jackknife results
+```{r, echo=TRUE}
+out.jk.coefs <- data.frame(Iteration=seq(1,seg,1),Intercept=Jackknife_intercept,t(Jackknife_coef))
+head(out.jk.coefs)[1:6]
+write.csv(out.jk.coefs,file=file.path(outdir,paste0(inVar,'_Jackkife_PLSR_Coefficients.csv')),
+          row.names=FALSE)
+```
+### Create core PLSR outputs
+```{r, echo=TRUE}
+print(paste("Output directory: ", getwd()))
+
+# Observed versus predicted
+write.csv(cal.plsr.output,file=file.path(outdir,paste0(inVar,'_Observed_PLSR_CV_Pred_',nComps,
+                                                       'comp.csv')),row.names=FALSE)
+
+# Validation data
+write.csv(val.plsr.output,file=file.path(outdir,paste0(inVar,'_Validation_PLSR_Pred_',nComps,
+                                                       'comp.csv')),row.names=FALSE)
+
+# Model coefficients
+coefs <- coef(plsr.out,ncomp=nComps,intercept=TRUE)
+write.csv(coefs,file=file.path(outdir,paste0(inVar,'_PLSR_Coefficients_',nComps,'comp.csv')),
+          row.names=TRUE)
+
+# PLSR VIP
+write.csv(vips,file=file.path(outdir,paste0(inVar,'_PLSR_VIPs_',nComps,'comp.csv')))
+
+# confirm files were written to temp space
+print("**** PLSR output files: ")
+list.files(outdir)[grep(pattern = inVar, list.files(outdir))]
+```
