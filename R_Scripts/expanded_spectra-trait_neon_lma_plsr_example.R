@@ -22,7 +22,7 @@ closeAllConnections()   # close any open connections to files
 
 #--------------------------------------------------------------------------------------------------#
 ### Install and load required R packages
-list.of.packages <- c("devtools","readr","RCurl","httr","pls","dplyr","reshape2",
+list.of.packages <- c("devtools","readr","RCurl","httr","pls","dplyr","reshape2","here",
                       "ggplot2","gridExtra")  # packages needed for script
 # check for dependencies and install if needed
 new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
@@ -35,7 +35,7 @@ invisible(lapply(list.of.packages, library, character.only = TRUE))
 
 #--------------------------------------------------------------------------------------------------#
 ### Setup other functions and options
-github_dir <- file.path("~/Data/GitHub/PLSR_for_plant_trait_prediction/R_Scripts/")
+github_dir <- file.path(here(),"R_Scripts")
 source_from_gh <- FALSE
 if (source_from_gh) {
   # Source helper functions from GitHub
@@ -51,7 +51,6 @@ if (source_from_gh) {
 # Script options
 pls.options(plsralg = "oscorespls")
 pls.options("plsralg")
-pls.options()$parallel
 
 # Default par options
 opar <- par(no.readonly = T)
@@ -104,14 +103,11 @@ rm(sample_info,sample_info2,Spectra)
 ### Create cal/val datasets
 ## Make a stratified random sampling in the strata USDA_Species_Code and Domain
 
+method <- "dplyr" #base/dplyr
 # base R - a bit slow
-split_data <- create_data_split(approach="base", split_seed=2356812, prop=0.8, 
-                                group_variables=c("USDA_Species_Code","Domain"))
-
 # dplyr - much faster
-split_data <- create_data_split(approach="dplyr", split_seed=2356812, prop=0.8, 
+split_data <- create_data_split(approach=method, split_seed=2356812, prop=0.8, 
                                 group_variables=c("USDA_Species_Code","Domain"))
-
 names(split_data)
 cal.plsr.data <- split_data$cal_data
 head(cal.plsr.data)[1:8]
@@ -146,6 +142,7 @@ val.plsr.data <- data.frame(val.plsr.data[, which(names(val.plsr.data) %notin% p
 head(val.plsr.data)[1:5]
 #--------------------------------------------------------------------------------------------------#
 
+
 #--------------------------------------------------------------------------------------------------#
 # plot cal and val spectra
 par(mfrow=c(1,2)) # B, L, T, R
@@ -158,24 +155,32 @@ par(mfrow=c(1,1))
 #--------------------------------------------------------------------------------------------------#
 ### Use permutation to determine the optimal number of components
 if(grepl("Windows", sessionInfo()$running)){
-  pls.options(parallel =NULL)
+  pls.options(parallel = NULL)
 } else {
   pls.options(parallel = parallel::detectCores()-1)
 }
 
-# pls package approach - faster but estimates more components....
-nComps <- find_optimal_components(method="pls", maxComps=20, seg=100, random_seed=2356812)
-
-# custom method - slow but generally finds the smallest number of components 
-nComps <- find_optimal_components(method="custom", maxComps=20, iterations=20, seg=100, prop=0.70, 
-                                  random_seed=2356812)
+method <- "custom"
+random_seed <- 2356812
+seg <- 100
+maxComps <- 20
+iterations <- 20
+if (method=="pls") {
+  # pls package approach - faster but estimates more components....
+  nComps <- find_optimal_components(method=method, maxComps=maxComps, seg=seg, 
+                                    random_seed=random_seed)
+} else {
+  # custom method - slow but generally finds the smallest number of components 
+  nComps <- find_optimal_components(method=method, maxComps=maxComps, iterations=iterations, 
+                                    seg=seg, prop=0.70, 
+                                    random_seed=random_seed)
+}
 #--------------------------------------------------------------------------------------------------#
 
 
 #--------------------------------------------------------------------------------------------------#
 ### Fit final model
 segs <- 100
-#pls.options(parallel = NULL)
 plsr.out <- plsr(as.formula(paste(inVar,"~","Spectra")),scale=FALSE,ncomp=nComps,validation="CV",
                  segments=segs, segment.type="interleaved",trace=FALSE,data=cal.plsr.data)
 fit <- plsr.out$fitted.values[,1,nComps]
