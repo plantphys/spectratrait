@@ -72,7 +72,7 @@ create_data_split <- function(approach=NULL, split_seed=123456789, prop=0.8,
       val.plsr.data <- plsr_data[plsr_data$CalVal== "Val",]
     } else if (approach=="dplyr")
       cal.plsr.data <- plsr_data %>% 
-        group_by_at(vars(group_variables)) %>% 
+        group_by_at(vars(all_of(group_variables))) %>% 
         slice(sample(1:n(), prop*n())) %>% 
         data.frame()
       val.plsr.data <- plsr_data[!plsr_data$Sample_ID %in% cal.plsr.data$Sample_ID,]
@@ -119,7 +119,7 @@ find_optimal_components <- function(method="pls", maxComps=20, iterations=20, se
     }
     # Jackknife PRESS plot
     pressDF <- as.data.frame(jk.out)
-    names(pressDF) <- as.character(seq(nComps))
+    names(pressDF) <- as.character(seq(maxComps))
     pressDFres <- reshape2::melt(pressDF)
     bp <- ggplot(pressDFres, aes(x=variable, y=value)) + theme_bw() + 
       geom_boxplot(notch=FALSE) + labs(x="Number of Components", y="PRESS") +
@@ -131,7 +131,7 @@ find_optimal_components <- function(method="pls", maxComps=20, iterations=20, se
     results <- NULL
     for(i in 1:(maxComps-1)){
       p_value <- t.test(jk.out[,i], jk.out[,(i+1)])$p.value
-      temp_results <- data.frame(Component=(i+1), P.value= round(p_value, 4))
+      temp_results <- data.frame(Component=(i+1), P.value= round(p_value, 6))
       results <- rbind(results, temp_results)
     }
     nComps <- min(results[results$P.value > 0.05, "Component"])
