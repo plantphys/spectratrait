@@ -127,3 +127,80 @@ val_hist_plot <- qplot(val.plsr.data[,paste0(inVar)],geom="histogram",
                        xlab = paste0(inVar),ylab = "Count",fill=I("grey50"),col=I("black"),alpha=I(.7))
 grid.arrange(cal_hist_plot, val_hist_plot, ncol=2)
 #--------------------------------------------------------------------------------------------------#
+
+
+#--------------------------------------------------------------------------------------------------#
+### Format PLSR data for model fitting 
+cal_spec <- as.matrix(cal.plsr.data[, which(names(cal.plsr.data) %in% paste0("Wave_",wv))])
+cal.plsr.data <- data.frame(cal.plsr.data[, which(names(cal.plsr.data) %notin% paste0("Wave_",wv))],
+                            Spectra=I(cal_spec))
+head(cal.plsr.data)[1:4]
+
+val_spec <- as.matrix(val.plsr.data[, which(names(val.plsr.data) %in% paste0("Wave_",wv))])
+val.plsr.data <- data.frame(val.plsr.data[, which(names(val.plsr.data) %notin% paste0("Wave_",wv))],
+                            Spectra=I(val_spec))
+head(val.plsr.data)[1:4]
+#--------------------------------------------------------------------------------------------------#
+
+
+#--------------------------------------------------------------------------------------------------#
+# plot cal and val spectra
+par(mfrow=c(1,2)) # B, L, T, R
+f.plot.spec(Z=cal.plsr.data$Spectra,wv=seq(Start.wave,End.wave,1),plot_label="Calibration")
+f.plot.spec(Z=val.plsr.data$Spectra,wv=seq(Start.wave,End.wave,1),plot_label="Validation")
+par(mfrow=c(1,1))
+#--------------------------------------------------------------------------------------------------#
+
+
+#--------------------------------------------------------------------------------------------------#
+### Use permutation to determine the optimal number of components
+if(grepl("Windows", sessionInfo()$running)){
+  pls.options(parallel = NULL)
+} else {
+  pls.options(parallel = parallel::detectCores()-1)
+}
+
+method <- "pls"
+random_seed <- 2356812
+seg <- 200
+maxComps <- 14
+iterations <- 50
+if (method=="pls") {
+  # pls package approach - faster but estimates more components....
+  nComps <- find_optimal_components(method=method, maxComps=maxComps, seg=seg, 
+                                    random_seed=random_seed)
+} else {
+  # custom method - slow but generally finds the smallest number of components 
+  nComps <- find_optimal_components(method=method, maxComps=maxComps, iterations=iterations, 
+                                    seg=seg, prop=0.70, 
+                                    random_seed=random_seed)
+}
+#--------------------------------------------------------------------------------------------------#
+
+
+#--------------------------------------------------------------------------------------------------#
+### Fit final model
+segs <- 100
+plsr.out <- plsr(as.formula(paste(inVar,"~","Spectra")),scale=FALSE,ncomp=nComps,validation="CV",
+                 segments=segs, segment.type="interleaved",trace=FALSE,data=cal.plsr.data)
+fit <- plsr.out$fitted.values[,1,nComps]
+pls.options(parallel = NULL)
+
+# External validation fit stats
+par(mfrow=c(1,2)) # B, L, T, R
+RMSEP(plsr.out, newdata = val.plsr.data)
+plot(RMSEP(plsr.out,estimate=c("test"),newdata = val.plsr.data), main="MODEL RMSEP",
+     xlab="Number of Components",ylab="Model Validation RMSEP",lty=1,col="black",cex=1.5,lwd=2)
+box(lwd=2.2)
+
+R2(plsr.out, newdata = val.plsr.data)
+plot(R2(plsr.out,estimate=c("test"),newdata = val.plsr.data), main="MODEL R2",
+     xlab="Number of Components",ylab="Model Validation R2",lty=1,col="black",cex=1.5,lwd=2)
+box(lwd=2.2)
+par(opar)
+#--------------------------------------------------------------------------------------------------#
+
+
+
+
+
