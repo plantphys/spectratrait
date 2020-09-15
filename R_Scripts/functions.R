@@ -43,6 +43,7 @@ get_ecosis_data <- function(ecosis_id = NULL) {
 #' @author Shawn P. Serbin, Jeremiah Anderson, Julien Lamour
 create_data_split <- function(approach=NULL, split_seed=123456789, prop=0.8,
                               group_variables=NULL) {
+  set.seed(split_seed)
   if(!is.null(approach)) {
     if (approach=="base") {
       plsr_data$CalVal <- NA
@@ -83,6 +84,63 @@ create_data_split <- function(approach=NULL, split_seed=123456789, prop=0.8,
   return(output_list)
 }
 #--------------------------------------------------------------------------------------------------#
+
+#--------------------------------------------------------------------------------------------------#
+#' @param method Which approach to use to find optimal components, the PLS package of custom method
+#' 
+#' @author Shawn P. Serbin, Jeremiah Anderson, Julien Lamour
+#' 
+find_optimal_components <- function(method="pls", maxComps=20, iterations=20, seg=100, prop=0.70,
+                                    random_seed=123456789) {
+  set.seed(random_seed)
+  if(method=="pls") {
+    maxComps <- maxComps
+    seg <- seg
+    plsr.out <- pls::plsr(as.formula(paste(inVar,"~","Spectra")), scale=FALSE, center=TRUE, ncomp=maxComps, 
+                     validation="CV", segments = seg, segment.type="interleaved", trace=FALSE, 
+                     jackknife=TRUE, data=cal.plsr.data)
+    nComps <- selectNcomp(plsr.out, method = "onesigma", plot = TRUE)
+  }
+  if(method=="custom") {
+    maxComps <- maxComps
+    iterations <- iterations
+    seg <- seg
+    prop <- prop
+    jk.out <- matrix(data=NA,nrow=iterations,ncol=maxComps) 
+    print("*** Running jacknife permutation test.  Please hang tight, this can take awhile ***")
+    for (i in 1:iterations) {
+      message(paste("Running interation", i))
+      rows <- sample(1:nrow(cal.plsr.data),floor(prop*nrow(cal.plsr.data)))
+      sub.data <- cal.plsr.data[rows,]
+      plsr.out <- plsr(as.formula(paste(inVar,"~","Spectra")), scale=FALSE, center=TRUE, ncomp=maxComps, 
+                       validation="CV", segments = seg, segment.type="interleaved", trace=FALSE, data=sub.data)
+      resPRESS <- as.vector(plsr.out$validation$PRESS)
+      jk.out[i,seq(plsr.out$validation$ncomp)] <- resPRESS
+    }
+    # Jackknife PRESS plot
+    pressDF <- as.data.frame(jk.out)
+    names(pressDF) <- as.character(seq(nComps))
+    pressDFres <- reshape2::melt(pressDF)
+    bp <- ggplot(pressDFres, aes(x=variable, y=value)) + theme_bw() + 
+      geom_boxplot(notch=FALSE) + labs(x="Number of Components", y="PRESS") +
+      theme(axis.text=element_text(size=18), legend.position="none",
+            axis.title=element_text(size=20, face="bold"), 
+            axis.text.x = element_text(angle = 0,vjust = 0.5),
+            panel.border = element_rect(linetype = "solid", fill = NA, size=1.5))
+    print(bp)
+    results <- NULL
+    for(i in 1:(maxComps-1)){
+      p_value <- t.test(jk.out[,i], jk.out[,(i+1)])$p.value
+      temp_results <- data.frame(Component=(i+1), P.value= round(p_value, 4))
+      results <- rbind(results, temp_results)
+    }
+    nComps <- min(results[results$P.value > 0.05, "Component"])
+    print(paste0("*** Optimal number of components based on t.test: ", nComps))
+  }
+  return(nComps)
+}
+#--------------------------------------------------------------------------------------------------#
+
 
 #--------------------------------------------------------------------------------------------------#
 #' @title f.plot.spec
