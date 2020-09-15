@@ -81,6 +81,11 @@ names(dat_raw)[1:40]
 
 #--------------------------------------------------------------------------------------------------#
 ### Create plsr dataset
+## cleanup any missing
+if (any(is.na(dat_raw))) {
+  dat_raw <- na.omit(dat_raw)
+}
+
 Start.wave <- 500
 End.wave <- 2400
 wv <- seq(Start.wave,End.wave,1)
@@ -201,6 +206,183 @@ par(opar)
 #--------------------------------------------------------------------------------------------------#
 
 
+#--------------------------------------------------------------------------------------------------#
+### PLSR fit observed vs. predicted plot data
+#calibration
+cal.plsr.output <- data.frame(cal.plsr.data[, which(names(cal.plsr.data) %notin% "Spectra")], PLSR_Predicted=fit,
+                              PLSR_CV_Predicted=as.vector(plsr.out$validation$pred[,,nComps]))
+cal.plsr.output <- cal.plsr.output %>%
+  mutate(PLSR_CV_Residuals = PLSR_CV_Predicted-get(inVar))
+head(cal.plsr.output)
+cal.R2 <- round(pls::R2(plsr.out)[[1]][nComps],2)
+cal.RMSEP <- round(sqrt(mean(cal.plsr.output$PLSR_CV_Residuals^2)),2)
 
+val.plsr.output <- data.frame(val.plsr.data[, which(names(val.plsr.data) %notin% "Spectra")],
+                              PLSR_Predicted=as.vector(predict(plsr.out, 
+                                                               newdata = val.plsr.data, 
+                                                               ncomp=nComps, type="response")[,,1]))
+val.plsr.output <- val.plsr.output %>%
+  mutate(PLSR_Residuals = PLSR_Predicted-get(inVar))
+head(val.plsr.output)
+val.R2 <- round(pls::R2(plsr.out,newdata=val.plsr.data)[[1]][nComps],2)
+val.RMSEP <- round(sqrt(mean(val.plsr.output$PLSR_Residuals^2)),2)
+
+rng_quant <- quantile(cal.plsr.output[,inVar], probs = c(0.001, 0.999))
+cal_scatter_plot <- ggplot(cal.plsr.output, aes(x=PLSR_CV_Predicted, y=get(inVar))) + 
+  theme_bw() + geom_point() + geom_abline(intercept = 0, slope = 1, color="dark grey", 
+                                          linetype="dashed", size=1.5) + xlim(rng_quant[1], rng_quant[2]) + 
+  ylim(rng_quant[1], rng_quant[2]) +
+  labs(x=paste0("Predicted ", paste(inVar), " (units)"),
+       y=paste0("Observed ", paste(inVar), " (units)"),
+       title=paste0("Calibration: ", paste0("Rsq = ", cal.R2), "; ", paste0("RMSEP = ", cal.RMSEP))) +
+  theme(axis.text=element_text(size=18), legend.position="none",
+        axis.title=element_text(size=20, face="bold"), 
+        axis.text.x = element_text(angle = 0,vjust = 0.5),
+        panel.border = element_rect(linetype = "solid", fill = NA, size=1.5))
+
+cal_resid_histogram <- ggplot(cal.plsr.output, aes(x=PLSR_CV_Residuals)) +
+  geom_histogram(alpha=.5, position="identity") + 
+  geom_vline(xintercept = 0, color="black", 
+             linetype="dashed", size=1) + theme_bw() + 
+  theme(axis.text=element_text(size=18), legend.position="none",
+        axis.title=element_text(size=20, face="bold"), 
+        axis.text.x = element_text(angle = 0,vjust = 0.5),
+        panel.border = element_rect(linetype = "solid", fill = NA, size=1.5))
+
+rng_quant <- quantile(val.plsr.output[,inVar], probs = c(0.001, 0.999))
+val_scatter_plot <- ggplot(val.plsr.output, aes(x=PLSR_Predicted, y=get(inVar))) + 
+  theme_bw() + geom_point() + geom_abline(intercept = 0, slope = 1, color="dark grey", 
+                                          linetype="dashed", size=1.5) + xlim(rng_quant[1], rng_quant[2]) + 
+  ylim(rng_quant[1], rng_quant[2]) +
+  labs(x=paste0("Predicted ", paste(inVar), " (units)"),
+       y=paste0("Observed ", paste(inVar), " (units)"),
+       title=paste0("Validation: ", paste0("Rsq = ", val.R2), "; ", paste0("RMSEP = ", val.RMSEP))) +
+  theme(axis.text=element_text(size=18), legend.position="none",
+        axis.title=element_text(size=20, face="bold"), 
+        axis.text.x = element_text(angle = 0,vjust = 0.5),
+        panel.border = element_rect(linetype = "solid", fill = NA, size=1.5))
+
+val_resid_histogram <- ggplot(val.plsr.output, aes(x=PLSR_Residuals)) +
+  geom_histogram(alpha=.5, position="identity") + 
+  geom_vline(xintercept = 0, color="black", 
+             linetype="dashed", size=1) + theme_bw() + 
+  theme(axis.text=element_text(size=18), legend.position="none",
+        axis.title=element_text(size=20, face="bold"), 
+        axis.text.x = element_text(angle = 0,vjust = 0.5),
+        panel.border = element_rect(linetype = "solid", fill = NA, size=1.5))
+
+# plot cal/val side-by-side
+grid.arrange(cal_scatter_plot, val_scatter_plot, cal_resid_histogram, val_resid_histogram, 
+             nrow=2,ncol=2)
+#--------------------------------------------------------------------------------------------------#
+
+
+#--------------------------------------------------------------------------------------------------#
+### Generate some useful outputs
+vips <- VIP(plsr.out)[nComps,]
+
+dev.off()
+par(mfrow=c(2,1))
+plot(plsr.out, plottype = "coef",xlab="Wavelength (nm)",
+     ylab="Regression coefficients",legendpos = "bottomright",ncomp=nComps)
+
+plot(seq(Start.wave,End.wave,1),vips,xlab="Wavelength (nm)",ylab="VIP",cex=0.01)
+lines(seq(Start.wave,End.wave,1),vips,lwd=3)
+abline(h=0.8,lty=2,col="dark grey")
+#--------------------------------------------------------------------------------------------------#
+
+
+#--------------------------------------------------------------------------------------------------#
+dev.off()
+if(grepl("Windows", sessionInfo()$running)){
+  pls.options(parallel =NULL)
+} else {
+  pls.options(parallel = parallel::detectCores()-1)
+}
+
+seg <- 100
+jk.plsr.out <- pls::plsr(as.formula(paste(inVar,"~","Spectra")), scale=FALSE, center=TRUE, ncomp=nComps, 
+                         validation="CV", segments = seg, segment.type="interleaved", trace=FALSE, 
+                         jackknife=TRUE, data=cal.plsr.data)
+pls.options(parallel = NULL)
+
+Jackknife_coef <- f.coef.valid(plsr.out = jk.plsr.out, data_plsr = cal.plsr.data, ncomp = nComps)
+Jackknife_intercept <- Jackknife_coef[1,,,]
+Jackknife_coef <- Jackknife_coef[2:dim(Jackknife_coef)[1],,,]
+
+interval <- c(0.025,0.975)
+interval <- c(0.05,0.95)
+Jackknife_Pred <- val.plsr.data$Spectra%*%Jackknife_coef+Jackknife_intercept
+Interval_Conf <- apply(X = Jackknife_Pred,MARGIN = 1,FUN = quantile,probs=c(interval[1],interval[2]))
+Interval_Pred <- apply(X = Jackknife_Pred,MARGIN = 1,FUN = quantile,probs=c(interval[1],interval[2]))
+sd_mean <- apply(X = Jackknife_Pred,MARGIN = 1,FUN =sd)
+sd_res <- sd(val.plsr.output$PLSR_Residuals)
+sd_tot <- sqrt(sd_mean^2+sd_res^2)
+val.plsr.output$LCI <- Interval_Pred[1,]
+val.plsr.output$UCI <- Interval_Pred[2,]
+val.plsr.output$LPI <- val.plsr.output$PLSR_Predicted+1.96*sd_tot
+val.plsr.output$UPI <- val.plsr.output$PLSR_Predicted-1.96*sd_tot
+head(val.plsr.output)
+
+# JK regression coefficient plot
+f.plot.coef(Z = t(Jackknife_coef), wv = seq(Start.wave,End.wave,1), 
+            plot_label="Jackknife regression coefficients",position = 'bottomleft')
+
+# JK validation plot
+rng_quant <- quantile(val.plsr.output[,inVar], probs = c(0.001, 0.999))
+jk_val_scatterplot <- ggplot(val.plsr.output, aes(x=PLSR_Predicted, y=get(inVar))) + 
+  theme_bw()+ geom_errorbar(aes(xmin = LPI,xmax = UPI),color='grey',width=0.2) + 
+  geom_errorbar(aes(xmin = LCI,xmax = UCI),color='blue',width=0.2)+ geom_point(size=0.3)  + 
+  geom_abline(intercept = 0, slope = 1, color="grey30", 
+              linetype="dashed", size=0.7) + 
+  xlim(rng_quant[1], rng_quant[2]) + 
+  ylim(rng_quant[1], rng_quant[2]) +
+  labs(x=paste0("Predicted ", paste(inVar), " (units)"),
+       y=paste0("Observed ", paste(inVar), " (units)"),
+       title=paste0("Confidence Interval: Blue;   Prediction_Interval: grey")) + 
+  theme(axis.text=element_text(size=18),legend.position = 'right',
+        axis.title=element_text(size=20, face="bold"), 
+        axis.text.x = element_text(angle = 0,vjust = 0.5),
+        panel.border = element_rect(linetype = "solid", fill = NA, size=1.5))
+jk_val_scatterplot
+#--------------------------------------------------------------------------------------------------#
+
+
+#---------------- Output jackknife results --------------------------------------------------------#
+# JK Coefficents
+out.jk.coefs <- data.frame(Iteration=seq(1,seg,1),Intercept=Jackknife_intercept,t(Jackknife_coef))
+head(out.jk.coefs)[1:6]
+write.csv(out.jk.coefs,file=file.path(outdir,paste0(inVar,'_Jackkife_PLSR_Coefficients.csv')),
+          row.names=FALSE)
+#--------------------------------------------------------------------------------------------------#
+
+
+#---------------- Export Model Output -------------------------------------------------------------#
+print(paste("Output directory: ", getwd()))
+
+# Observed versus predicted
+write.csv(cal.plsr.output,file=file.path(outdir,paste0(inVar,'_Observed_PLSR_CV_Pred_',nComps,
+                                                       'comp.csv')),row.names=FALSE)
+
+# Validation data
+write.csv(val.plsr.output,file=file.path(outdir,paste0(inVar,'_Validation_PLSR_Pred_',nComps,
+                                                       'comp.csv')),row.names=FALSE)
+
+# Model coefficients
+coefs <- coef(plsr.out,ncomp=nComps,intercept=TRUE)
+write.csv(coefs,file=file.path(outdir,paste0(inVar,'_PLSR_Coefficients_',nComps,'comp.csv')),
+          row.names=TRUE)
+
+# PLSR VIP
+write.csv(vips,file=file.path(outdir,paste0(inVar,'_PLSR_VIPs_',nComps,'comp.csv')))
+
+# confirm files were written to temp space
+print("**** PLSR output files: ")
+list.files(getwd())[grep(pattern = inVar, list.files(getwd()))]
+#--------------------------------------------------------------------------------------------------#
+
+
+#--------------------------------------------------------------------------------------------------#
+### EOF
 
 
