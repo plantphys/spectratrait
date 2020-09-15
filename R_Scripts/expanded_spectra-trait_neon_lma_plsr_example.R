@@ -282,16 +282,81 @@ abline(h=0.8,lty=2,col="dark grey")
 #--------------------------------------------------------------------------------------------------#
 
 
+#--------------------------------------------------------------------------------------------------#
+dev.off()
+if(grepl("Windows", sessionInfo()$running)){
+  pls.options(parallel =NULL)
+} else {
+  pls.options(parallel = parallel::detectCores()-1)
+}
+
+seg <- 100
+jk.plsr.out <- pls::plsr(as.formula(paste(inVar,"~","Spectra")), scale=FALSE, center=TRUE, ncomp=nComps, 
+                      validation="CV", segments = seg, segment.type="interleaved", trace=FALSE, 
+                      jackknife=TRUE, data=cal.plsr.data)
+pls.options(parallel = NULL)
+
+Jackknife_coef <- f.coef.valid(plsr.out = jk.plsr.out, data_plsr = cal.plsr.data, ncomp = nComps)
+Jackknife_intercept <- Jackknife_coef[1,,,]
+Jackknife_coef <- Jackknife_coef[2:dim(Jackknife_coef)[1],,,]
+
+interval <- c(0.025,0.975)
+interval <- c(0.05,0.95)
+Jackknife_Pred <- val.plsr.data$Spectra%*%Jackknife_coef+Jackknife_intercept
+Interval_Conf <- apply(X = Jackknife_Pred,MARGIN = 1,FUN = quantile,probs=c(interval[1],interval[2]))
+Interval_Pred <- apply(X = Jackknife_Pred,MARGIN = 1,FUN = quantile,probs=c(interval[1],interval[2]))
+sd_mean <- apply(X = Jackknife_Pred,MARGIN = 1,FUN =sd)
+sd_res <- sd(val.plsr.output$PLSR_Residuals)
+sd_tot <- sqrt(sd_mean^2+sd_res^2)
+val.plsr.output$LCI <- Interval_Pred[1,]
+val.plsr.output$UCI <- Interval_Pred[2,]
+val.plsr.output$LPI <- val.plsr.output$PLSR_Predicted+1.96*sd_tot
+val.plsr.output$UPI <- val.plsr.output$PLSR_Predicted-1.96*sd_tot
+head(val.plsr.output)
+
+# JK regression coefficient plot
+f.plot.coef(Z = t(Jackknife_coef), wv = seq(Start.wave,End.wave,1), 
+            plot_label="Jackknife regression coefficients",position = 'bottomleft')
+
+# JK validation plot
+rng_quant <- quantile(val.plsr.output[,inVar], probs = c(0.001, 0.999))
+jk_val_scatterplot <- ggplot(val.plsr.output, aes(x=PLSR_Predicted, y=get(inVar))) + 
+  theme_bw()+ geom_errorbar(aes(xmin = LPI,xmax = UPI),color='grey',width=0.2) + 
+  geom_errorbar(aes(xmin = LCI,xmax = UCI),color='blue',width=0.2)+ geom_point(size=0.3)  + 
+  geom_abline(intercept = 0, slope = 1, color="grey30", 
+              linetype="dashed", size=0.7) + 
+  xlim(rng_quant[1], rng_quant[2]) + 
+  ylim(rng_quant[1], rng_quant[2]) +
+  labs(x=paste0("Predicted ", paste(inVar), " (units)"),
+       y=paste0("Observed ", paste(inVar), " (units)"),
+       title=paste0("Confidence Interval: Blue;   Prediction_Interval: grey")) + 
+  theme(axis.text=element_text(size=18),legend.position = 'right',
+        axis.title=element_text(size=20, face="bold"), 
+        axis.text.x = element_text(angle = 0,vjust = 0.5),
+        panel.border = element_rect(linetype = "solid", fill = NA, size=1.5))
+jk_val_scatterplot
+#--------------------------------------------------------------------------------------------------#
+
+
+#---------------- Output jackknife results --------------------------------------------------------#
+# JK Coefficents
+out.jk.coefs <- data.frame(Iteration=seq(1,seg,1),Intercept=Jackknife_intercept,t(Jackknife_coef))
+head(out.jk.coefs)[1:6]
+write.csv(out.jk.coefs,file=file.path(outdir,paste0(inVar,'_Jackkife_PLSR_Coefficients.csv')),
+          row.names=FALSE)
+#--------------------------------------------------------------------------------------------------#
+
+
 #---------------- Export Model Output -------------------------------------------------------------#
 print(paste("Output directory: ", getwd()))
 
 # Observed versus predicted
 write.csv(cal.plsr.output,file=file.path(outdir,paste0(inVar,'_Observed_PLSR_CV_Pred_',nComps,
-                                                  'comp.csv')),row.names=FALSE)
+                                                       'comp.csv')),row.names=FALSE)
 
 # Validation data
 write.csv(val.plsr.output,file=file.path(outdir,paste0(inVar,'_Validation_PLSR_Pred_',nComps,
-                                                  'comp.csv')),row.names=FALSE)
+                                                       'comp.csv')),row.names=FALSE)
 
 # Model coefficients
 coefs <- coef(plsr.out,ncomp=nComps,intercept=TRUE)
@@ -307,3 +372,5 @@ list.files(getwd())[grep(pattern = inVar, list.files(getwd()))]
 #--------------------------------------------------------------------------------------------------#
 
 
+#--------------------------------------------------------------------------------------------------#
+### EOF
