@@ -1,4 +1,4 @@
-# How_to_PLSR
+# PLSR modeling for the estimation of plant functional traits
 Tutorial and example scripts illustrating how to fit, evaluate, and report spectra-trait PLSR models
 
 
