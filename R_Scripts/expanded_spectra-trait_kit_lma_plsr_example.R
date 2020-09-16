@@ -36,7 +36,7 @@ invisible(lapply(list.of.packages, library, character.only = TRUE))
 #--------------------------------------------------------------------------------------------------#
 ### Setup other functions and options
 github_dir <- file.path(here(),"R_Scripts")
-source_from_gh <- FALSE
+source_from_gh <- TRUE
 if (source_from_gh) {
   # Source helper functions from GitHub
   devtools::source_url("https://raw.githubusercontent.com/TESTgroup-BNL/PLSR_for_plant_trait_prediction/master/R_Scripts/functions.R")
@@ -85,6 +85,9 @@ names(dat_raw)[1:40]
 if (any(is.na(dat_raw))) {
   dat_raw <- na.omit(dat_raw)
 }
+# remove suspect high values
+dat_raw <- dat_raw %>%
+  filter(`SLA (g/cm )`<=500)
 
 Start.wave <- 500
 End.wave <- 2400
@@ -108,7 +111,7 @@ rm(sample_info,sample_info2,Spectra)
 ### Create cal/val datasets
 ## Make a stratified random sampling in the strata USDA_Species_Code and Domain
 
-method <- "dplyr" #base/dplyr
+method <- "base" #base/dplyr
 # base R - a bit slow
 # dplyr - much faster
 split_data <- create_data_split(approach=method, split_seed=2356812, prop=0.8, 
@@ -165,11 +168,11 @@ if(grepl("Windows", sessionInfo()$running)){
   pls.options(parallel = parallel::detectCores()-1)
 }
 
-method <- "pls"
+method <- "custom" #pls/custom
 random_seed <- 2356812
-seg <- 200
-maxComps <- 14
-iterations <- 50
+seg <- 100
+maxComps <- 18
+iterations <- 30
 if (method=="pls") {
   # pls package approach - faster but estimates more components....
   nComps <- find_optimal_components(method=method, maxComps=maxComps, seg=seg, 
@@ -310,7 +313,7 @@ Jackknife_coef <- f.coef.valid(plsr.out = jk.plsr.out, data_plsr = cal.plsr.data
 Jackknife_intercept <- Jackknife_coef[1,,,]
 Jackknife_coef <- Jackknife_coef[2:dim(Jackknife_coef)[1],,,]
 
-interval <- c(0.025,0.975)
+#interval <- c(0.025,0.975)
 interval <- c(0.05,0.95)
 Jackknife_Pred <- val.plsr.data$Spectra%*%Jackknife_coef+Jackknife_intercept
 Interval_Conf <- apply(X = Jackknife_Pred,MARGIN = 1,FUN = quantile,probs=c(interval[1],interval[2]))
@@ -320,8 +323,8 @@ sd_res <- sd(val.plsr.output$PLSR_Residuals)
 sd_tot <- sqrt(sd_mean^2+sd_res^2)
 val.plsr.output$LCI <- Interval_Pred[1,]
 val.plsr.output$UCI <- Interval_Pred[2,]
-val.plsr.output$LPI <- val.plsr.output$PLSR_Predicted+1.96*sd_tot
-val.plsr.output$UPI <- val.plsr.output$PLSR_Predicted-1.96*sd_tot
+val.plsr.output$LPI <- val.plsr.output$PLSR_Predicted-1.96*sd_tot
+val.plsr.output$UPI <- val.plsr.output$PLSR_Predicted+1.96*sd_tot
 head(val.plsr.output)
 
 # JK regression coefficient plot
@@ -329,14 +332,15 @@ f.plot.coef(Z = t(Jackknife_coef), wv = seq(Start.wave,End.wave,1),
             plot_label="Jackknife regression coefficients",position = 'bottomleft')
 
 # JK validation plot
-rng_quant <- quantile(val.plsr.output[,inVar], probs = c(0.001, 0.999))
+#rng_vals <- quantile(val.plsr.output[,inVar], probs = c(0.001, 0.999))
+rng_vals <- c(min(val.plsr.output$LPI), max(val.plsr.output$UPI))
 jk_val_scatterplot <- ggplot(val.plsr.output, aes(x=PLSR_Predicted, y=get(inVar))) + 
   theme_bw()+ geom_errorbar(aes(xmin = LPI,xmax = UPI),color='grey',width=0.2) + 
   geom_errorbar(aes(xmin = LCI,xmax = UCI),color='blue',width=0.2)+ geom_point(size=0.3)  + 
   geom_abline(intercept = 0, slope = 1, color="grey30", 
               linetype="dashed", size=0.7) + 
-  xlim(rng_quant[1], rng_quant[2]) + 
-  ylim(rng_quant[1], rng_quant[2]) +
+  xlim(rng_vals[1], rng_vals[2]) + 
+  ylim(rng_vals[1], rng_vals[2]) +
   labs(x=paste0("Predicted ", paste(inVar), " (units)"),
        y=paste0("Observed ", paste(inVar), " (units)"),
        title=paste0("Confidence Interval: Blue;   Prediction_Interval: grey")) + 
@@ -384,5 +388,3 @@ list.files(getwd())[grep(pattern = inVar, list.files(getwd()))]
 
 #--------------------------------------------------------------------------------------------------#
 ### EOF
-
-
