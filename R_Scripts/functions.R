@@ -48,9 +48,12 @@ create_data_split <- function(approach=NULL, split_seed=123456789, prop=0.8,
     if (approach=="base") {
       plsr_data$CalVal <- NA
       split_var <- group_variables
-      plsr_data$ID <- apply(plsr_data[, split_var], MARGIN = 1, FUN = function(x) paste(x, collapse = " "))
+      if(length(group_variables) > 1){
+        plsr_data$ID <- apply(plsr_data[, group_variables], MARGIN = 1, FUN = function(x) paste(x, collapse = " "))
+      } else {
+        plsr_data$ID <- plsr_data[, group_variables]
+      }
       split_var_list <- unique(plsr_data$ID)
-      split_var_list <- split_var_list[ -grep("NA", split_var_list)]
       for(i in 1:length(split_var_list)){
         temp <- row.names(plsr_data[ plsr_data$ID == split_var_list[i], ])
         ## there should probably be more than 4 obs I'm guessing, so this may need adjusting
