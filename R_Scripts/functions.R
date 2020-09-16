@@ -75,7 +75,8 @@ create_data_split <- function(approach=NULL, split_seed=123456789, prop=0.8,
         group_by_at(vars(all_of(group_variables))) %>% 
         slice(sample(1:n(), prop*n())) %>% 
         data.frame()
-      val.plsr.data <- plsr_data[!plsr_data$Sample_ID %in% cal.plsr.data$Sample_ID,]
+      #val.plsr.data <- plsr_data[!plsr_data$Sample_ID %in% cal.plsr.data$Sample_ID,]
+      val.plsr.data <-plsr_data[!row.names(plsr_data) %in% row.names(cal.plsr.data),]
     
   } else {
     stop("**** Please choose either base R or dplyr data split ****")
@@ -166,7 +167,7 @@ f.plot.spec <- function(
   spectra_quantiles <- apply(Z,2,quantile,na.rm=T,probs=c(0,0.025,0.05,0.5,0.95,0.975,1))
   
   plot(x=NULL,y=NULL,ylim=c(0,100),xlim=xlim,xlab="Wavelength (nm)",
-       ylab=type,main=plot_label)
+       ylab=paste0(type," (%)"),main=plot_label)
   polygon(c(wv ,rev(wv)),c(spectra_quantiles[5,]*100, rev(spectra_quantiles[3,]*100)),
           col="#99CC99",border=NA)
   lines(wv,mean_spec*100,lwd=2, lty=1, col="black")
@@ -193,13 +194,15 @@ f.plot.coef <- function(
   
   plot(x=NULL,y=NULL,xlim=xlim,ylim=c(min(Z),max(Z)),xlab="Wavelength (nm)",
        ylab=type,main=plot_label)
+  polygon(c(wv ,rev(wv)),c(spectra_quantiles[9,], rev(spectra_quantiles[1,])),
+          col="grey60",border=NA)
   polygon(c(wv ,rev(wv)),c(spectra_quantiles[6,], rev(spectra_quantiles[4,])),
           col="#99CC99",border=NA)
   lines(wv,mean_spec,lwd=2, lty=1, col="black")
-  lines(wv,spectra_quantiles[1,], lty=3, col="grey40")
-  lines(wv,spectra_quantiles[9,], lty=3, col="grey40")
+  lines(wv,spectra_quantiles[1,], lty=3, col="grey60")
+  lines(wv,spectra_quantiles[9,], lty=3, col="grey60")
   legend(position,legend=c(paste("Mean",type),"Min/Max", "95% CI"),lty=c(1,3,1),
-         lwd=c(2,1,10),col=c("black","grey40","#99CC99"),bty="n")
+         lwd=c(2,1,10),col=c("black","grey50","#99CC99"),bty="n")
 }
 #--------------------------------------------------------------------------------------------------#
 
