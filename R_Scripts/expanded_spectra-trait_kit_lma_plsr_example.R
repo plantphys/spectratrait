@@ -7,7 +7,7 @@
 #   illustrates an approach to quantify model prediction uncertainty based on a jackknife analysis
 #
 #   Spectra and trait data source:
-#   https://ecosis.org/package/fresh-leaf-spectra-to-estimate-lma-over-neon-domains-in-eastern-united-states
+#   https://ecosis.org/package/leaf-reflectance-plant-functional-gradient-ifgg-kit
 #
 #    Notes:
 #    * The author notes the code is not the most elegant or clean, but is functional 
@@ -56,10 +56,10 @@ pls.options("plsralg")
 opar <- par(no.readonly = T)
 
 # What is the target variable?
-inVar <- "LMA_gDW_m2"
+inVar <- "SLA_g_cm"
 
 # What is the source dataset from EcoSIS?
-ecosis_id <- "5617da17-c925-49fb-b395-45a51291bd2d"
+ecosis_id <- "3cf6b27e-d80e-4bc7-b214-c95506e46daa"
 #--------------------------------------------------------------------------------------------------#
 
 
@@ -81,6 +81,11 @@ names(dat_raw)[1:40]
 
 #--------------------------------------------------------------------------------------------------#
 ### Create plsr dataset
+## cleanup any missing
+if (any(is.na(dat_raw))) {
+  dat_raw <- na.omit(dat_raw)
+}
+
 Start.wave <- 500
 End.wave <- 2400
 wv <- seq(Start.wave,End.wave,1)
@@ -91,7 +96,7 @@ sample_info <- dat_raw[,names(dat_raw) %notin% seq(350,2500,1)]
 head(sample_info)
 
 sample_info2 <- sample_info %>%
-  select(Domain,Functional_type,Sample_ID,USDA_Species_Code=`USDA Symbol`,LMA_gDW_m2=LMA)
+  select(Plant_Species=species,Growth_Form=`growth form`,timestamp,SLA_g_cm=`SLA (g/cm )`)
 head(sample_info2)
 
 plsr_data <- data.frame(sample_info2,Spectra)
@@ -107,7 +112,7 @@ method <- "dplyr" #base/dplyr
 # base R - a bit slow
 # dplyr - much faster
 split_data <- create_data_split(approach=method, split_seed=2356812, prop=0.8, 
-                                group_variables=c("USDA_Species_Code","Domain"))
+                                group_variables="Plant_Species")
 names(split_data)
 cal.plsr.data <- split_data$cal_data
 head(cal.plsr.data)[1:8]
@@ -134,12 +139,12 @@ grid.arrange(cal_hist_plot, val_hist_plot, ncol=2)
 cal_spec <- as.matrix(cal.plsr.data[, which(names(cal.plsr.data) %in% paste0("Wave_",wv))])
 cal.plsr.data <- data.frame(cal.plsr.data[, which(names(cal.plsr.data) %notin% paste0("Wave_",wv))],
                             Spectra=I(cal_spec))
-head(cal.plsr.data)[1:5]
+head(cal.plsr.data)[1:4]
 
 val_spec <- as.matrix(val.plsr.data[, which(names(val.plsr.data) %in% paste0("Wave_",wv))])
 val.plsr.data <- data.frame(val.plsr.data[, which(names(val.plsr.data) %notin% paste0("Wave_",wv))],
                             Spectra=I(val_spec))
-head(val.plsr.data)[1:5]
+head(val.plsr.data)[1:4]
 #--------------------------------------------------------------------------------------------------#
 
 
@@ -160,11 +165,11 @@ if(grepl("Windows", sessionInfo()$running)){
   pls.options(parallel = parallel::detectCores()-1)
 }
 
-method <- "custom"
+method <- "pls"
 random_seed <- 2356812
-seg <- 100
-maxComps <- 20
-iterations <- 20
+seg <- 200
+maxComps <- 14
+iterations <- 50
 if (method=="pls") {
   # pls package approach - faster but estimates more components....
   nComps <- find_optimal_components(method=method, maxComps=maxComps, seg=seg, 
@@ -273,7 +278,7 @@ grid.arrange(cal_scatter_plot, val_scatter_plot, cal_resid_histogram, val_resid_
 
 
 #--------------------------------------------------------------------------------------------------#
-### Generate some useful outputs
+### Generate Coefficient and VIP plots
 vips <- VIP(plsr.out)[nComps,]
 
 dev.off()
@@ -297,21 +302,19 @@ if(grepl("Windows", sessionInfo()$running)){
 
 seg <- 100
 jk.plsr.out <- pls::plsr(as.formula(paste(inVar,"~","Spectra")), scale=FALSE, center=TRUE, ncomp=nComps, 
-                      validation="CV", segments = seg, segment.type="interleaved", trace=FALSE, 
-                      jackknife=TRUE, data=cal.plsr.data)
+                         validation="CV", segments = seg, segment.type="interleaved", trace=FALSE, 
+                         jackknife=TRUE, data=cal.plsr.data)
 pls.options(parallel = NULL)
 
 Jackknife_coef <- f.coef.valid(plsr.out = jk.plsr.out, data_plsr = cal.plsr.data, ncomp = nComps)
 Jackknife_intercept <- Jackknife_coef[1,,,]
 Jackknife_coef <- Jackknife_coef[2:dim(Jackknife_coef)[1],,,]
 
-#interval <- c(0.025,0.975)
+interval <- c(0.025,0.975)
 interval <- c(0.05,0.95)
 Jackknife_Pred <- val.plsr.data$Spectra%*%Jackknife_coef+Jackknife_intercept
-Interval_Conf <- apply(X = Jackknife_Pred,MARGIN = 1,
-                       FUN = quantile,probs=c(interval[1],interval[2]))
-Interval_Pred <- apply(X = Jackknife_Pred,MARGIN = 1,
-                       FUN = quantile,probs=c(interval[1],interval[2]))
+Interval_Conf <- apply(X = Jackknife_Pred,MARGIN = 1,FUN = quantile,probs=c(interval[1],interval[2]))
+Interval_Pred <- apply(X = Jackknife_Pred,MARGIN = 1,FUN = quantile,probs=c(interval[1],interval[2]))
 sd_mean <- apply(X = Jackknife_Pred,MARGIN = 1,FUN =sd)
 sd_res <- sd(val.plsr.output$PLSR_Residuals)
 sd_tot <- sqrt(sd_mean^2+sd_res^2)
@@ -326,15 +329,14 @@ f.plot.coef(Z = t(Jackknife_coef), wv = seq(Start.wave,End.wave,1),
             plot_label="Jackknife regression coefficients",position = 'bottomleft')
 
 # JK validation plot
-#rng_vals <- quantile(val.plsr.output[,inVar], probs = c(0.001, 0.999))
-rng_vals <- c(min(val.plsr.output$LPI), max(val.plsr.output$UPI))
+rng_quant <- quantile(val.plsr.output[,inVar], probs = c(0.001, 0.999))
 jk_val_scatterplot <- ggplot(val.plsr.output, aes(x=PLSR_Predicted, y=get(inVar))) + 
   theme_bw()+ geom_errorbar(aes(xmin = LPI,xmax = UPI),color='grey',width=0.2) + 
   geom_errorbar(aes(xmin = LCI,xmax = UCI),color='blue',width=0.2)+ geom_point(size=0.3)  + 
   geom_abline(intercept = 0, slope = 1, color="grey30", 
               linetype="dashed", size=0.7) + 
-  xlim(rng_vals[1], rng_vals[2]) + 
-  ylim(rng_vals[1], rng_vals[2]) +
+  xlim(rng_quant[1], rng_quant[2]) + 
+  ylim(rng_quant[1], rng_quant[2]) +
   labs(x=paste0("Predicted ", paste(inVar), " (units)"),
        y=paste0("Observed ", paste(inVar), " (units)"),
        title=paste0("Confidence Interval: Blue;   Prediction_Interval: grey")) + 
@@ -382,3 +384,5 @@ list.files(getwd())[grep(pattern = inVar, list.files(getwd()))]
 
 #--------------------------------------------------------------------------------------------------#
 ### EOF
+
+
