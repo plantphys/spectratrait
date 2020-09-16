@@ -7,7 +7,7 @@
 #   illustrates an approach to quantify model prediction uncertainty based on a jackknife analysis
 #
 #   Spectra and trait data source:
-#   https://ecosis.org/package/leaf-reflectance-plant-functional-gradient-ifgg-kit
+#   https://ecosis.org/package/leaf-spectra-of-36-species-growing-in-rosa-rugosa-invaded-coastal-grassland-communities-in-belgium
 #
 #    Notes:
 #    * The author notes the code is not the most elegant or clean, but is functional 
@@ -56,10 +56,10 @@ pls.options("plsralg")
 opar <- par(no.readonly = T)
 
 # What is the target variable?
-inVar <- "SLA_g_cm"
+inVar <- "LMA_g_m2"
 
 # What is the source dataset from EcoSIS?
-ecosis_id <- "3cf6b27e-d80e-4bc7-b214-c95506e46daa"
+ecosis_id <- "9db4c5a2-7eac-4e1e-8859-009233648e89"
 #--------------------------------------------------------------------------------------------------#
 
 
@@ -96,7 +96,10 @@ sample_info <- dat_raw[,names(dat_raw) %notin% seq(350,2500,1)]
 head(sample_info)
 
 sample_info2 <- sample_info %>%
-  select(Plant_Species=species,Growth_Form=`growth form`,timestamp,SLA_g_cm=`SLA (g/cm )`)
+  select(Plant_Species=`Latin Species`,Species_Code=`species code`,Plot=`plot code`,
+         LMA_g_cm2=`Leaf mass per area (g/cm2)`)
+sample_info2 <- sample_info2 %>%
+  mutate(LMA_g_m2=LMA_g_cm2*10000)
 head(sample_info2)
 
 plsr_data <- data.frame(sample_info2,Spectra)
@@ -111,8 +114,8 @@ rm(sample_info,sample_info2,Spectra)
 method <- "dplyr" #base/dplyr
 # base R - a bit slow
 # dplyr - much faster
-split_data <- create_data_split(approach=method, split_seed=2356812, prop=0.8, 
-                                group_variables="Plant_Species")
+split_data <- create_data_split(approach=method, split_seed=7529075, prop=0.8, 
+                                group_variables="Species_Code")
 names(split_data)
 cal.plsr.data <- split_data$cal_data
 head(cal.plsr.data)[1:8]
@@ -139,12 +142,12 @@ grid.arrange(cal_hist_plot, val_hist_plot, ncol=2)
 cal_spec <- as.matrix(cal.plsr.data[, which(names(cal.plsr.data) %in% paste0("Wave_",wv))])
 cal.plsr.data <- data.frame(cal.plsr.data[, which(names(cal.plsr.data) %notin% paste0("Wave_",wv))],
                             Spectra=I(cal_spec))
-head(cal.plsr.data)[1:4]
+head(cal.plsr.data)[1:5]
 
 val_spec <- as.matrix(val.plsr.data[, which(names(val.plsr.data) %in% paste0("Wave_",wv))])
 val.plsr.data <- data.frame(val.plsr.data[, which(names(val.plsr.data) %notin% paste0("Wave_",wv))],
                             Spectra=I(val_spec))
-head(val.plsr.data)[1:4]
+head(val.plsr.data)[1:5]
 #--------------------------------------------------------------------------------------------------#
 
 
@@ -166,10 +169,10 @@ if(grepl("Windows", sessionInfo()$running)){
 }
 
 method <- "pls"
-random_seed <- 2356812
-seg <- 200
-maxComps <- 14
-iterations <- 50
+random_seed <- 7529075
+seg <- 50
+maxComps <- 16
+iterations <- 80
 if (method=="pls") {
   # pls package approach - faster but estimates more components....
   nComps <- find_optimal_components(method=method, maxComps=maxComps, seg=seg, 
@@ -184,10 +187,9 @@ if (method=="pls") {
 
 
 #--------------------------------------------------------------------------------------------------#
-### Fit final model
-segs <- 100
-plsr.out <- plsr(as.formula(paste(inVar,"~","Spectra")),scale=FALSE,ncomp=nComps,validation="CV",
-                 segments=segs, segment.type="interleaved",trace=FALSE,data=cal.plsr.data)
+### Fit final model - using leave-one-out cross validation
+plsr.out <- plsr(as.formula(paste(inVar,"~","Spectra")),scale=FALSE,ncomp=nComps,validation="LOO",
+                 trace=FALSE,data=cal.plsr.data)
 fit <- plsr.out$fitted.values[,1,nComps]
 pls.options(parallel = NULL)
 
@@ -300,28 +302,28 @@ if(grepl("Windows", sessionInfo()$running)){
   pls.options(parallel = parallel::detectCores()-1)
 }
 
-seg <- 100
 jk.plsr.out <- pls::plsr(as.formula(paste(inVar,"~","Spectra")), scale=FALSE, center=TRUE, ncomp=nComps, 
-                         validation="CV", segments = seg, segment.type="interleaved", trace=FALSE, 
-                         jackknife=TRUE, data=cal.plsr.data)
+                         validation="LOO", trace=TRUE, jackknife=TRUE, data=cal.plsr.data)
 pls.options(parallel = NULL)
 
 Jackknife_coef <- f.coef.valid(plsr.out = jk.plsr.out, data_plsr = cal.plsr.data, ncomp = nComps)
 Jackknife_intercept <- Jackknife_coef[1,,,]
 Jackknife_coef <- Jackknife_coef[2:dim(Jackknife_coef)[1],,,]
 
-interval <- c(0.025,0.975)
+#interval <- c(0.025,0.975)
 interval <- c(0.05,0.95)
 Jackknife_Pred <- val.plsr.data$Spectra%*%Jackknife_coef+Jackknife_intercept
-Interval_Conf <- apply(X = Jackknife_Pred,MARGIN = 1,FUN = quantile,probs=c(interval[1],interval[2]))
-Interval_Pred <- apply(X = Jackknife_Pred,MARGIN = 1,FUN = quantile,probs=c(interval[1],interval[2]))
-sd_mean <- apply(X = Jackknife_Pred,MARGIN = 1,FUN =sd)
+Interval_Conf <- apply(X = Jackknife_Pred, MARGIN = 1, FUN = quantile, 
+                       probs=c(interval[1], interval[2]))
+Interval_Pred <- apply(X = Jackknife_Pred, MARGIN = 1, FUN = quantile, 
+                       probs=c(interval[1], interval[2]))
+sd_mean <- apply(X = Jackknife_Pred, MARGIN = 1, FUN =sd)
 sd_res <- sd(val.plsr.output$PLSR_Residuals)
 sd_tot <- sqrt(sd_mean^2+sd_res^2)
 val.plsr.output$LCI <- Interval_Pred[1,]
 val.plsr.output$UCI <- Interval_Pred[2,]
-val.plsr.output$LPI <- val.plsr.output$PLSR_Predicted+1.96*sd_tot
-val.plsr.output$UPI <- val.plsr.output$PLSR_Predicted-1.96*sd_tot
+val.plsr.output$LPI <- val.plsr.output$PLSR_Predicted-1.96*sd_tot
+val.plsr.output$UPI <- val.plsr.output$PLSR_Predicted+1.96*sd_tot
 head(val.plsr.output)
 
 # JK regression coefficient plot
@@ -329,14 +331,15 @@ f.plot.coef(Z = t(Jackknife_coef), wv = seq(Start.wave,End.wave,1),
             plot_label="Jackknife regression coefficients",position = 'bottomleft')
 
 # JK validation plot
-rng_quant <- quantile(val.plsr.output[,inVar], probs = c(0.001, 0.999))
+#rng_vals <- quantile(val.plsr.output[,inVar], probs = c(0.001, 0.999))
+rng_vals <- c(min(val.plsr.output$LPI), max(val.plsr.output$UPI))
 jk_val_scatterplot <- ggplot(val.plsr.output, aes(x=PLSR_Predicted, y=get(inVar))) + 
   theme_bw()+ geom_errorbar(aes(xmin = LPI,xmax = UPI),color='grey',width=0.2) + 
-  geom_errorbar(aes(xmin = LCI,xmax = UCI),color='blue',width=0.2)+ geom_point(size=0.3)  + 
+  geom_errorbar(aes(xmin = LCI,xmax = UCI),color='blue',width=0.2)+ geom_point(size=1.3)  + 
   geom_abline(intercept = 0, slope = 1, color="grey30", 
               linetype="dashed", size=0.7) + 
-  xlim(rng_quant[1], rng_quant[2]) + 
-  ylim(rng_quant[1], rng_quant[2]) +
+  xlim(rng_vals[1], rng_vals[2]) + 
+  ylim(rng_vals[1], rng_vals[2]) +
   labs(x=paste0("Predicted ", paste(inVar), " (units)"),
        y=paste0("Observed ", paste(inVar), " (units)"),
        title=paste0("Confidence Interval: Blue;   Prediction_Interval: grey")) + 
@@ -350,7 +353,8 @@ jk_val_scatterplot
 
 #---------------- Output jackknife results --------------------------------------------------------#
 # JK Coefficents
-out.jk.coefs <- data.frame(Iteration=seq(1,seg,1),Intercept=Jackknife_intercept,t(Jackknife_coef))
+out.jk.coefs <- data.frame(Iteration=seq(1,length(Jackknife_intercept),1),
+                           Intercept=Jackknife_intercept,t(Jackknife_coef))
 head(out.jk.coefs)[1:6]
 write.csv(out.jk.coefs,file=file.path(outdir,paste0(inVar,'_Jackkife_PLSR_Coefficients.csv')),
           row.names=FALSE)
@@ -384,5 +388,3 @@ list.files(getwd())[grep(pattern = inVar, list.files(getwd()))]
 
 #--------------------------------------------------------------------------------------------------#
 ### EOF
-
-
