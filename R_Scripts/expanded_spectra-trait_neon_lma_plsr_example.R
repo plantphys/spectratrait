@@ -308,8 +308,10 @@ Jackknife_coef <- Jackknife_coef[2:dim(Jackknife_coef)[1],,,]
 #interval <- c(0.025,0.975)
 interval <- c(0.05,0.95)
 Jackknife_Pred <- val.plsr.data$Spectra%*%Jackknife_coef+Jackknife_intercept
-Interval_Conf <- apply(X = Jackknife_Pred,MARGIN = 1,FUN = quantile,probs=c(interval[1],interval[2]))
-Interval_Pred <- apply(X = Jackknife_Pred,MARGIN = 1,FUN = quantile,probs=c(interval[1],interval[2]))
+Interval_Conf <- apply(X = Jackknife_Pred,MARGIN = 1,
+                       FUN = quantile,probs=c(interval[1],interval[2]))
+Interval_Pred <- apply(X = Jackknife_Pred,MARGIN = 1,
+                       FUN = quantile,probs=c(interval[1],interval[2]))
 sd_mean <- apply(X = Jackknife_Pred,MARGIN = 1,FUN =sd)
 sd_res <- sd(val.plsr.output$PLSR_Residuals)
 sd_tot <- sqrt(sd_mean^2+sd_res^2)
