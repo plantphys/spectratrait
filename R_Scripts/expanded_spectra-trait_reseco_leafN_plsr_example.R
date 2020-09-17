@@ -22,12 +22,18 @@ closeAllConnections()   # close any open connections to files
 
 #--------------------------------------------------------------------------------------------------#
 ### Install and load required R packages
-list.of.packages <- c("devtools","readr","RCurl","httr","pls","dplyr","reshape2","here",
+list.of.packages <- c("devtools","remotes","readr","RCurl","httr","pls","dplyr","reshape2","here",
                       "ggplot2","gridExtra")  # packages needed for script
 # check for dependencies and install if needed
 new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
-if(length(new.packages)) install.packages(new.packages)
-
+if(length(new.packages)) install.packages(new.packages, dependencies=c("Depends", "Imports",
+                                                                       "LinkingTo"))
+version_requirements <- c("3.3.2")
+if (!packageVersion("ggplot2") >= version_requirements[1]) {
+  remotes::install_version(package="ggplot2", version=paste0(">= ", version_requirements), 
+                           dependencies=c("Depends", "Imports", "LinkingTo"), upgrade="ask",
+                           quiet=TRUE)
+}
 # Load libraries
 invisible(lapply(list.of.packages, library, character.only = TRUE))
 #--------------------------------------------------------------------------------------------------#
@@ -36,9 +42,10 @@ invisible(lapply(list.of.packages, library, character.only = TRUE))
 #--------------------------------------------------------------------------------------------------#
 ### Setup other functions and options
 github_dir <- file.path(here(),"R_Scripts")
-source_from_gh <- FALSE
+source_from_gh <- TRUE
 if (source_from_gh) {
   # Source helper functions from GitHub
+  print("*** GitHub hash of functions.R file:")
   devtools::source_url("https://raw.githubusercontent.com/TESTgroup-BNL/PLSR_for_plant_trait_prediction/master/R_Scripts/functions.R")
 } else {
   functions <- file.path(github_dir,"functions.R")
@@ -169,7 +176,7 @@ if(grepl("Windows", sessionInfo()$running)){
   pls.options(parallel = parallel::detectCores()-1)
 }
 
-method <- "pls"
+method <- "pls" #pls, custom, lowestPRESS
 random_seed <- 1245565
 seg <- 50
 maxComps <- 16
@@ -178,6 +185,7 @@ if (method=="pls") {
   # pls package approach - faster but estimates more components....
   nComps <- find_optimal_components(method=method, maxComps=maxComps, seg=seg, 
                                     random_seed=random_seed)
+  print(paste0("*** Optimal number of components: ", nComps))
 } else {
   # custom method - slow but generally finds the smallest number of components 
   nComps <- find_optimal_components(method=method, maxComps=maxComps, iterations=iterations, 
@@ -348,7 +356,7 @@ jk_val_scatterplot <- ggplot(val.plsr.output, aes(x=PLSR_Predicted, y=get(inVar)
         axis.title=element_text(size=20, face="bold"), 
         axis.text.x = element_text(angle = 0,vjust = 0.5),
         panel.border = element_rect(linetype = "solid", fill = NA, size=1.5))
-jk_val_scatterplot
+print(jk_val_scatterplot)
 #--------------------------------------------------------------------------------------------------#
 
 
