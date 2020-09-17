@@ -36,7 +36,7 @@ invisible(lapply(list.of.packages, library, character.only = TRUE))
 #--------------------------------------------------------------------------------------------------#
 ### Setup other functions and options
 github_dir <- file.path(here(),"R_Scripts")
-source_from_gh <- TRUE
+source_from_gh <- FALSE
 if (source_from_gh) {
   # Source helper functions from GitHub
   devtools::source_url("https://raw.githubusercontent.com/TESTgroup-BNL/PLSR_for_plant_trait_prediction/master/R_Scripts/functions.R")
@@ -168,15 +168,16 @@ if(grepl("Windows", sessionInfo()$running)){
   pls.options(parallel = parallel::detectCores()-1)
 }
 
-method <- "custom" #pls/custom
+method <- "lowestPRESS" #pls, custom, lowestPRESS
 random_seed <- 2356812
 seg <- 100
 maxComps <- 18
-iterations <- 30
+iterations <- 50
 if (method=="pls") {
   # pls package approach - faster but estimates more components....
   nComps <- find_optimal_components(method=method, maxComps=maxComps, seg=seg, 
                                     random_seed=random_seed)
+  print(paste0("*** Optimal number of components: ", nComps))
 } else {
   # custom method - slow but generally finds the smallest number of components 
   nComps <- find_optimal_components(method=method, maxComps=maxComps, iterations=iterations, 
@@ -212,7 +213,8 @@ par(opar)
 #--------------------------------------------------------------------------------------------------#
 ### PLSR fit observed vs. predicted plot data
 #calibration
-cal.plsr.output <- data.frame(cal.plsr.data[, which(names(cal.plsr.data) %notin% "Spectra")], PLSR_Predicted=fit,
+cal.plsr.output <- data.frame(cal.plsr.data[, which(names(cal.plsr.data) %notin% "Spectra")], 
+                              PLSR_Predicted=fit,
                               PLSR_CV_Predicted=as.vector(plsr.out$validation$pred[,,nComps]))
 cal.plsr.output <- cal.plsr.output %>%
   mutate(PLSR_CV_Residuals = PLSR_CV_Predicted-get(inVar))

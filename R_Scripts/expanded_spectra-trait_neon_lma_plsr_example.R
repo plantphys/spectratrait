@@ -160,7 +160,7 @@ if(grepl("Windows", sessionInfo()$running)){
   pls.options(parallel = parallel::detectCores()-1)
 }
 
-method <- "custom"
+method <- "custom" #pls, custom, lowestPRESS
 random_seed <- 2356812
 seg <- 100
 maxComps <- 20
@@ -169,6 +169,7 @@ if (method=="pls") {
   # pls package approach - faster but estimates more components....
   nComps <- find_optimal_components(method=method, maxComps=maxComps, seg=seg, 
                                     random_seed=random_seed)
+  print(paste0("*** Optimal number of components: ", nComps))
 } else {
   # custom method - slow but generally finds the smallest number of components 
   nComps <- find_optimal_components(method=method, maxComps=maxComps, iterations=iterations, 
