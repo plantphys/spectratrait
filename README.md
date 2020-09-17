@@ -2,9 +2,12 @@
 Tutorial and example scripts illustrating how to fit, evaluate, and report spectra-trait PLSR models
 
 
-## Contains:
+### Contains:
 
-## Linked dataset citations and DOIs:
+### Linked dataset citations and DOIs:
 
 ### Article citation:
 TBD
+
+### Script authors:
+Julien Lamour, Jeremiah Anderson, Ken Davidson, Shawn P. Serbin [author list needs to be finalized]
