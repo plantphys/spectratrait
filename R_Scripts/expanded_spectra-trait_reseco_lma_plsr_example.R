@@ -69,10 +69,10 @@ inVar <- "LMA_g_m2"
 ecosis_id <- "9db4c5a2-7eac-4e1e-8859-009233648e89"
 
 # Specify output directory, output_dir 
-#Options: 
+# Options: 
 # tempdir - use a OS-specified temporary directory 
 # user defined PATH - e.g. "~/scratch/PLSR"
-output_dir <- "~/scratch/PLSR"
+output_dir <- "tempdir"
 #--------------------------------------------------------------------------------------------------#
 
 
