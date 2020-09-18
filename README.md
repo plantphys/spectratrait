@@ -4,6 +4,7 @@ Tutorial and example scripts illustrating how to fit, evaluate, and report spect
 
 ### Contains:
 1) Example R script files that illustrate the "best practices" of PLSR model fitting for the estimation of leaf functional traits with reflectance spectroscopy
+  + expanded_spectra-trait_kit_lma_plsr_example.R required some data cleaning (removal of NA's and suspect high values)
 
 2) R functions used in the example PLSR model fitting scripts
 

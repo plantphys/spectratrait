@@ -88,14 +88,6 @@ names(dat_raw)[1:40]
 
 #--------------------------------------------------------------------------------------------------#
 ### Create plsr dataset
-## cleanup any missing
-if (any(is.na(dat_raw))) {
-  dat_raw <- na.omit(dat_raw)
-}
-# remove suspect high values
-dat_raw <- dat_raw %>%
-  filter(`SLA (g/cm )`<=500)
-
 Start.wave <- 500
 End.wave <- 2400
 wv <- seq(Start.wave,End.wave,1)
@@ -111,6 +103,16 @@ head(sample_info2)
 
 plsr_data <- data.frame(sample_info2,Spectra)
 rm(sample_info,sample_info2,Spectra)
+#--------------------------------------------------------------------------------------------------#
+
+
+#--------------------------------------------------------------------------------------------------#
+#### Example data cleaning.  End user needs to do what's appropriate for their 
+#### data.  This may be an iterative process.
+# Keep only complete rows of inVar and spec data before fitting
+plsr_data <- plsr_data[complete.cases(plsr_data[,names(plsr_data) %in% c(inVar,wv)]),]
+# Remove suspect high values
+plsr_data <- plsr_data[ plsr_data[,inVar] <= 500, ]
 #--------------------------------------------------------------------------------------------------#
 
 
