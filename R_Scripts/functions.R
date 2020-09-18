@@ -40,7 +40,7 @@ get_ecosis_data <- function(ecosis_id = NULL) {
 #--------------------------------------------------------------------------------------------------#
 
 #--------------------------------------------------------------------------------------------------#
-#' @author Shawn P. Serbin, Jeremiah Anderson, Julien Lamour
+#' @author Julien Lamour, Jeremiah Anderson, Shawn P. Serbin
 create_data_split <- function(approach=NULL, split_seed=123456789, prop=0.8,
                               group_variables=NULL) {
   set.seed(split_seed)
@@ -90,9 +90,9 @@ create_data_split <- function(approach=NULL, split_seed=123456789, prop=0.8,
 #--------------------------------------------------------------------------------------------------#
 
 #--------------------------------------------------------------------------------------------------#
-#' @param method Which approach to use to find optimal components, the PLS package of custom method
+#' @param method Which approach to use to find optimal components. Options: pls, firstPlateau, firstMin
 #' 
-#' @author Shawn P. Serbin, Jeremiah Anderson, Julien Lamour
+#' @author Julien Lamour, Jeremiah Anderson, Shawn P. Serbin
 #' 
 find_optimal_components <- function(method="pls", maxComps=20, iterations=20, seg=100, prop=0.70,
                                     random_seed=123456789) {
@@ -105,7 +105,7 @@ find_optimal_components <- function(method="pls", maxComps=20, iterations=20, se
                      jackknife=TRUE, data=cal.plsr.data)
     nComps <- selectNcomp(plsr.out, method = "onesigma", plot = TRUE)
   }
-  if(method=="custom") {
+  if(method=="firstPlateau") {
     maxComps <- maxComps
     iterations <- iterations
     seg <- seg
@@ -141,7 +141,7 @@ find_optimal_components <- function(method="pls", maxComps=20, iterations=20, se
     nComps <- min(results[results$P.value > 0.05, "Component"])
     print(paste0("*** Optimal number of components based on t.test: ", nComps))
   }
-  if(method=="lowestPRESS") {
+  if(method=="firstMin") {
     maxComps <- maxComps
     iterations <- iterations
     seg <- seg
@@ -226,6 +226,8 @@ f.plot.spec <- function(
 #--------------------------------------------------------------------------------------------------#
 
 #--------------------------------------------------------------------------------------------------#
+#' @title f.plot.coef
+#' @author Julien Lamour
 f.plot.coef <- function(
   Z,                  ## Coefficient matrix with each row corresponding to the coefficients and wavelength in columns
   wv,                 ## vector of wavelengths 
@@ -256,6 +258,7 @@ f.plot.coef <- function(
 #--------------------------------------------------------------------------------------------------#
 ## Return the intercept and the coefficients of the jackknife validation
 ## Only work in the case where center=TRUE in the plsr model
+#' @author Julien Lamour
 f.coef.valid <- function(plsr.out, ## plsr model with center = TRUE
                        data_plsr, ## data used for the plsr model
                        ncomp ## number of selection components

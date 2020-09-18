@@ -67,12 +67,24 @@ inVar <- "LMA_g_m2"
 
 # What is the source dataset from EcoSIS?
 ecosis_id <- "9db4c5a2-7eac-4e1e-8859-009233648e89"
+
+# Specify output directory, output_dir 
+#Options: 
+# tempdir - use a OS-specified temporary directory 
+# user defined PATH - e.g. "~/scratch/PLSR"
+output_dir <- "tempdir"
+output_dir <- "~/scratch/PLSR"
 #--------------------------------------------------------------------------------------------------#
 
 
 #--------------------------------------------------------------------------------------------------#
-### Set working directory (scratch space)
-outdir <- tempdir()
+### Set working directory
+if (output_dir=="tempdir") {
+  outdir <- tempdir()
+} else {
+  if (! file.exists(output_dir)) dir.create(output_dir,recursive=TRUE)
+  outdir <- file.path(path.expand(output_dir))
+}
 setwd(outdir) # set working directory
 getwd()  # check wd
 #--------------------------------------------------------------------------------------------------#
@@ -88,11 +100,6 @@ names(dat_raw)[1:40]
 
 #--------------------------------------------------------------------------------------------------#
 ### Create plsr dataset
-## cleanup any missing
-if (any(is.na(dat_raw))) {
-  dat_raw <- na.omit(dat_raw)
-}
-
 Start.wave <- 500
 End.wave <- 2400
 wv <- seq(Start.wave,End.wave,1)
@@ -111,6 +118,14 @@ head(sample_info2)
 
 plsr_data <- data.frame(sample_info2,Spectra)
 rm(sample_info,sample_info2,Spectra)
+#--------------------------------------------------------------------------------------------------#
+
+
+#--------------------------------------------------------------------------------------------------#
+#### Example data cleaning.  End user needs to do what's appropriate for their 
+#### data.  This may be an iterative process.
+# Keep only complete rows of inVar and spec data before fitting
+plsr_data <- plsr_data[complete.cases(plsr_data[,names(plsr_data) %in% c(inVar,wv)]),]
 #--------------------------------------------------------------------------------------------------#
 
 
@@ -135,12 +150,18 @@ print(paste("Cal observations: ",dim(cal.plsr.data)[1],sep=""))
 print(paste("Val observations: ",dim(val.plsr.data)[1],sep=""))
 
 cal_hist_plot <- qplot(cal.plsr.data[,paste0(inVar)],geom="histogram",
-                       main = paste0("Cal. Histogram for ",inVar),
+                       main = paste0("Calibration Histogram for ",inVar),
                        xlab = paste0(inVar),ylab = "Count",fill=I("grey50"),col=I("black"),alpha=I(.7))
 val_hist_plot <- qplot(val.plsr.data[,paste0(inVar)],geom="histogram",
-                       main = paste0("Val. Histogram for ",inVar),
+                       main = paste0("Validation Histogram for ",inVar),
                        xlab = paste0(inVar),ylab = "Count",fill=I("grey50"),col=I("black"),alpha=I(.7))
-grid.arrange(cal_hist_plot, val_hist_plot, ncol=2)
+histograms <- grid.arrange(cal_hist_plot, val_hist_plot, ncol=2)
+ggsave(paste0(inVar,"_Cal_Val_Histograms.png"), plot = histograms, device="png", width = 30, 
+       height = 12, units = "cm",
+       dpi = 300)
+# output cal/val data
+write.csv(cal.plsr.data,file=file.path(outdir,paste0(inVar,'_Cal_PLSR_Dataset.csv')),row.names=FALSE)
+write.csv(val.plsr.data,file=file.path(outdir,paste0(inVar,'_Val_PLSR_Dataset.csv')),row.names=FALSE)
 #--------------------------------------------------------------------------------------------------#
 
 
@@ -163,6 +184,11 @@ head(val.plsr.data)[1:5]
 par(mfrow=c(1,2)) # B, L, T, R
 f.plot.spec(Z=cal.plsr.data$Spectra,wv=seq(Start.wave,End.wave,1),plot_label="Calibration")
 f.plot.spec(Z=val.plsr.data$Spectra,wv=seq(Start.wave,End.wave,1),plot_label="Validation")
+png(file=file.path(outdir,paste0(inVar,'_Cal_Val_Spectra.png')),height=2500,width=4500, res=340)
+par(mfrow=c(1,2)) # B, L, T, R
+f.plot.spec(Z=cal.plsr.data$Spectra,wv=seq(Start.wave,End.wave,1),plot_label="Calibration")
+f.plot.spec(Z=val.plsr.data$Spectra,wv=seq(Start.wave,End.wave,1),plot_label="Validation")
+dev.off()
 par(mfrow=c(1,1))
 #--------------------------------------------------------------------------------------------------#
 
@@ -175,22 +201,22 @@ if(grepl("Windows", sessionInfo()$running)){
   pls.options(parallel = parallel::detectCores()-1)
 }
 
-method <- "pls" #pls, custom, lowestPRESS
+method <- "pls" #pls, firstPlateau, firstMin
 random_seed <- 7529075
 seg <- 50
 maxComps <- 16
 iterations <- 50
 if (method=="pls") {
-  # pls package approach - faster but estimates more components....
   nComps <- find_optimal_components(method=method, maxComps=maxComps, seg=seg, 
                                     random_seed=random_seed)
   print(paste0("*** Optimal number of components: ", nComps))
 } else {
-  # custom method - slow but generally finds the smallest number of components 
   nComps <- find_optimal_components(method=method, maxComps=maxComps, iterations=iterations, 
                                     seg=seg, prop=0.70, 
                                     random_seed=random_seed)
 }
+dev.copy(png,file.path(outdir,paste0(paste0(inVar,"_PLSR_component_selection.png"))))
+dev.off ();
 #--------------------------------------------------------------------------------------------------#
 
 
@@ -282,8 +308,12 @@ val_resid_histogram <- ggplot(val.plsr.output, aes(x=PLSR_Residuals)) +
         panel.border = element_rect(linetype = "solid", fill = NA, size=1.5))
 
 # plot cal/val side-by-side
-grid.arrange(cal_scatter_plot, val_scatter_plot, cal_resid_histogram, val_resid_histogram, 
-             nrow=2,ncol=2)
+scatterplots <- grid.arrange(cal_scatter_plot, val_scatter_plot, cal_resid_histogram, 
+                             val_resid_histogram, nrow=2, ncol=2)
+ggsave(paste0(inVar,"_Cal_Val_scatterplots.png"), plot = scatterplots, device="png", 
+       width = 32, 
+       height = 30, units = "cm",
+       dpi = 300)
 #--------------------------------------------------------------------------------------------------#
 
 
@@ -295,10 +325,17 @@ dev.off()
 par(mfrow=c(2,1))
 plot(plsr.out, plottype = "coef",xlab="Wavelength (nm)",
      ylab="Regression coefficients",legendpos = "bottomright",ncomp=nComps)
-
 plot(seq(Start.wave,End.wave,1),vips,xlab="Wavelength (nm)",ylab="VIP",cex=0.01)
 lines(seq(Start.wave,End.wave,1),vips,lwd=3)
 abline(h=0.8,lty=2,col="dark grey")
+png(file=file.path(outdir,paste0(inVar,'_coefficient_VIP_plot.png')),height=2900,width=4100, res=340)
+par(mfrow=c(2,1))
+plot(plsr.out, plottype = "coef",xlab="Wavelength (nm)",
+     ylab="Regression coefficients",legendpos = "bottomright",ncomp=nComps)
+plot(seq(Start.wave,End.wave,1),vips,xlab="Wavelength (nm)",ylab="VIP",cex=0.01)
+lines(seq(Start.wave,End.wave,1),vips,lwd=3)
+abline(h=0.8,lty=2,col="dark grey")
+dev.off()
 #--------------------------------------------------------------------------------------------------#
 
 
@@ -356,6 +393,8 @@ jk_val_scatterplot <- ggplot(val.plsr.output, aes(x=PLSR_Predicted, y=get(inVar)
         axis.text.x = element_text(angle = 0,vjust = 0.5),
         panel.border = element_rect(linetype = "solid", fill = NA, size=1.5))
 print(jk_val_scatterplot)
+ggsave(paste0(inVar,"_PLSR_validation_scatterplot.png"), plot = jk_val_scatterplot, device="png",
+              width = 32, height = 30, units = "cm", dpi = 300)
 #--------------------------------------------------------------------------------------------------#
 
 
