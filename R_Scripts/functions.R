@@ -94,6 +94,7 @@ create_data_split <- function(approach=NULL, split_seed=123456789, prop=0.8,
 #' @author Julien Lamour, Shawn P. Serbin
 #'
 pls_permutation <- function(dataset=NULL, maxComps=20, iterations=20, seg=100, prop=0.70) {
+  coefs <- array(0,dim=c((ncol(dataset$Spectra)+1),iterations,maxComps))
   press.out <- array(data=NA, dim=c(iterations,maxComps))
   print("*** Running permutation test.  Please hang tight, this can take awhile ***")
   print(paste("Options:", maxComps, iterations, seg, prop, sep=" "))
@@ -108,9 +109,12 @@ pls_permutation <- function(dataset=NULL, maxComps=20, iterations=20, seg=100, p
     sq_resid <- (pred_val[,,]-val.sub.data[,inVar])^2
     press <- apply(X = sq_resid, MARGIN = 2, FUN = sum)
     press.out[i,] <- press
+    coefs[,i,] <- coef(plsr.out,intercept = TRUE, ncomp = 1:maxComps)
     rm(rows,sub.data,val.sub.data,plsr.out,pred_val,sq_resid,press)
   }
-  return(press.out)
+  # create a new list with PRESS and permuted coefficients x wavelength x component number
+  output <- list(PRESS=press.out, coef_array=coefs)
+  return(output)
 }
 #--------------------------------------------------------------------------------------------------#
 
@@ -135,7 +139,7 @@ find_optimal_components <- function(dataset=NULL, method="pls", maxComps=20, ite
     press.out <- pls_permutation(dataset=dataset, maxComps=maxComps, iterations=iterations, 
                                  seg=seg, prop=prop)
     # PRESS plot
-    pressDF <- as.data.frame(press.out)
+    pressDF <- as.data.frame(press.out$PRESS)
     names(pressDF) <- as.character(seq(maxComps))
     pressDFres <- reshape2::melt(pressDF)
     bp <- ggplot(pressDFres, aes(x=variable, y=value)) + theme_bw() + 
@@ -147,7 +151,7 @@ find_optimal_components <- function(dataset=NULL, method="pls", maxComps=20, ite
     print(bp)
     results <- NULL
     for(i in 1:(maxComps-1)){
-      p_value <- t.test(press.out[,i], press.out[,(i+1)])$p.value
+      p_value <- t.test(press.out$PRESS[,i], press.out$PRESS[,(i+1)])$p.value
       temp_results <- data.frame(Component=(i+1), P.value= round(p_value, 6))
       results <- rbind(results, temp_results)
     }
@@ -158,7 +162,7 @@ find_optimal_components <- function(dataset=NULL, method="pls", maxComps=20, ite
     press.out <- pls_permutation(dataset=dataset, maxComps=maxComps, iterations=iterations, 
                                  seg=seg, prop=prop)
     # PRESS plot
-    pressDF <- as.data.frame(press.out)
+    pressDF <- as.data.frame(press.out$PRESS)
     names(pressDF) <- as.character(seq(maxComps))
     pressDFres <- reshape2::melt(pressDF)
     bp <- ggplot(pressDFres, aes(x=variable, y=value)) + theme_bw() + 
