@@ -72,7 +72,6 @@ ecosis_id <- "9db4c5a2-7eac-4e1e-8859-009233648e89"
 #Options: 
 # tempdir - use a OS-specified temporary directory 
 # user defined PATH - e.g. "~/scratch/PLSR"
-output_dir <- "tempdir"
 output_dir <- "~/scratch/PLSR"
 #--------------------------------------------------------------------------------------------------#
 
@@ -201,18 +200,19 @@ if(grepl("Windows", sessionInfo()$running)){
   pls.options(parallel = parallel::detectCores()-1)
 }
 
-method <- "pls" #pls, firstPlateau, firstMin
+method <- "firstMin" #pls, firstPlateau, firstMin
 random_seed <- 7529075
-seg <- 50
+seg <- 80
 maxComps <- 16
 iterations <- 50
+prop <- 0.70
 if (method=="pls") {
-  nComps <- find_optimal_components(method=method, maxComps=maxComps, seg=seg, 
-                                    random_seed=random_seed)
+  nComps <- find_optimal_components(dataset=cal.plsr.data, method=method, maxComps=maxComps, 
+                                    seg=seg, random_seed=random_seed)
   print(paste0("*** Optimal number of components: ", nComps))
 } else {
-  nComps <- find_optimal_components(method=method, maxComps=maxComps, iterations=iterations, 
-                                    seg=seg, prop=0.70, 
+  nComps <- find_optimal_components(dataset=cal.plsr.data, method=method, maxComps=maxComps, 
+                                    iterations=iterations, seg=seg, prop=prop, 
                                     random_seed=random_seed)
 }
 dev.copy(png,file.path(outdir,paste0(paste0(inVar,"_PLSR_component_selection.png"))))
@@ -347,17 +347,22 @@ if(grepl("Windows", sessionInfo()$running)){
   pls.options(parallel = parallel::detectCores()-1)
 }
 
-jk.plsr.out <- pls::plsr(as.formula(paste(inVar,"~","Spectra")), scale=FALSE, center=TRUE, ncomp=nComps, 
-                         validation="LOO", trace=TRUE, jackknife=TRUE, data=cal.plsr.data)
+jk.plsr.out <- pls::plsr(as.formula(paste(inVar,"~","Spectra")), scale=FALSE, 
+                         center=TRUE, ncomp=nComps, validation="LOO", trace=TRUE, 
+                         jackknife=TRUE, 
+                         data=cal.plsr.data)
 pls.options(parallel = NULL)
 
-Jackknife_coef <- f.coef.valid(plsr.out = jk.plsr.out, data_plsr = cal.plsr.data, ncomp = nComps)
+Jackknife_coef <- f.coef.valid(plsr.out = jk.plsr.out, data_plsr = cal.plsr.data, 
+                               ncomp = nComps)
 Jackknife_intercept <- Jackknife_coef[1,,,]
 Jackknife_coef <- Jackknife_coef[2:dim(Jackknife_coef)[1],,,]
 
-#interval <- c(0.025,0.975)
-interval <- c(0.05,0.95)
-Jackknife_Pred <- val.plsr.data$Spectra%*%Jackknife_coef+Jackknife_intercept
+interval <- c(0.025,0.975)
+Jackknife_Pred <- val.plsr.data$Spectra %*% Jackknife_coef + 
+  matrix(rep(Jackknife_intercept, length(val.plsr.data[,inVar])), byrow=TRUE, 
+         ncol=length(Jackknife_intercept))
+
 Interval_Conf <- apply(X = Jackknife_Pred, MARGIN = 1, FUN = quantile, 
                        probs=c(interval[1], interval[2]))
 Interval_Pred <- apply(X = Jackknife_Pred, MARGIN = 1, FUN = quantile, 
@@ -376,7 +381,6 @@ f.plot.coef(Z = t(Jackknife_coef), wv = seq(Start.wave,End.wave,1),
             plot_label="Jackknife regression coefficients",position = 'bottomleft')
 
 # JK validation plot
-#rng_vals <- quantile(val.plsr.output[,inVar], probs = c(0.001, 0.999))
 rng_vals <- c(min(val.plsr.output$LPI), max(val.plsr.output$UPI))
 jk_val_scatterplot <- ggplot(val.plsr.output, aes(x=PLSR_Predicted, y=get(inVar))) + 
   theme_bw()+ geom_errorbar(aes(xmin = LPI,xmax = UPI),color='grey',width=0.2) + 
