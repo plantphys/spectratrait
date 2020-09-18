@@ -69,7 +69,7 @@ create_data_split <- function(approach=NULL, split_seed=123456789, prop=0.8,
         }
       }
       plsr_data$ID <- NULL
-      # drop NA's  Not all observations had a species associated with it
+      # drop NA's in CalVal
       plsr_data <- plsr_data[!is.na(plsr_data$CalVal), ]
       cal.plsr.data <- plsr_data[plsr_data$CalVal== "Cal",]
       val.plsr.data <- plsr_data[plsr_data$CalVal== "Val",]
