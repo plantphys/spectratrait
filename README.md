@@ -4,9 +4,17 @@ Tutorial and example scripts illustrating how to fit, evaluate, and report spect
 
 ### Contains:
 1) Example R script files that illustrate the "best practices" of PLSR model fitting for the estimation of leaf functional traits with reflectance spectroscopy
-  + expanded_spectra-trait_kit_lma_plsr_example.R required some data cleaning (removal of NA's and suspect high values)
+  + _expanded_spectra-trait_kit_lma_plsr_example.R_  Small dataset looking at LMA with some data cleaning (removal of NA's and suspect high values)
+  + _expanded_spectra-trait_neon_lma_plsr_example.R_ Large dataset looking at LMA with multiple grouping variables, very slow (>6000 observations)
+  + _expanded_spectra-trait_reseco_leafN_plsr_example.R_ Small dataset looking at leaf nitrogen
+  + _expanded_spectra-trait_reseco_lma_plsr_example.R_ Small dataset looking at LMA
+  + _simple_spectra-trait_plsr_example.R_ Basic PLSR example using a large dataset
+  + _pull_data_from_ecosis_ Quick example of how to pull data from EcoSIS and plot it
 
 2) R functions used in the example PLSR model fitting scripts
+  + _create_data_split()_ Randomly plits data into calibration and validation datasets based on grouping variables.  'base' option is slow but verbose.  'dplyr' is fast and quiet.
+  + _find_optimal_components()_ Finds optium number of components for PLSR.  'pls' package consists of choosing the model with fewest components that is still less than one standard error away from the overall best model. 'first min' consists of choosing the first component that gives statistically (t-test) the same result as the following component. This method finds the first 'plateau' in the PRESS diminution.  'firstMin' finds the first component that gives statistically (t-test) the same result as the overall best model.
+  
 
 3) Example Rmarkdown vignettes illustrating the various PLSR model fitting examples
 
