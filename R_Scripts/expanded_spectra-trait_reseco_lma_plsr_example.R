@@ -379,6 +379,13 @@ head(val.plsr.output)
 # JK regression coefficient plot
 f.plot.coef(Z = t(Jackknife_coef), wv = seq(Start.wave,End.wave,1), 
             plot_label="Jackknife regression coefficients",position = 'bottomleft')
+png(file=file.path(outdir,paste0(inVar,'_jackknife regression coefficients.png')),
+    height=2100,width=3800, res=340)
+f.plot.coef(Z = t(Jackknife_coef), wv = seq(Start.wave,End.wave,1), 
+            plot_label="Jackknife regression coefficients",position = 'bottomleft')
+abline(h=0,lty=2,col="grey50")
+box(lwd=2.2)
+dev.off()
 
 # JK validation plot
 rng_vals <- c(min(val.plsr.output$LPI), max(val.plsr.output$UPI))
