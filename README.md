@@ -29,6 +29,7 @@ Rpubs example output: https://rpubs.com/sserbin/661964
 Target variable: LMA <br>
 EcoSIS URL: https://ecosis.org/package/fresh-leaf-spectra-to-estimate-lma-over-neon-domains-in-eastern-united-states <br>
 EcoSIS ID: 5617da17-c925-49fb-b395-45a51291bd2d <br>
+DOI: https://doi.org/doi:10.21232/9831-rq60 <br>
 Rpubs example output: https://rpubs.com/sserbin/661976
 
 3) Leaf spectra of 36 species growing in Rosa rugosa invaded coastal grassland communities in Belgium <br>
