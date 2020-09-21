@@ -35,6 +35,7 @@ Rpubs example output: https://rpubs.com/sserbin/661976
 Target variable: LMA, leaf nitrogen <br>
 EcoSIS URL: https://ecosis.org/package/leaf-spectra-of-36-species-growing-in-rosa-rugosa-invaded-coastal-grassland-communities-in-belgium <br>
 EcoSIS ID: 9db4c5a2-7eac-4e1e-8859-009233648e89 <br>
+DOI: https://doi.org/doi:10.21232/9nr6-sq54
 Rpubs LMA example output: https://rpubs.com/sserbin/661963 <br>
 Rpubs LeafN example output: https://rpubs.com/sserbin/661958
 
