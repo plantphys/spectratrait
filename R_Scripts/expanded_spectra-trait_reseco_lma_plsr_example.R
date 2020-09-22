@@ -8,6 +8,8 @@
 #
 #   Spectra and trait data source:
 #   https://ecosis.org/package/leaf-spectra-of-36-species-growing-in-rosa-rugosa-invaded-coastal-grassland-communities-in-belgium
+#   DOI: https://doi.org/doi:10.21232/9nr6-sq54
+#
 #
 #    Notes:
 #    * The author notes the code is not the most elegant or clean, but is functional 
@@ -23,7 +25,7 @@ closeAllConnections()   # close any open connections to files
 #--------------------------------------------------------------------------------------------------#
 ### Install and load required R packages
 list.of.packages <- c("devtools","remotes","readr","RCurl","httr","pls","dplyr","reshape2","here",
-                      "ggplot2","gridExtra")  # packages needed for script
+                      "plotrix","ggplot2","gridExtra")  # packages needed for script
 # check for dependencies and install if needed
 new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
 if(length(new.packages)) install.packages(new.packages, dependencies=c("Depends", "Imports",
@@ -73,6 +75,7 @@ ecosis_id <- "9db4c5a2-7eac-4e1e-8859-009233648e89"
 # tempdir - use a OS-specified temporary directory 
 # user defined PATH - e.g. "~/scratch/PLSR"
 output_dir <- "tempdir"
+output_dir <- "~/scratch/PLSR"
 #--------------------------------------------------------------------------------------------------#
 
 
@@ -215,8 +218,9 @@ if (method=="pls") {
                                     iterations=iterations, seg=seg, prop=prop, 
                                     random_seed=random_seed)
 }
-dev.copy(png,file.path(outdir,paste0(paste0(inVar,"_PLSR_component_selection.png"))))
-dev.off ();
+dev.copy(png,file.path(outdir,paste0(paste0(inVar,"_PLSR_component_selection.png"))), 
+         height=2800, width=3400,  res=340)
+dev.off();
 #--------------------------------------------------------------------------------------------------#
 
 
@@ -362,7 +366,6 @@ interval <- c(0.025,0.975)
 Jackknife_Pred <- val.plsr.data$Spectra %*% Jackknife_coef + 
   matrix(rep(Jackknife_intercept, length(val.plsr.data[,inVar])), byrow=TRUE, 
          ncol=length(Jackknife_intercept))
-
 Interval_Conf <- apply(X = Jackknife_Pred, MARGIN = 1, FUN = quantile, 
                        probs=c(interval[1], interval[2]))
 Interval_Pred <- apply(X = Jackknife_Pred, MARGIN = 1, FUN = quantile, 
@@ -379,7 +382,7 @@ head(val.plsr.output)
 # JK regression coefficient plot
 f.plot.coef(Z = t(Jackknife_coef), wv = seq(Start.wave,End.wave,1), 
             plot_label="Jackknife regression coefficients",position = 'bottomleft')
-png(file=file.path(outdir,paste0(inVar,'_jackknife regression coefficients.png')),
+png(file=file.path(outdir,paste0(inVar,'_jackknife_regression_coefficients.png')),
     height=2100,width=3800, res=340)
 f.plot.coef(Z = t(Jackknife_coef), wv = seq(Start.wave,End.wave,1), 
             plot_label="Jackknife regression coefficients",position = 'bottomleft')
@@ -388,26 +391,29 @@ box(lwd=2.2)
 dev.off()
 
 # JK validation plot
+RMSEP <- sqrt(mean(val.plsr.output$PLSR_Residuals^2))
+pecr_RMSEP <- RMSEP/mean(val.plsr.output[,inVar])*100
+r2 <- round(pls::R2(plsr.out, newdata = val.plsr.data)$val[nComps+1],2)
+expr <- vector("expression", 3)
+expr[[1]] <- bquote(R^2==.(r2))
+expr[[2]] <- bquote(RMSEP==.(round(RMSEP,2)))
+expr[[3]] <- bquote("%RMSEP"==.(round(pecr_RMSEP,2)))
 rng_vals <- c(min(val.plsr.output$LPI), max(val.plsr.output$UPI))
-jk_val_scatterplot <- ggplot(val.plsr.output, aes(x=PLSR_Predicted, y=get(inVar))) + 
-  theme_bw()+ geom_errorbar(aes(xmin = LPI,xmax = UPI),color='grey',width=0.2) + 
-  geom_errorbar(aes(xmin = LCI,xmax = UCI),color='blue',width=0.2)+ geom_point(size=1.3)  + 
-  geom_abline(intercept = 0, slope = 1, color="grey30", 
-              linetype="dashed", size=0.7) + 
-  xlim(rng_vals[1], rng_vals[2]) + 
-  ylim(rng_vals[1], rng_vals[2]) +
-  labs(x=paste0("Predicted ", paste(inVar), " (units)"),
-       y=paste0("Observed ", paste(inVar), " (units)"),
-       title=paste0("Confidence Interval: Blue;   Prediction_Interval: grey")) + 
-  theme(axis.text=element_text(size=18),legend.position = 'right',
-        axis.title=element_text(size=20, face="bold"), 
-        axis.text.x = element_text(angle = 0,vjust = 0.5),
-        panel.border = element_rect(linetype = "solid", fill = NA, size=1.5))
-print(jk_val_scatterplot)
-ggsave(paste0(inVar,"_PLSR_validation_scatterplot.png"), plot = jk_val_scatterplot, device="png",
-              width = 32, height = 30, units = "cm", dpi = 300)
+par(mfrow=c(1,1), mar=c(4.2,5.3,1,0.4), oma=c(0, 0.1, 0, 0.2))
+plotCI(val.plsr.output$PLSR_Predicted,val.plsr.output[,inVar], 
+       li=val.plsr.output$LPI, ui=val.plsr.output$UPI, gap=0.009,sfrac=0.004, 
+       lwd=1.6, xlim=c(rng_vals[1], rng_vals[2]), ylim=c(rng_vals[1], rng_vals[2]), 
+       err="x", pch=21, col="black", pt.bg=alpha("grey70",0.7), scol="grey50",
+       cex=2, xlab=paste0("Predicted ", paste(inVar), " (units)"),
+       ylab=paste0("Observed ", paste(inVar), " (units)"),
+       cex.axis=1.5,cex.lab=1.8)
+abline(0,1,lty=2,lw=2)
+legend("topleft", legend=expr, bty="n", cex=1.5)
+box(lwd=2.2)
+dev.copy(png,file.path(outdir,paste0(inVar,"_PLSR_validation_scatterplot.png")), 
+         height=2800, width=3200,  res=340)
+dev.off(dev.prev())
 #--------------------------------------------------------------------------------------------------#
-
 
 #---------------- Output jackknife results --------------------------------------------------------#
 # JK Coefficents
