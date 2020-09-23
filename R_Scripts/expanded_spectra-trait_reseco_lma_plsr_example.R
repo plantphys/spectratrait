@@ -126,7 +126,8 @@ rm(sample_info,sample_info2,Spectra)
 #### Example data cleaning.  End user needs to do what's appropriate for their 
 #### data.  This may be an iterative process.
 # Keep only complete rows of inVar and spec data before fitting
-plsr_data <- plsr_data[complete.cases(plsr_data[,names(plsr_data) %in% c(inVar,wv)]),]
+plsr_data <- plsr_data[complete.cases(plsr_data[,names(plsr_data) %in% 
+                                                  c(inVar,paste0("Wave_",wv))]),]
 #--------------------------------------------------------------------------------------------------#
 
 
@@ -250,7 +251,8 @@ par(opar)
 #--------------------------------------------------------------------------------------------------#
 ### PLSR fit observed vs. predicted plot data
 #calibration
-cal.plsr.output <- data.frame(cal.plsr.data[, which(names(cal.plsr.data) %notin% "Spectra")], PLSR_Predicted=fit,
+cal.plsr.output <- data.frame(cal.plsr.data[, which(names(cal.plsr.data) %notin% "Spectra")], 
+                              PLSR_Predicted=fit,
                               PLSR_CV_Predicted=as.vector(plsr.out$validation$pred[,,nComps]))
 cal.plsr.output <- cal.plsr.output %>%
   mutate(PLSR_CV_Residuals = PLSR_CV_Predicted-get(inVar))

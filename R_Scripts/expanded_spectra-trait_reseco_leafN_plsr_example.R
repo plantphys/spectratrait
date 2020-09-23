@@ -73,7 +73,6 @@ ecosis_id <- "9db4c5a2-7eac-4e1e-8859-009233648e89"
 # tempdir - use a OS-specified temporary directory 
 # user defined PATH - e.g. "~/scratch/PLSR"
 output_dir <- "tempdir"
-output_dir <- "~/scratch/PLSR"
 #--------------------------------------------------------------------------------------------------#
 
 
@@ -126,7 +125,8 @@ rm(sample_info,sample_info2,Spectra)
 #### Example data cleaning.  End user needs to do what's appropriate for their 
 #### data.  This may be an iterative process.
 # Keep only complete rows of inVar and spec data before fitting
-plsr_data <- plsr_data[complete.cases(plsr_data[,names(plsr_data) %in% c(inVar,wv)]),]
+plsr_data <- plsr_data[complete.cases(plsr_data[,names(plsr_data) %in% 
+                                                  c(inVar,paste0("Wave_",wv))]),]
 #--------------------------------------------------------------------------------------------------#
 
 
