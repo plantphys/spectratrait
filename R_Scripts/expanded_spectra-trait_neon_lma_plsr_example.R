@@ -23,7 +23,7 @@ closeAllConnections()   # close any open connections to files
 #--------------------------------------------------------------------------------------------------#
 ### Install and load required R packages
 list.of.packages <- c("devtools","remotes","readr","RCurl","httr","pls","dplyr","reshape2","here",
-                      "ggplot2","gridExtra")  # packages needed for script
+                      "plotrix","ggplot2","gridExtra")  # packages needed for script
 # check for dependencies and install if needed
 new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
 if(length(new.packages)) install.packages(new.packages, dependencies=c("Depends", "Imports",
@@ -67,12 +67,23 @@ inVar <- "LMA_gDW_m2"
 
 # What is the source dataset from EcoSIS?
 ecosis_id <- "5617da17-c925-49fb-b395-45a51291bd2d"
+
+# Specify output directory, output_dir 
+# Options: 
+# tempdir - use a OS-specified temporary directory 
+# user defined PATH - e.g. "~/scratch/PLSR"
+output_dir <- "tempdir"
 #--------------------------------------------------------------------------------------------------#
 
 
 #--------------------------------------------------------------------------------------------------#
-### Set working directory (scratch space)
-outdir <- tempdir()
+### Set working directory
+if (output_dir=="tempdir") {
+  outdir <- tempdir()
+} else {
+  if (! file.exists(output_dir)) dir.create(output_dir,recursive=TRUE)
+  outdir <- file.path(path.expand(output_dir))
+}
 setwd(outdir) # set working directory
 getwd()  # check wd
 #--------------------------------------------------------------------------------------------------#
@@ -103,6 +114,16 @@ head(sample_info2)
 
 plsr_data <- data.frame(sample_info2,Spectra)
 rm(sample_info,sample_info2,Spectra)
+dim(plsr_data)
+#--------------------------------------------------------------------------------------------------#
+
+
+#--------------------------------------------------------------------------------------------------#
+#### Example data cleaning.  End user needs to do what's appropriate for their 
+#### data.  This may be an iterative process.
+# Keep only complete rows of inVar and spec data before fitting
+plsr_data <- plsr_data[complete.cases(plsr_data[,names(plsr_data) %in% 
+                                                  c(inVar,paste0("Wave_",wv))]),]
 #--------------------------------------------------------------------------------------------------#
 
 
@@ -132,7 +153,13 @@ cal_hist_plot <- qplot(cal.plsr.data[,paste0(inVar)],geom="histogram",
 val_hist_plot <- qplot(val.plsr.data[,paste0(inVar)],geom="histogram",
                        main = paste0("Val. Histogram for ",inVar),
                        xlab = paste0(inVar),ylab = "Count",fill=I("grey50"),col=I("black"),alpha=I(.7))
-grid.arrange(cal_hist_plot, val_hist_plot, ncol=2)
+histograms <- grid.arrange(cal_hist_plot, val_hist_plot, ncol=2)
+ggsave(paste0(inVar,"_Cal_Val_Histograms.png"), plot = histograms, device="png", width = 30, 
+       height = 12, units = "cm",
+       dpi = 300)
+# output cal/val data
+write.csv(cal.plsr.data,file=file.path(outdir,paste0(inVar,'_Cal_PLSR_Dataset.csv')),row.names=FALSE)
+write.csv(val.plsr.data,file=file.path(outdir,paste0(inVar,'_Val_PLSR_Dataset.csv')),row.names=FALSE)
 #--------------------------------------------------------------------------------------------------#
 
 
@@ -151,10 +178,14 @@ head(val.plsr.data)[1:5]
 
 
 #--------------------------------------------------------------------------------------------------#
-# plot cal and val spectra
+### plot cal and val spectra
 par(mfrow=c(1,2)) # B, L, T, R
 f.plot.spec(Z=cal.plsr.data$Spectra,wv=seq(Start.wave,End.wave,1),plot_label="Calibration")
 f.plot.spec(Z=val.plsr.data$Spectra,wv=seq(Start.wave,End.wave,1),plot_label="Validation")
+
+dev.copy(png,file.path(outdir,paste0(inVar,'_Cal_Val_Spectra.png')), 
+         height=2500,width=4900, res=340)
+dev.off();
 par(mfrow=c(1,1))
 #--------------------------------------------------------------------------------------------------#
 
@@ -167,22 +198,24 @@ if(grepl("Windows", sessionInfo()$running)){
   pls.options(parallel = parallel::detectCores()-1)
 }
 
-method <- "custom" #pls, custom, lowestPRESS
+method <- "firstPlateau" #pls, firstPlateau, firstMin
 random_seed <- 2356812
-seg <- 100
+seg <- 250
 maxComps <- 20
-iterations <- 20
+iterations <- 40
+prop <- 0.70
 if (method=="pls") {
-  # pls package approach - faster but estimates more components....
-  nComps <- find_optimal_components(method=method, maxComps=maxComps, seg=seg, 
-                                    random_seed=random_seed)
+  nComps <- find_optimal_components(dataset=cal.plsr.data, method=method, maxComps=maxComps, 
+                                    seg=seg, random_seed=random_seed)
   print(paste0("*** Optimal number of components: ", nComps))
 } else {
-  # custom method - slow but generally finds the smallest number of components 
-  nComps <- find_optimal_components(method=method, maxComps=maxComps, iterations=iterations, 
-                                    seg=seg, prop=0.70, 
+  nComps <- find_optimal_components(dataset=cal.plsr.data, method=method, maxComps=maxComps, 
+                                    iterations=iterations, seg=seg, prop=prop, 
                                     random_seed=random_seed)
 }
+dev.copy(png,file.path(outdir,paste0(paste0(inVar,"_PLSR_Component_Selection.png"))), 
+         height=2800, width=3400,  res=340)
+dev.off();
 #--------------------------------------------------------------------------------------------------#
 
 
@@ -205,6 +238,9 @@ R2(plsr.out, newdata = val.plsr.data)
 plot(R2(plsr.out,estimate=c("test"),newdata = val.plsr.data), main="MODEL R2",
      xlab="Number of Components",ylab="Model Validation R2",lty=1,col="black",cex=1.5,lwd=2)
 box(lwd=2.2)
+dev.copy(png,file.path(outdir,paste0(paste0(inVar,"_Validation_RMSEP_R2_by_Component.png"))), 
+         height=2800, width=4800,  res=340)
+dev.off();
 par(opar)
 #--------------------------------------------------------------------------------------------------#
 
@@ -212,7 +248,8 @@ par(opar)
 #--------------------------------------------------------------------------------------------------#
 ### PLSR fit observed vs. predicted plot data
 #calibration
-cal.plsr.output <- data.frame(cal.plsr.data[, which(names(cal.plsr.data) %notin% "Spectra")], PLSR_Predicted=fit,
+cal.plsr.output <- data.frame(cal.plsr.data[, which(names(cal.plsr.data) %notin% "Spectra")], 
+                              PLSR_Predicted=fit,
                               PLSR_CV_Predicted=as.vector(plsr.out$validation$pred[,,nComps]))
 cal.plsr.output <- cal.plsr.output %>%
   mutate(PLSR_CV_Residuals = PLSR_CV_Predicted-get(inVar))
@@ -275,23 +312,32 @@ val_resid_histogram <- ggplot(val.plsr.output, aes(x=PLSR_Residuals)) +
         panel.border = element_rect(linetype = "solid", fill = NA, size=1.5))
 
 # plot cal/val side-by-side
-grid.arrange(cal_scatter_plot, val_scatter_plot, cal_resid_histogram, val_resid_histogram, 
-             nrow=2,ncol=2)
+scatterplots <- grid.arrange(cal_scatter_plot, val_scatter_plot, cal_resid_histogram, 
+                             val_resid_histogram, nrow=2, ncol=2)
+ggsave(paste0(inVar,"_Cal_Val_scatterplots.png"), plot = scatterplots, device="png", 
+       width = 32, 
+       height = 30, units = "cm",
+       dpi = 300)
 #--------------------------------------------------------------------------------------------------#
 
 
 #--------------------------------------------------------------------------------------------------#
-### Generate some useful outputs
+### Generate Coefficient and VIP plots
 vips <- VIP(plsr.out)[nComps,]
 
 dev.off()
 par(mfrow=c(2,1))
 plot(plsr.out, plottype = "coef",xlab="Wavelength (nm)",
-     ylab="Regression coefficients",legendpos = "bottomright",ncomp=nComps)
-
+     ylab="Regression coefficients",legendpos = "bottomright",
+     ncomp=nComps,lwd=2)
+box(lwd=2.2)
 plot(seq(Start.wave,End.wave,1),vips,xlab="Wavelength (nm)",ylab="VIP",cex=0.01)
 lines(seq(Start.wave,End.wave,1),vips,lwd=3)
 abline(h=0.8,lty=2,col="dark grey")
+box(lwd=2.2)
+dev.copy(png,file.path(outdir,paste0(inVar,'_Coefficient_VIP_plot.png')), 
+         height=3100, width=4100, res=340)
+dev.off();
 #--------------------------------------------------------------------------------------------------#
 
 
@@ -304,18 +350,22 @@ if(grepl("Windows", sessionInfo()$running)){
 }
 
 seg <- 100
-jk.plsr.out <- pls::plsr(as.formula(paste(inVar,"~","Spectra")), scale=FALSE, center=TRUE, ncomp=nComps, 
-                      validation="CV", segments = seg, segment.type="interleaved", trace=FALSE, 
+jk.plsr.out <- pls::plsr(as.formula(paste(inVar,"~","Spectra")), scale=FALSE, 
+                         center=TRUE, ncomp=nComps, 
+                         validation="CV", segments = seg, 
+                         segment.type="interleaved", trace=FALSE, 
                       jackknife=TRUE, data=cal.plsr.data)
 pls.options(parallel = NULL)
 
-Jackknife_coef <- f.coef.valid(plsr.out = jk.plsr.out, data_plsr = cal.plsr.data, ncomp = nComps)
+Jackknife_coef <- f.coef.valid(plsr.out = jk.plsr.out, data_plsr = cal.plsr.data, 
+                               ncomp = nComps)
 Jackknife_intercept <- Jackknife_coef[1,,,]
 Jackknife_coef <- Jackknife_coef[2:dim(Jackknife_coef)[1],,,]
 
-#interval <- c(0.025,0.975)
-interval <- c(0.05,0.95)
-Jackknife_Pred <- val.plsr.data$Spectra%*%Jackknife_coef+Jackknife_intercept
+interval <- c(0.025,0.975)
+Jackknife_Pred <- val.plsr.data$Spectra %*% Jackknife_coef + 
+  matrix(rep(Jackknife_intercept, length(val.plsr.data[,inVar])), byrow=TRUE, 
+         ncol=length(Jackknife_intercept))
 Interval_Conf <- apply(X = Jackknife_Pred,MARGIN = 1,
                        FUN = quantile,probs=c(interval[1],interval[2]))
 Interval_Pred <- apply(X = Jackknife_Pred,MARGIN = 1,
@@ -332,25 +382,35 @@ head(val.plsr.output)
 # JK regression coefficient plot
 f.plot.coef(Z = t(Jackknife_coef), wv = seq(Start.wave,End.wave,1), 
             plot_label="Jackknife regression coefficients",position = 'bottomleft')
+abline(h=0,lty=2,col="grey50")
+box(lwd=2.2)
+dev.copy(png,file.path(outdir,paste0(inVar,'_Jackknife_Regression_Coefficients.png')), 
+         height=2100, width=3800, res=340)
+dev.off();
 
 # JK validation plot
-#rng_vals <- quantile(val.plsr.output[,inVar], probs = c(0.001, 0.999))
+RMSEP <- sqrt(mean(val.plsr.output$PLSR_Residuals^2))
+pecr_RMSEP <- RMSEP/mean(val.plsr.output[,inVar])*100
+r2 <- round(pls::R2(plsr.out, newdata = val.plsr.data)$val[nComps+1],2)
+expr <- vector("expression", 3)
+expr[[1]] <- bquote(R^2==.(r2))
+expr[[2]] <- bquote(RMSEP==.(round(RMSEP,2)))
+expr[[3]] <- bquote("%RMSEP"==.(round(pecr_RMSEP,2)))
 rng_vals <- c(min(val.plsr.output$LPI), max(val.plsr.output$UPI))
-jk_val_scatterplot <- ggplot(val.plsr.output, aes(x=PLSR_Predicted, y=get(inVar))) + 
-  theme_bw()+ geom_errorbar(aes(xmin = LPI,xmax = UPI),color='grey',width=0.2) + 
-  geom_errorbar(aes(xmin = LCI,xmax = UCI),color='blue',width=0.2)+ geom_point(size=0.3)  + 
-  geom_abline(intercept = 0, slope = 1, color="grey30", 
-              linetype="dashed", size=0.7) + 
-  xlim(rng_vals[1], rng_vals[2]) + 
-  ylim(rng_vals[1], rng_vals[2]) +
-  labs(x=paste0("Predicted ", paste(inVar), " (units)"),
-       y=paste0("Observed ", paste(inVar), " (units)"),
-       title=paste0("Confidence Interval: Blue;   Prediction_Interval: grey")) + 
-  theme(axis.text=element_text(size=18),legend.position = 'right',
-        axis.title=element_text(size=20, face="bold"), 
-        axis.text.x = element_text(angle = 0,vjust = 0.5),
-        panel.border = element_rect(linetype = "solid", fill = NA, size=1.5))
-print(jk_val_scatterplot)
+par(mfrow=c(1,1), mar=c(4.2,5.3,1,0.4), oma=c(0, 0.1, 0, 0.2))
+plotCI(val.plsr.output$PLSR_Predicted,val.plsr.output[,inVar], 
+       li=val.plsr.output$LPI, ui=val.plsr.output$UPI, gap=0.009,sfrac=0.004, 
+       lwd=1.6, xlim=c(rng_vals[1], rng_vals[2]), ylim=c(rng_vals[1], rng_vals[2]), 
+       err="x", pch=21, col="black", pt.bg=alpha("grey70",0.7), scol="grey50",
+       cex=2, xlab=paste0("Predicted ", paste(inVar), " (units)"),
+       ylab=paste0("Observed ", paste(inVar), " (units)"),
+       cex.axis=1.5,cex.lab=1.8)
+abline(0,1,lty=2,lw=2)
+legend("topleft", legend=expr, bty="n", cex=1.5)
+box(lwd=2.2)
+dev.copy(png,file.path(outdir,paste0(inVar,"_PLSR_Validation_Scatterplot.png")), 
+         height=2800, width=3200,  res=340)
+dev.off();
 #--------------------------------------------------------------------------------------------------#
 
 
