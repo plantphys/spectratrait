@@ -75,7 +75,6 @@ ecosis_id <- "9db4c5a2-7eac-4e1e-8859-009233648e89"
 # tempdir - use a OS-specified temporary directory 
 # user defined PATH - e.g. "~/scratch/PLSR"
 output_dir <- "tempdir"
-output_dir <- "~/scratch/PLSR"
 #--------------------------------------------------------------------------------------------------#
 
 
@@ -182,15 +181,14 @@ head(val.plsr.data)[1:5]
 
 
 #--------------------------------------------------------------------------------------------------#
-# plot cal and val spectra
+### plot cal and val spectra
 par(mfrow=c(1,2)) # B, L, T, R
 f.plot.spec(Z=cal.plsr.data$Spectra,wv=seq(Start.wave,End.wave,1),plot_label="Calibration")
 f.plot.spec(Z=val.plsr.data$Spectra,wv=seq(Start.wave,End.wave,1),plot_label="Validation")
-png(file=file.path(outdir,paste0(inVar,'_Cal_Val_Spectra.png')),height=2500,width=4500, res=340)
-par(mfrow=c(1,2)) # B, L, T, R
-f.plot.spec(Z=cal.plsr.data$Spectra,wv=seq(Start.wave,End.wave,1),plot_label="Calibration")
-f.plot.spec(Z=val.plsr.data$Spectra,wv=seq(Start.wave,End.wave,1),plot_label="Validation")
-dev.off()
+
+dev.copy(png,file.path(outdir,paste0(inVar,'_Cal_Val_Spectra.png')), 
+         height=2500,width=4900, res=340)
+dev.off();
 par(mfrow=c(1,1))
 #--------------------------------------------------------------------------------------------------#
 
@@ -218,7 +216,7 @@ if (method=="pls") {
                                     iterations=iterations, seg=seg, prop=prop, 
                                     random_seed=random_seed)
 }
-dev.copy(png,file.path(outdir,paste0(paste0(inVar,"_PLSR_component_selection.png"))), 
+dev.copy(png,file.path(outdir,paste0(paste0(inVar,"_PLSR_Component_Selection.png"))), 
          height=2800, width=3400,  res=340)
 dev.off();
 #--------------------------------------------------------------------------------------------------#
@@ -242,6 +240,9 @@ R2(plsr.out, newdata = val.plsr.data)
 plot(R2(plsr.out,estimate=c("test"),newdata = val.plsr.data), main="MODEL R2",
      xlab="Number of Components",ylab="Model Validation R2",lty=1,col="black",cex=1.5,lwd=2)
 box(lwd=2.2)
+dev.copy(png,file.path(outdir,paste0(paste0(inVar,"_Validation_RMSEP_R2_by_Component.png"))), 
+         height=2800, width=4800,  res=340)
+dev.off();
 par(opar)
 #--------------------------------------------------------------------------------------------------#
 
@@ -314,7 +315,7 @@ val_resid_histogram <- ggplot(val.plsr.output, aes(x=PLSR_Residuals)) +
 # plot cal/val side-by-side
 scatterplots <- grid.arrange(cal_scatter_plot, val_scatter_plot, cal_resid_histogram, 
                              val_resid_histogram, nrow=2, ncol=2)
-ggsave(paste0(inVar,"_Cal_Val_scatterplots.png"), plot = scatterplots, device="png", 
+ggsave(paste0(inVar,"_Cal_Val_Scatterplots.png"), plot = scatterplots, device="png", 
        width = 32, 
        height = 30, units = "cm",
        dpi = 300)
@@ -328,18 +329,16 @@ vips <- VIP(plsr.out)[nComps,]
 dev.off()
 par(mfrow=c(2,1))
 plot(plsr.out, plottype = "coef",xlab="Wavelength (nm)",
-     ylab="Regression coefficients",legendpos = "bottomright",ncomp=nComps)
+     ylab="Regression coefficients",legendpos = "bottomright",
+     ncomp=nComps,lwd=2)
+box(lwd=2.2)
 plot(seq(Start.wave,End.wave,1),vips,xlab="Wavelength (nm)",ylab="VIP",cex=0.01)
 lines(seq(Start.wave,End.wave,1),vips,lwd=3)
 abline(h=0.8,lty=2,col="dark grey")
-png(file=file.path(outdir,paste0(inVar,'_coefficient_VIP_plot.png')),height=2900,width=4100, res=340)
-par(mfrow=c(2,1))
-plot(plsr.out, plottype = "coef",xlab="Wavelength (nm)",
-     ylab="Regression coefficients",legendpos = "bottomright",ncomp=nComps)
-plot(seq(Start.wave,End.wave,1),vips,xlab="Wavelength (nm)",ylab="VIP",cex=0.01)
-lines(seq(Start.wave,End.wave,1),vips,lwd=3)
-abline(h=0.8,lty=2,col="dark grey")
-dev.off()
+box(lwd=2.2)
+dev.copy(png,file.path(outdir,paste0(inVar,'_Coefficient_VIP_plot.png')), 
+         height=3100, width=4100, res=340)
+dev.off();
 #--------------------------------------------------------------------------------------------------#
 
 
@@ -352,7 +351,7 @@ if(grepl("Windows", sessionInfo()$running)){
 }
 
 jk.plsr.out <- pls::plsr(as.formula(paste(inVar,"~","Spectra")), scale=FALSE, 
-                         center=TRUE, ncomp=nComps, validation="LOO", trace=TRUE, 
+                         center=TRUE, ncomp=nComps, validation="LOO", trace=FALSE, 
                          jackknife=TRUE, 
                          data=cal.plsr.data)
 pls.options(parallel = NULL)
@@ -382,13 +381,11 @@ head(val.plsr.output)
 # JK regression coefficient plot
 f.plot.coef(Z = t(Jackknife_coef), wv = seq(Start.wave,End.wave,1), 
             plot_label="Jackknife regression coefficients",position = 'bottomleft')
-png(file=file.path(outdir,paste0(inVar,'_jackknife_regression_coefficients.png')),
-    height=2100,width=3800, res=340)
-f.plot.coef(Z = t(Jackknife_coef), wv = seq(Start.wave,End.wave,1), 
-            plot_label="Jackknife regression coefficients",position = 'bottomleft')
 abline(h=0,lty=2,col="grey50")
 box(lwd=2.2)
-dev.off()
+dev.copy(png,file.path(outdir,paste0(inVar,'_Jackknife_Regression_Coefficients.png')), 
+         height=2100, width=3800, res=340)
+dev.off();
 
 # JK validation plot
 RMSEP <- sqrt(mean(val.plsr.output$PLSR_Residuals^2))
@@ -410,10 +407,11 @@ plotCI(val.plsr.output$PLSR_Predicted,val.plsr.output[,inVar],
 abline(0,1,lty=2,lw=2)
 legend("topleft", legend=expr, bty="n", cex=1.5)
 box(lwd=2.2)
-dev.copy(png,file.path(outdir,paste0(inVar,"_PLSR_validation_scatterplot.png")), 
+dev.copy(png,file.path(outdir,paste0(inVar,"_PLSR_Validation_Scatterplot.png")), 
          height=2800, width=3200,  res=340)
-dev.off(dev.prev())
+dev.off();
 #--------------------------------------------------------------------------------------------------#
+
 
 #---------------- Output jackknife results --------------------------------------------------------#
 # JK Coefficents
