@@ -1,10 +1,11 @@
 ####################################################################################################
 #
 #  
-#   An expanded example "How-to" script illustrating the use of PLSR modeling to develop a 
+#   An example "How-to" script illustrating the use of PLSR modeling to develop a 
 #   spectra-trait algorithm to estimate leaf mass area with leaf-level spectroscopy data. The 
-#   example is built from published data source from the EcoSIS spectral database. This examples
-#   illustrates an approach to quantify model prediction uncertainty based on a jackknife analysis
+#   example is built from published data source from the EcoSIS spectral database. This example
+#   illustrates how to select the optimal number of components and quantify model prediction 
+#   uncertainty based on permutation approaches
 #
 #   Spectra and trait data source:
 #   https://ecosis.org/package/leaf-spectra-of-36-species-growing-in-rosa-rugosa-invaded-coastal-grassland-communities-in-belgium
