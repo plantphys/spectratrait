@@ -150,17 +150,22 @@ print(paste("Val observations: ",dim(val.plsr.data)[1],sep=""))
 
 cal_hist_plot <- qplot(cal.plsr.data[,paste0(inVar)],geom="histogram",
                        main = paste0("Cal. Histogram for ",inVar),
-                       xlab = paste0(inVar),ylab = "Count",fill=I("grey50"),col=I("black"),alpha=I(.7))
+                       xlab = paste0(inVar),ylab = "Count",fill=I("grey50"),col=I("black"),
+                       alpha=I(.7))
 val_hist_plot <- qplot(val.plsr.data[,paste0(inVar)],geom="histogram",
                        main = paste0("Val. Histogram for ",inVar),
-                       xlab = paste0(inVar),ylab = "Count",fill=I("grey50"),col=I("black"),alpha=I(.7))
+                       xlab = paste0(inVar),ylab = "Count",fill=I("grey50"),col=I("black"),
+                       alpha=I(.7))
 histograms <- grid.arrange(cal_hist_plot, val_hist_plot, ncol=2)
-ggsave(paste0(inVar,"_Cal_Val_Histograms.png"), plot = histograms, device="png", width = 30, 
+ggsave(filename = file.path(outdir,paste0(inVar,"_Cal_Val_Histograms.png")), plot = histograms, 
+                            device="png", width = 30, 
        height = 12, units = "cm",
        dpi = 300)
 # output cal/val data
-write.csv(cal.plsr.data,file=file.path(outdir,paste0(inVar,'_Cal_PLSR_Dataset.csv')),row.names=FALSE)
-write.csv(val.plsr.data,file=file.path(outdir,paste0(inVar,'_Val_PLSR_Dataset.csv')),row.names=FALSE)
+write.csv(cal.plsr.data,file=file.path(outdir,paste0(inVar,'_Cal_PLSR_Dataset.csv')),
+          row.names=FALSE)
+write.csv(val.plsr.data,file=file.path(outdir,paste0(inVar,'_Val_PLSR_Dataset.csv')),
+          row.names=FALSE)
 #--------------------------------------------------------------------------------------------------#
 
 
@@ -315,9 +320,8 @@ val_resid_histogram <- ggplot(val.plsr.output, aes(x=PLSR_Residuals)) +
 # plot cal/val side-by-side
 scatterplots <- grid.arrange(cal_scatter_plot, val_scatter_plot, cal_resid_histogram, 
                              val_resid_histogram, nrow=2, ncol=2)
-ggsave(paste0(inVar,"_Cal_Val_scatterplots.png"), plot = scatterplots, device="png", 
-       width = 32, 
-       height = 30, units = "cm",
+ggsave(filename = file.path(outdir,paste0(inVar,"_Cal_Val_scatterplots.png")), 
+       plot = scatterplots, device="png", width = 32, height = 30, units = "cm",
        dpi = 300)
 #--------------------------------------------------------------------------------------------------#
 

@@ -317,9 +317,8 @@ val_resid_histogram <- ggplot(val.plsr.output, aes(x=PLSR_Residuals)) +
 # plot cal/val side-by-side
 scatterplots <- grid.arrange(cal_scatter_plot, val_scatter_plot, cal_resid_histogram, 
                              val_resid_histogram, nrow=2, ncol=2)
-ggsave(paste0(inVar,"_Cal_Val_Scatterplots.png"), plot = scatterplots, device="png", 
-       width = 32, 
-       height = 30, units = "cm",
+ggsave(filename = file.path(outdir,paste0(inVar,"_Cal_Val_Scatterplots.png")), 
+       plot = scatterplots, device="png", width = 32, height = 30, units = "cm",
        dpi = 300)
 #--------------------------------------------------------------------------------------------------#
 
