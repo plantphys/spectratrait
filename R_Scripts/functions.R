@@ -142,13 +142,6 @@ find_optimal_components <- function(dataset=NULL, method="pls", maxComps=20, ite
     pressDF <- as.data.frame(press.out$PRESS)
     names(pressDF) <- as.character(seq(maxComps))
     pressDFres <- reshape2::melt(pressDF)
-    bp <- ggplot(pressDFres, aes(x=variable, y=value)) + theme_bw() + 
-      geom_boxplot(notch=FALSE) + labs(x="Number of Components", y="PRESS") +
-      theme(axis.text=element_text(size=18), legend.position="none",
-            axis.title=element_text(size=20, face="bold"), 
-            axis.text.x = element_text(angle = 0,vjust = 0.5),
-            panel.border = element_rect(linetype = "solid", fill = NA, size=1.5))
-    print(bp)
     results <- NULL
     for(i in 1:(maxComps-1)){
       p_value <- t.test(press.out$PRESS[,i], press.out$PRESS[,(i+1)])$p.value
@@ -157,6 +150,16 @@ find_optimal_components <- function(dataset=NULL, method="pls", maxComps=20, ite
     }
     nComps <- min(results[results$P.value > 0.05, "Component"])
     print(paste0("*** Optimal number of components based on t.test: ", nComps))
+    bp <- ggplot(pressDFres, aes(x=variable, y=value)) + theme_bw() + 
+      geom_boxplot(notch=FALSE) + labs(x="Number of Components", y="PRESS") + 
+      stat_boxplot(geom = "errorbar", width = 0.2) +
+      geom_vline(xintercept = nComps, linetype="dashed", 
+                 color = "blue", size=1.0)
+    theme(axis.text=element_text(size=18), legend.position="none",
+          axis.title=element_text(size=20, face="bold"), 
+          axis.text.x = element_text(angle = 0,vjust = 0.5),
+          panel.border = element_rect(linetype = "solid", fill = NA, size=1.5))
+    print(bp)
   }
   if(method=="firstMin") {
     press.out <- pls_permutation(dataset=dataset, maxComps=maxComps, iterations=iterations, 
@@ -165,13 +168,6 @@ find_optimal_components <- function(dataset=NULL, method="pls", maxComps=20, ite
     pressDF <- as.data.frame(press.out$PRESS)
     names(pressDF) <- as.character(seq(maxComps))
     pressDFres <- reshape2::melt(pressDF)
-    bp <- ggplot(pressDFres, aes(x=variable, y=value)) + theme_bw() + 
-      geom_boxplot(notch=FALSE) + labs(x="Number of Components", y="PRESS") +
-      theme(axis.text=element_text(size=18), legend.position="none",
-            axis.title=element_text(size=20, face="bold"), 
-            axis.text.x = element_text(angle = 0,vjust = 0.5),
-            panel.border = element_rect(linetype = "solid", fill = NA, size=1.5))
-    print(bp)
     # find lowest press
     mean_PRESS_comp <- apply(X = pressDF, MARGIN = 2, FUN = mean)
     lowest_PRESS <- which.min(mean_PRESS_comp)
@@ -188,11 +184,20 @@ find_optimal_components <- function(dataset=NULL, method="pls", maxComps=20, ite
     first <- min(which(as.numeric(as.character(results$P.value)) > 0.05))
     nComps <- results$Component[first]
     print(paste0("*** Optimal number of components based on t.test: ", nComps))
+    bp <- ggplot(pressDFres, aes(x=variable, y=value)) + theme_bw() + 
+      geom_boxplot(notch=FALSE) + labs(x="Number of Components", y="PRESS") + 
+      stat_boxplot(geom = "errorbar", width = 0.2) +
+      geom_vline(xintercept = nComps, linetype="dashed", 
+                 color = "blue", size=1.0)
+    theme(axis.text=element_text(size=18), legend.position="none",
+          axis.title=element_text(size=20, face="bold"), 
+          axis.text.x = element_text(angle = 0,vjust = 0.5),
+          panel.border = element_rect(linetype = "solid", fill = NA, size=1.5))
+    print(bp)
   }
   return(nComps)
 }
 #--------------------------------------------------------------------------------------------------#
-
 
 #--------------------------------------------------------------------------------------------------#
 #' @title f.plot.spec

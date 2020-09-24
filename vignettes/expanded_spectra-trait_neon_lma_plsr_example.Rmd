@@ -24,7 +24,7 @@ This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook to illustrate how
 ```{r, eval=TRUE, echo=FALSE}
 ### Install and load required R packages
 list.of.packages <- c("devtools","remotes","readr","RCurl","httr","pls","dplyr","reshape2","here",
-                      "ggplot2","gridExtra")  # packages needed for script
+                      "plotrix","ggplot2","gridExtra")  # packages needed for script
 # check for dependencies and install if needed
 new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
 if(length(new.packages)) install.packages(new.packages, dependencies=c("Depends", "Imports",
@@ -68,12 +68,23 @@ inVar <- "LMA_gDW_m2"
 
 # What is the source dataset from EcoSIS?
 ecosis_id <- "5617da17-c925-49fb-b395-45a51291bd2d"
+
+# Specify output directory, output_dir 
+# Options: 
+# tempdir - use a OS-specified temporary directory 
+# user defined PATH - e.g. "~/scratch/PLSR"
+output_dir <- "tempdir"
 ```
 ### Set working directory (scratch space)
 ```{r, echo=FALSE}
-outdir <- tempdir()
+if (output_dir=="tempdir") {
+  outdir <- tempdir()
+} else {
+  if (! file.exists(output_dir)) dir.create(output_dir,recursive=TRUE)
+  outdir <- file.path(path.expand(output_dir))
+}
 setwd(outdir) # set working directory
-print(paste0("Output directory: ",getwd()))
+getwd()  # check wd
 ```
 
 ### Grab data from EcoSIS
@@ -134,7 +145,15 @@ val_hist_plot <- qplot(val.plsr.data[,paste0(inVar)],geom="histogram",
                        main = paste0("Val. Histogram for ",inVar),
                        xlab = paste0(inVar),ylab = "Count",fill=I("grey50"),
                        col=I("black"),alpha=I(.7))
-grid.arrange(cal_hist_plot, val_hist_plot, ncol=2)
+histograms <- grid.arrange(cal_hist_plot, val_hist_plot, ncol=2)
+ggsave(filename = file.path(outdir,paste0(inVar,"_Cal_Val_Histograms.png")), 
+       plot = histograms, device="png", width = 30, height = 12, units = "cm",
+       dpi = 300)
+# output cal/val data
+write.csv(cal.plsr.data,file=file.path(outdir,paste0(inVar,'_Cal_PLSR_Dataset.csv')),
+          row.names=FALSE)
+write.csv(val.plsr.data,file=file.path(outdir,paste0(inVar,'_Val_PLSR_Dataset.csv')),
+          row.names=FALSE)
 ```
 
 ### Create calibration and validation PLSR datasets
@@ -156,6 +175,10 @@ head(val.plsr.data)[1:5]
 par(mfrow=c(1,2)) # B, L, T, R
 f.plot.spec(Z=cal.plsr.data$Spectra,wv=seq(Start.wave,End.wave,1),plot_label="Calibration")
 f.plot.spec(Z=val.plsr.data$Spectra,wv=seq(Start.wave,End.wave,1),plot_label="Validation")
+
+dev.copy(png,file.path(outdir,paste0(inVar,'_Cal_Val_Spectra.png')), 
+         height=2500,width=4900, res=340)
+dev.off();
 par(mfrow=c(1,1))
 ```
 
@@ -168,22 +191,24 @@ if(grepl("Windows", sessionInfo()$running)){
   pls.options(parallel = parallel::detectCores()-1)
 }
 
-method <- "custom" #pls, custom, lowestPRESS
+method <- "firstPlateau" #pls, firstPlateau, firstMin
 random_seed <- 2356812
-seg <- 100
+seg <- 250
 maxComps <- 20
-iterations <- 20
+iterations <- 40
+prop <- 0.70
 if (method=="pls") {
-  # pls package approach - faster but estimates more components....
-  nComps <- find_optimal_components(method=method, maxComps=maxComps, seg=seg, 
-                                    random_seed=random_seed)
+  nComps <- find_optimal_components(dataset=cal.plsr.data, method=method, maxComps=maxComps, 
+                                    seg=seg, random_seed=random_seed)
   print(paste0("*** Optimal number of components: ", nComps))
 } else {
-  # custom method - slow but generally finds the smallest number of components 
-  nComps <- find_optimal_components(method=method, maxComps=maxComps, iterations=iterations, 
-                                    seg=seg, prop=0.70, 
+  nComps <- find_optimal_components(dataset=cal.plsr.data, method=method, maxComps=maxComps, 
+                                    iterations=iterations, seg=seg, prop=prop, 
                                     random_seed=random_seed)
 }
+dev.copy(png,file.path(outdir,paste0(paste0(inVar,"_PLSR_Component_Selection.png"))), 
+         height=2800, width=3400,  res=340)
+dev.off();
 ```
 
 ### Fit final model
