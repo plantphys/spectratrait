@@ -2,9 +2,10 @@
 #
 #  
 #   An expanded example "How-to" script illustrating the use of PLSR modeling to develop a 
-#   spectra-trait algorithm to estimate leaf mass area with leaf-level spectroscopy data. The 
-#   example is built from published data source from the EcoSIS spectral database. This examples
-#   illustrates an approach to quantify model prediction uncertainty based on a jackknife analysis
+#   spectra-trait algorithm to estimate leaf nitrogen content with leaf-level spectroscopy data. 
+#   The example is built from published data source from the EcoSIS spectral database. This example
+#   illustrates how to select the optimal number of components and quantify model prediction 
+#   uncertainty based on permutation approaches
 #
 #   Spectra and trait data source:
 #   https://ecosis.org/package/leaf-spectra-of-36-species-growing-in-rosa-rugosa-invaded-coastal-grassland-communities-in-belgium
@@ -152,17 +153,22 @@ print(paste("Val observations: ",dim(val.plsr.data)[1],sep=""))
 
 cal_hist_plot <- qplot(cal.plsr.data[,paste0(inVar)],geom="histogram",
                        main = paste0("Cal. Histogram for ",inVar),
-                       xlab = paste0(inVar),ylab = "Count",fill=I("grey50"),col=I("black"),alpha=I(.7))
+                       xlab = paste0(inVar),ylab = "Count",fill=I("grey50"),col=I("black"),
+                       alpha=I(.7))
 val_hist_plot <- qplot(val.plsr.data[,paste0(inVar)],geom="histogram",
                        main = paste0("Val. Histogram for ",inVar),
-                       xlab = paste0(inVar),ylab = "Count",fill=I("grey50"),col=I("black"),alpha=I(.7))
+                       xlab = paste0(inVar),ylab = "Count",fill=I("grey50"),col=I("black"),
+                       alpha=I(.7))
 histograms <- grid.arrange(cal_hist_plot, val_hist_plot, ncol=2)
-ggsave(paste0(inVar,"_Cal_Val_Histograms.png"), plot = histograms, device="png", width = 30, 
+ggsave(filename = file.path(outdir,paste0(inVar,"_Cal_Val_Histograms.png")), plot = histograms, 
+       device="png", width = 30, 
        height = 12, units = "cm",
        dpi = 300)
 # output cal/val data
-write.csv(cal.plsr.data,file=file.path(outdir,paste0(inVar,'_Cal_PLSR_Dataset.csv')),row.names=FALSE)
-write.csv(val.plsr.data,file=file.path(outdir,paste0(inVar,'_Val_PLSR_Dataset.csv')),row.names=FALSE)
+write.csv(cal.plsr.data,file=file.path(outdir,paste0(inVar,'_Cal_PLSR_Dataset.csv')),
+          row.names=FALSE)
+write.csv(val.plsr.data,file=file.path(outdir,paste0(inVar,'_Val_PLSR_Dataset.csv')),
+          row.names=FALSE)
 #--------------------------------------------------------------------------------------------------#
 
 
@@ -316,9 +322,8 @@ val_resid_histogram <- ggplot(val.plsr.output, aes(x=PLSR_Residuals)) +
 # plot cal/val side-by-side
 scatterplots <- grid.arrange(cal_scatter_plot, val_scatter_plot, cal_resid_histogram, 
                              val_resid_histogram, nrow=2,ncol=2)
-ggsave(paste0(inVar,"_Cal_Val_Scatterplots.png"), plot = scatterplots, device="png", 
-       width = 32, 
-       height = 30, units = "cm",
+ggsave(filename = file.path(outdir,paste0(inVar,"_Cal_Val_Scatterplots.png")), 
+       plot = scatterplots, device="png", width = 32, height = 30, units = "cm",
        dpi = 300)
 #--------------------------------------------------------------------------------------------------#
 
@@ -367,13 +372,11 @@ Jackknife_Pred <- val.plsr.data$Spectra %*% Jackknife_coef +
          ncol=length(Jackknife_intercept))
 Interval_Conf <- apply(X = Jackknife_Pred, MARGIN = 1, FUN = quantile, 
                        probs=c(interval[1], interval[2]))
-Interval_Pred <- apply(X = Jackknife_Pred, MARGIN = 1, FUN = quantile, 
-                       probs=c(interval[1], interval[2]))
 sd_mean <- apply(X = Jackknife_Pred, MARGIN = 1, FUN =sd)
 sd_res <- sd(val.plsr.output$PLSR_Residuals)
 sd_tot <- sqrt(sd_mean^2+sd_res^2)
-val.plsr.output$LCI <- Interval_Pred[1,]
-val.plsr.output$UCI <- Interval_Pred[2,]
+val.plsr.output$LCI <- Interval_Conf[1,]
+val.plsr.output$UCI <- Interval_Conf[2,]
 val.plsr.output$LPI <- val.plsr.output$PLSR_Predicted-1.96*sd_tot
 val.plsr.output$UPI <- val.plsr.output$PLSR_Predicted+1.96*sd_tot
 head(val.plsr.output)

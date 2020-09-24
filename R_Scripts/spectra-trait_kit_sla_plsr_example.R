@@ -1,13 +1,14 @@
 ####################################################################################################
 #
 #  
-#   An expanded example "How-to" script illustrating the use of PLSR modeling to develop a 
-#   spectra-trait algorithm to estimate leaf mass area with leaf-level spectroscopy data. The 
-#   example is built from published data source from the EcoSIS spectral database. This examples
-#   illustrates an approach to quantify model prediction uncertainty based on a jackknife analysis
+#   An example "How-to" script illustrating the use of PLSR modeling to develop a 
+#   spectra-trait algorithm to estimate specific leaf area mass with leaf-level spectroscopy data. 
+#   The example is built from published data source from the EcoSIS spectral database. This example
+#   illustrates how to select the optimal number of components and quantify model prediction 
+#   uncertainty based on permutation approaches
 #
 #   Spectra and trait data source:
-#   https://ecosis.org/package/fresh-leaf-spectra-to-estimate-lma-over-neon-domains-in-eastern-united-states
+#   https://ecosis.org/package/leaf-reflectance-plant-functional-gradient-ifgg-kit
 #
 #    Notes:
 #    * The author notes the code is not the most elegant or clean, but is functional 
@@ -63,10 +64,10 @@ pls.options("plsralg")
 opar <- par(no.readonly = T)
 
 # What is the target variable?
-inVar <- "LMA_gDW_m2"
+inVar <- "SLA_g_cm"
 
 # What is the source dataset from EcoSIS?
-ecosis_id <- "5617da17-c925-49fb-b395-45a51291bd2d"
+ecosis_id <- "3cf6b27e-d80e-4bc7-b214-c95506e46daa"
 
 # Specify output directory, output_dir 
 # Options: 
@@ -109,12 +110,11 @@ sample_info <- dat_raw[,names(dat_raw) %notin% seq(350,2500,1)]
 head(sample_info)
 
 sample_info2 <- sample_info %>%
-  select(Domain,Functional_type,Sample_ID,USDA_Species_Code=`USDA Symbol`,LMA_gDW_m2=LMA)
+  select(Plant_Species=species,Growth_Form=`growth form`,timestamp,SLA_g_cm=`SLA (g/cm )`)
 head(sample_info2)
 
 plsr_data <- data.frame(sample_info2,Spectra)
 rm(sample_info,sample_info2,Spectra)
-dim(plsr_data)
 #--------------------------------------------------------------------------------------------------#
 
 
@@ -124,6 +124,8 @@ dim(plsr_data)
 # Keep only complete rows of inVar and spec data before fitting
 plsr_data <- plsr_data[complete.cases(plsr_data[,names(plsr_data) %in% 
                                                   c(inVar,paste0("Wave_",wv))]),]
+# Remove suspect high values
+plsr_data <- plsr_data[ plsr_data[,inVar] <= 500, ]
 #--------------------------------------------------------------------------------------------------#
 
 
@@ -131,11 +133,11 @@ plsr_data <- plsr_data[complete.cases(plsr_data[,names(plsr_data) %in%
 ### Create cal/val datasets
 ## Make a stratified random sampling in the strata USDA_Species_Code and Domain
 
-method <- "dplyr" #base/dplyr
+method <- "base" #base/dplyr
 # base R - a bit slow
 # dplyr - much faster
 split_data <- create_data_split(approach=method, split_seed=2356812, prop=0.8, 
-                                group_variables=c("USDA_Species_Code","Domain"))
+                                group_variables="Plant_Species")
 names(split_data)
 cal.plsr.data <- split_data$cal_data
 head(cal.plsr.data)[1:8]
@@ -154,12 +156,14 @@ val_hist_plot <- qplot(val.plsr.data[,paste0(inVar)],geom="histogram",
                        main = paste0("Val. Histogram for ",inVar),
                        xlab = paste0(inVar),ylab = "Count",fill=I("grey50"),col=I("black"),alpha=I(.7))
 histograms <- grid.arrange(cal_hist_plot, val_hist_plot, ncol=2)
-ggsave(paste0(inVar,"_Cal_Val_Histograms.png"), plot = histograms, device="png", width = 30, 
-       height = 12, units = "cm",
+ggsave(filename = file.path(outdir,paste0(inVar,"_Cal_Val_Histograms.png")), 
+       plot = histograms, device="png", width = 30, height = 12, units = "cm",
        dpi = 300)
 # output cal/val data
-write.csv(cal.plsr.data,file=file.path(outdir,paste0(inVar,'_Cal_PLSR_Dataset.csv')),row.names=FALSE)
-write.csv(val.plsr.data,file=file.path(outdir,paste0(inVar,'_Val_PLSR_Dataset.csv')),row.names=FALSE)
+write.csv(cal.plsr.data,file=file.path(outdir,paste0(inVar,'_Cal_PLSR_Dataset.csv')),
+          row.names=FALSE)
+write.csv(val.plsr.data,file=file.path(outdir,paste0(inVar,'_Val_PLSR_Dataset.csv')),
+          row.names=FALSE)
 #--------------------------------------------------------------------------------------------------#
 
 
@@ -168,12 +172,12 @@ write.csv(val.plsr.data,file=file.path(outdir,paste0(inVar,'_Val_PLSR_Dataset.cs
 cal_spec <- as.matrix(cal.plsr.data[, which(names(cal.plsr.data) %in% paste0("Wave_",wv))])
 cal.plsr.data <- data.frame(cal.plsr.data[, which(names(cal.plsr.data) %notin% paste0("Wave_",wv))],
                             Spectra=I(cal_spec))
-head(cal.plsr.data)[1:5]
+head(cal.plsr.data)[1:4]
 
 val_spec <- as.matrix(val.plsr.data[, which(names(val.plsr.data) %in% paste0("Wave_",wv))])
 val.plsr.data <- data.frame(val.plsr.data[, which(names(val.plsr.data) %notin% paste0("Wave_",wv))],
                             Spectra=I(val_spec))
-head(val.plsr.data)[1:5]
+head(val.plsr.data)[1:4]
 #--------------------------------------------------------------------------------------------------#
 
 
@@ -198,15 +202,16 @@ if(grepl("Windows", sessionInfo()$running)){
   pls.options(parallel = parallel::detectCores()-1)
 }
 
-method <- "firstPlateau" #pls, firstPlateau, firstMin
+method <- "pls" #pls, firstPlateau, firstMin
 random_seed <- 2356812
-seg <- 250
-maxComps <- 20
-iterations <- 40
+seg <- 100
+maxComps <- 18
+iterations <- 50
 prop <- 0.70
 if (method=="pls") {
-  nComps <- find_optimal_components(dataset=cal.plsr.data, method=method, maxComps=maxComps, 
-                                    seg=seg, random_seed=random_seed)
+  # pls package approach - faster but estimates more components....
+  nComps <- find_optimal_components(method=method, maxComps=maxComps, seg=seg, 
+                                    random_seed=random_seed)
   print(paste0("*** Optimal number of components: ", nComps))
 } else {
   nComps <- find_optimal_components(dataset=cal.plsr.data, method=method, maxComps=maxComps, 
@@ -314,9 +319,8 @@ val_resid_histogram <- ggplot(val.plsr.output, aes(x=PLSR_Residuals)) +
 # plot cal/val side-by-side
 scatterplots <- grid.arrange(cal_scatter_plot, val_scatter_plot, cal_resid_histogram, 
                              val_resid_histogram, nrow=2, ncol=2)
-ggsave(paste0(inVar,"_Cal_Val_scatterplots.png"), plot = scatterplots, device="png", 
-       width = 32, 
-       height = 30, units = "cm",
+ggsave(filename = file.path(outdir,paste0(inVar,"_Cal_Val_Scatterplots.png")), 
+       plot = scatterplots, device="png", width = 32, height = 30, units = "cm",
        dpi = 300)
 #--------------------------------------------------------------------------------------------------#
 
@@ -350,10 +354,9 @@ if(grepl("Windows", sessionInfo()$running)){
 
 seg <- 100
 jk.plsr.out <- pls::plsr(as.formula(paste(inVar,"~","Spectra")), scale=FALSE, 
-                         center=TRUE, ncomp=nComps, 
-                         validation="CV", segments = seg, 
-                         segment.type="interleaved", trace=FALSE, 
-                      jackknife=TRUE, data=cal.plsr.data)
+                         center=TRUE, ncomp=nComps, validation="CV", 
+                         segments = seg, segment.type="interleaved", trace=FALSE, 
+                         jackknife=TRUE, data=cal.plsr.data)
 pls.options(parallel = NULL)
 
 Jackknife_coef <- f.coef.valid(plsr.out = jk.plsr.out, data_plsr = cal.plsr.data, 
@@ -365,15 +368,13 @@ interval <- c(0.025,0.975)
 Jackknife_Pred <- val.plsr.data$Spectra %*% Jackknife_coef + 
   matrix(rep(Jackknife_intercept, length(val.plsr.data[,inVar])), byrow=TRUE, 
          ncol=length(Jackknife_intercept))
-Interval_Conf <- apply(X = Jackknife_Pred,MARGIN = 1,
-                       FUN = quantile,probs=c(interval[1],interval[2]))
-Interval_Pred <- apply(X = Jackknife_Pred,MARGIN = 1,
-                       FUN = quantile,probs=c(interval[1],interval[2]))
-sd_mean <- apply(X = Jackknife_Pred,MARGIN = 1,FUN =sd)
+Interval_Conf <- apply(X = Jackknife_Pred, MARGIN = 1, FUN = quantile, 
+                       probs=c(interval[1], interval[2]))
+sd_mean <- apply(X = Jackknife_Pred, MARGIN = 1, FUN =sd)
 sd_res <- sd(val.plsr.output$PLSR_Residuals)
 sd_tot <- sqrt(sd_mean^2+sd_res^2)
-val.plsr.output$LCI <- Interval_Pred[1,]
-val.plsr.output$UCI <- Interval_Pred[2,]
+val.plsr.output$LCI <- Interval_Conf[1,]
+val.plsr.output$UCI <- Interval_Conf[2,]
 val.plsr.output$LPI <- val.plsr.output$PLSR_Predicted-1.96*sd_tot
 val.plsr.output$UPI <- val.plsr.output$PLSR_Predicted+1.96*sd_tot
 head(val.plsr.output)
