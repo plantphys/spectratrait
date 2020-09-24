@@ -13,7 +13,6 @@
 #    * Code is provided under GNU General Public License v3.0 
 #
 #
-#    --- Last updated:  05.11.2020 By Shawn P. Serbin <sserbin@bnl.gov>
 ####################################################################################################
 
 
@@ -22,20 +21,16 @@ rm(list=ls(all=TRUE))   # clear workspace
 graphics.off()          # close any open graphics
 closeAllConnections()   # close any open connections to files
 
-list.of.packages <- c("readr","httr","dplyr","reshape2","ggplot2", "magick")  # packages needed for script
+list.of.packages <- c("readr","httr","dplyr","reshape2","ggplot2")  # packages needed for script
 # check for dependencies and install if needed
 new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
-if(length(new.packages)) install.packages(new.packages)
+if(length(new.packages)) install.packages(new.packages, dependencies=c("Depends", "Imports",
+                                                                       "LinkingTo"))
+# Load libraries
+invisible(lapply(list.of.packages, library, character.only = TRUE))
 
-# load libraries needed for script
-library(readr)    # readr - read_csv function to pull data from EcoSIS
-library(dplyr)
-library(reshape2)
-library(ggplot2)
-
-# define function to grab PLSR model from GitHub
 #devtools::source_gist("gist.github.com/christophergandrud/4466237")
-source_GitHubData <-function(url, sep = ",", header = TRUE) {
+source_GitHubData <- function(url, sep = ",", header = TRUE) {
   require(httr)
   request <- GET(url)
   stop_for_status(request)
@@ -46,12 +41,23 @@ source_GitHubData <-function(url, sep = ",", header = TRUE) {
 
 # not in
 `%notin%` <- Negate(`%in%`)
+
+# Specify output directory, output_dir 
+# Options: 
+# tempdir - use a OS-specified temporary directory 
+# user defined PATH - e.g. "~/scratch/PLSR"
+output_dir <- "tempdir"
 #--------------------------------------------------------------------------------------------------#
 
 
 #--------------------------------------------------------------------------------------------------#
-### Set working directory (scratch space)
-outdir <- tempdir()
+### Set working directory
+if (output_dir=="tempdir") {
+  outdir <- tempdir()
+} else {
+  if (! file.exists(output_dir)) dir.create(output_dir,recursive=TRUE)
+  outdir <- file.path(path.expand(output_dir))
+}
 setwd(outdir) # set working directory
 getwd()  # check wd
 #--------------------------------------------------------------------------------------------------#
@@ -105,10 +111,6 @@ ylim2 <- 65
 mean_spec <- colMeans(spectra[,which(names(spectra) %in% paste0("Wave_",wv))])
 spectra_quantiles <- apply(spectra[,which(names(spectra) %in% paste0("Wave_",wv))],
                            2,quantile,na.rm=T,probs=c(0,0.025,0.05,0.5,0.95,0.975,1))
-
-print("**** Plotting Ecosis specrtal data. Writing to scratch space ****")
-png(file=file.path(outdir,'NGEE-Arctic_2016_Kougarok_leaf_spectra_summary_plot.png'),height=3000,
-    width=3900, res=340)
 par(mfrow=c(1,1), mar=c(4.5,5.7,0.3,0.4), oma=c(0.3,0.9,0.3,0.1)) # B, L, T, R
 plot(wv,mean_spec,ylim=c(0,ylim),cex=0.00001, col="white",xlab="Wavelength (nm)",
      ylab="Reflectance (%)",cex.axis=cexaxis, cex.lab=cexlab)
@@ -120,7 +122,10 @@ lines(wv,spectra_quantiles[7,],lwd=1.85, lty=3, col="grey40")
 legend("topright",legend=c("Mean reflectance","Min/Max", "95% CI"),lty=c(1,3,1),
        lwd=c(3,3,15),col=c("black","grey40","#99CC99"),bty="n", cex=1.7)
 box(lwd=2.2)
-dev.off()
+dev.copy(png,file.path(outdir,
+                       "NGEE-Arctic_2016_Kougarok_leaf_spectra_summary_plot.png"), 
+         height=3000,width=3900, res=340)
+dev.off();
 #--------------------------------------------------------------------------------------------------#
 
 
@@ -146,19 +151,9 @@ head(trait_data)
 p2 <- ggplot(trait_data, aes(x=USDA_Species_Code, y=value)) + 
   geom_boxplot() +
   facet_wrap(~variable, scale="free")
+print(p2)
 ggsave(filename = file.path(outdir,"NGEE-Arctic_2016_Kougarok_Trait_data.png"), plot = p2,
        width = 40, height = 20, units = "cm")
 #--------------------------------------------------------------------------------------------------#
-
-
-#--------------------------------------------------------------------------------------------------#
-print(paste0("**** Output can be found in: ", outdir))
-spec <- magick::image_read(file.path(outdir,'NGEE-Arctic_2016_Kougarok_leaf_spectra_summary_plot.png'))
-plot.new()
-plot(spec) 
-
-traits <- magick::image_read(file.path(outdir,'NGEE-Arctic_2016_Kougarok_Trait_data.png'))
-plot.new()
-plot(traits) 
 
 ### EOF
