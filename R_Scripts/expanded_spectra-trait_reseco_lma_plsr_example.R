@@ -158,9 +158,8 @@ val_hist_plot <- qplot(val.plsr.data[,paste0(inVar)],geom="histogram",
                        main = paste0("Validation Histogram for ",inVar),
                        xlab = paste0(inVar),ylab = "Count",fill=I("grey50"),col=I("black"),alpha=I(.7))
 histograms <- grid.arrange(cal_hist_plot, val_hist_plot, ncol=2)
-ggsave(paste0(inVar,"_Cal_Val_Histograms.png"), plot = histograms, device="png", width = 30, 
-       height = 12, units = "cm",
-       dpi = 300)
+ggsave(filename = file.path(outdir,paste0(inVar,"_Cal_Val_Histograms.png")), plot = histograms, 
+       device="png", width = 30, height = 12, units = "cm", dpi = 300)
 # output cal/val data
 write.csv(cal.plsr.data,file=file.path(outdir,paste0(inVar,'_Cal_PLSR_Dataset.csv')),row.names=FALSE)
 write.csv(val.plsr.data,file=file.path(outdir,paste0(inVar,'_Val_PLSR_Dataset.csv')),row.names=FALSE)
