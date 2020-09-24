@@ -327,7 +327,6 @@ ggsave(paste0(inVar,"_Cal_Val_Scatterplots.png"), plot = scatterplots, device="p
 ### Generate Coefficient and VIP plots
 vips <- VIP(plsr.out)[nComps,]
 
-dev.off()
 par(mfrow=c(2,1))
 plot(plsr.out, plottype = "coef",xlab="Wavelength (nm)",
      ylab="Regression coefficients",legendpos = "bottomright",
@@ -340,11 +339,11 @@ box(lwd=2.2)
 dev.copy(png,file.path(outdir,paste0(inVar,'_Coefficient_VIP_plot.png')), 
          height=3100, width=4100, res=340)
 dev.off();
+par(opar)
 #--------------------------------------------------------------------------------------------------#
 
 
 #--------------------------------------------------------------------------------------------------#
-dev.off()
 if(grepl("Windows", sessionInfo()$running)){
   pls.options(parallel =NULL)
 } else {
