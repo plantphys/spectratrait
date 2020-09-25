@@ -78,8 +78,6 @@ ecosis_id <- "9db4c5a2-7eac-4e1e-8859-009233648e89"
 # tempdir - use a OS-specified temporary directory 
 # user defined PATH - e.g. "~/scratch/PLSR"
 output_dir <- "tempdir"
-
-output_dir <- "~/scratch/PLSR"
 #--------------------------------------------------------------------------------------------------#
 
 
