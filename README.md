@@ -4,10 +4,10 @@ Tutorial and example scripts illustrating how to fit, evaluate, and report spect
 
 ### Contains:
 1) Example R script files that illustrate the "best practices" of PLSR model fitting for the estimation of leaf functional traits with reflectance spectroscopy
-  + _expanded_spectra-trait_kit_lma_plsr_example.R_  Small dataset looking at LMA with some data cleaning (removal of NA's and suspect high values)
-  + _expanded_spectra-trait_neon_lma_plsr_example.R_ Large dataset looking at LMA with multiple grouping variables, very slow (>6000 observations)
-  + _expanded_spectra-trait_reseco_leafN_plsr_example.R_ Small dataset looking at leaf nitrogen
-  + _expanded_spectra-trait_reseco_lma_plsr_example.R_ Small dataset looking at LMA
+  + _spectra-trait_kit_lma_plsr_example.R_  Small dataset looking at LMA with some data cleaning (removal of NA's and suspect high values)
+  + _spectra-trait_neon_lma_plsr_example.R_ Large dataset looking at LMA with multiple grouping variables, very slow (>6000 observations)
+  + _spectra-trait_reseco_leafN_plsr_example.R_ Small dataset looking at leaf nitrogen
+  + _spectra-trait_reseco_lma_plsr_example.R_ Small dataset looking at LMA
   + _simple_spectra-trait_plsr_example.R_ Basic PLSR example using a large dataset
   + _pull_data_from_ecosis_ Quick example of how to pull data from EcoSIS and plot it
 
