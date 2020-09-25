@@ -4,8 +4,13 @@ This repository provides a general best-practices tutorial through example scrip
 ### Article citation:
 Burnett AC, Anderson J, Davidson KD, Ely KS, Lamour J, Li Q, Morrison BD, Yang D, Rogers A, Serbin SP (2020) A best-practice guide to predicting plant traits from leaf-level hyperspectral data using partial least squares regression. Journal of Experimental Botany. In Review.
 
+### EcoSML
+https://ecosml.org/package/github/TESTgroup-BNL/PLSR_for_plant_trait_prediction
 
-### Contains:
+### Script authors:
+Julien Lamour, Jeremiah Anderson, Ken Davidson, Shawn P. Serbin
+
+## Contains:
 1) Example R script files that illustrate the "best practices" of PLSR model fitting for the estimation of leaf functional traits with reflectance spectroscopy
   + _spectra-trait_kit_lma_plsr_example.R_  Small dataset looking at LMA with some data cleaning (removal of NA's and suspect high values)
   + _spectra-trait_neon_lma_plsr_example.R_ Large dataset looking at LMA with multiple grouping variables, very slow (>6000 observations)
@@ -23,7 +28,6 @@ Burnett AC, Anderson J, Davidson KD, Ely KS, Lamour J, Li Q, Morrison BD, Yang D
   + _f.plot.coef()_ Plots PLSR model coefficients with uncertainty envelope
   + _f.coef.valid()_ Returns the intercept and the coefficients of the jackknife permutation analysis. Called from _f.plot.coef()_
   
-
 3) Example Rmarkdown vignettes illustrating the various PLSR model fitting examples
 
 ### Linked dataset citations, DOIs, and EcoSIS IDs/URLs: <br>
@@ -48,5 +52,4 @@ DOI: https://doi.org/doi:10.21232/9nr6-sq54 <br>
 Rpubs LMA example output: https://rpubs.com/sserbin/665512 <br>
 Rpubs LeafN example output: https://rpubs.com/sserbin/665516
 
-### Script authors:
-Julien Lamour, Jeremiah Anderson, Ken Davidson, Shawn P. Serbin [author list needs to be finalized]
+
