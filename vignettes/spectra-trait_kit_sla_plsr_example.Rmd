@@ -9,7 +9,7 @@ output:
     df_print: paged
 params:
   date: !r Sys.Date()
-title: Spectra-trait PLSR example using leaf-level spectra and leaf mass per area (LMA) data from more than 40 species grassland species comprising both herbs and graminoids. 
+title: Spectra-trait PLSR example using leaf-level spectra and specific leaf area (SLA) data from more than 40 species grassland species comprising both herbs and graminoids. 
 ---
 
 ```{r setup, include=FALSE, echo=FALSE}
@@ -17,7 +17,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ### Overview
-This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook to illustrate how to retrieve a dataset from the EcoSIS spectral database, choose the "optimal" number of plsr components, and fit a plsr model for leaf-mass area (LMA). In this example, the plants were cultivated in an outdoor setting in the botanical garden of the KIT using 40x40 cm pots with an standardized substrate. The data was measured on a weekly basis (the timestamp is included in the dataset). 
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook to illustrate how to retrieve a dataset from the EcoSIS spectral database, choose the "optimal" number of plsr components, and fit a plsr model for specific leaf area (SLA). In this example, the plants were cultivated in an outdoor setting in the botanical garden of the KIT using 40x40 cm pots with an standardized substrate. The data was measured on a weekly basis (the timestamp is included in the dataset). 
 
 ### Getting Started
 ### Installation
@@ -68,6 +68,12 @@ inVar <- "SLA_g_cm"
 
 # What is the source dataset from EcoSIS?
 ecosis_id <- "3cf6b27e-d80e-4bc7-b214-c95506e46daa"
+
+# Specify output directory, output_dir 
+# Options: 
+# tempdir - use a OS-specified temporary directory 
+# user defined PATH - e.g. "~/scratch/PLSR"
+output_dir <- "tempdir"
 ```
 
 ### Set working directory (scratch space)
@@ -78,7 +84,6 @@ print(paste0("Output directory: ",getwd()))
 ```
 
 ### Grab data from EcoSIS
-##### URL:  https://ecosis.org/package/fresh-leaf-spectra-to-estimate-lma-over-neon-domains-in-eastern-united-states
 ```{r, echo=TRUE}
 print(paste0("Output directory: ",getwd()))  # check wd
 ### Get source dataset from EcoSIS
