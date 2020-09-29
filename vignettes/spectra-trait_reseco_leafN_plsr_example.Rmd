@@ -358,7 +358,7 @@ jk.plsr.out <- pls::plsr(as.formula(paste(inVar,"~","Spectra")), scale=FALSE,
 pls.options(parallel = NULL)
 
 Jackknife_coef <- f.coef.valid(plsr.out = jk.plsr.out, data_plsr = cal.plsr.data, 
-                               ncomp = nComps)
+                               ncomp = nComps, inVar=inVar)
 Jackknife_intercept <- Jackknife_coef[1,,,]
 Jackknife_coef <- Jackknife_coef[2:dim(Jackknife_coef)[1],,,]
 
