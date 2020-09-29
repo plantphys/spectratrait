@@ -10,9 +10,12 @@ https://ecosml.org/package/github/TESTgroup-BNL/PLSR_for_plant_trait_prediction
 ### Script authors:
 Julien Lamour, Jeremiah Anderson, Ken Davidson, Shawn P. Serbin
 
+### Depends: 
+ggplot2 (>= 3.3.2), remotes (>= 2.2.0), devtools (>= 2.3.1), readr (>= 1.3.1), RCurl (>= 1.98-1.2), httr (>= 1.4.2), pls (>= 2.7-2), dplyr (>= 1.0.1), reshape2 (1.4.4), here (0.1), plotrix (>= 3.7-8), gridExtra (>= 2.3), scales(>= 1.1.1)
+
 ## Contains:
 1. Example R script files that illustrate the "best practices" of PLSR model fitting for the estimation of leaf functional traits with reflectance spectroscopy
-    * _spectra-trait_kit_lma_plsr_example.R_  Small dataset looking at LMA with some data cleaning (removal of NA's and suspect high values)
+    * _spectra-trait_kit_lma_plsr_example.R_ Small dataset looking at LMA with some data cleaning (removal of NA's and suspect high values)
     * _spectra-trait_neon_lma_plsr_example.R_ Large dataset looking at LMA with multiple grouping variables, very slow (>6000 observations)
     * _spectra-trait_reseco_leafN_plsr_example.R_ Small dataset looking at leaf nitrogen
     * _spectra-trait_reseco_lma_plsr_example.R_ Small dataset looking at LMA
