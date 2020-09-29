@@ -11,7 +11,7 @@ https://ecosml.org/package/github/TESTgroup-BNL/PLSR_for_plant_trait_prediction
 Julien Lamour, Jeremiah Anderson, Ken Davidson, Shawn P. Serbin
 
 ### Depends: 
-ggplot2 (>= 3.3.2), remotes (>= 2.2.0), devtools (>= 2.3.1), readr (>= 1.3.1), RCurl (>= 1.98-1.2), httr (>= 1.4.2), pls (>= 2.7-2), dplyr (>= 1.0.1), reshape2 (1.4.4), here (0.1), plotrix (>= 3.7-8), gridExtra (>= 2.3), scales(>= 1.1.1)
+ggplot2 (>= 3.3.2), remotes (>= 2.2.0), devtools (>= 2.3.1), readr (>= 1.3.1), RCurl (>= 1.98-1.2), httr (>= 1.4.2), pls (>= 2.7-2), dplyr (>= 1.0.1), reshape2 (>= 1.4.4), here (>= 0.1), plotrix (>= 3.7-8), gridExtra (>= 2.3), scales(>= 1.1.1)
 
 ## Contains:
 1. Example R script files that illustrate the "best practices" of PLSR model fitting for the estimation of leaf functional traits with reflectance spectroscopy
@@ -26,10 +26,10 @@ ggplot2 (>= 3.3.2), remotes (>= 2.2.0), devtools (>= 2.3.1), readr (>= 1.3.1), R
     * _get_ecosis_data()_ Function to pull data from the EcoSIS database (ecosis.org) using their application programmer interface (API)
     * _create_data_split()_ Randomly plits data into calibration and validation datasets based on grouping variables.  'base' option is slow but verbose.  'dplyr' is fast and quiet.
     * _f.plot.spec()_ Function to generate spectral plot with mean, min/max and 95% confidence intervals
-    * _find_optimal_components()_ Finds optium number of components for PLSR.  'pls' package consists of choosing the model with fewest components that is still less than one standard error away from the overall best model. 'first min' consists of choosing the first component that gives statistically (t-test) the same result as the following component. This method finds the first 'plateau' in the PRESS diminution.  'firstMin' finds the first component that gives statistically (t-test) the same result as the overall best model.
+    * _find_optimal_components()_ Finds optimum number of components for PLSR.  'pls' chooses the model with fewest components that is still less than one standard error away from the overall best model. 'first plateau' chooses the first component that gives statistically (t-test) the same result as the following component.  'firstMin' finds the first component that gives statistically (t-test) the same result as the overall best model.
     * _pls_permutation()_ Generate PLSR model permutation analysis ensembles for opimal component selection and uncertainty analysis.  Currently called by _find_optimal_components()_
     * _f.plot.coef()_ Plots PLSR model coefficients with uncertainty envelope
-    * _f.coef.valid()_ Returns the intercept and the coefficients of the jackknife permutation analysis. Called from _f.plot.coef()_
+    * _f.coef.valid()_ Returns the intercept and the coefficients of the jackknife permutation analysis.
   
 3. Example Rmarkdown vignettes illustrating the various PLSR model fitting examples
 
