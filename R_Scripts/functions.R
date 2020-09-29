@@ -268,10 +268,11 @@ f.plot.coef <- function(
 ## Return the intercept and the coefficients of the jackknife validation
 ## Only work in the case where center=TRUE in the plsr model
 #' @author Julien Lamour
-f.coef.valid <- function(plsr.out, ## plsr model with center = TRUE
-                       data_plsr, ## data used for the plsr model
-                       ncomp ## number of selection components
-){
+f.coef.valid <- function(plsr.out, ## plsr model obtained with jaccknife = TRUE 
+                       data_plsr, ## data used for the plsr model with Spectra the matrix of spectra
+                       ncomp, ## number of selection components
+                      inVar=inVar ## Name of the response variable  
+                       ){
   B <- plsr.out$validation$coefficients[, , ncomp,, drop = FALSE]
   dB <- dim(B)
   dB[1] <- dB[1] + 1
