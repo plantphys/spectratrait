@@ -271,7 +271,7 @@ f.plot.coef <- function(
 f.coef.valid <- function(plsr.out, ## plsr model obtained with jaccknife = TRUE 
                        data_plsr, ## data used for the plsr model with Spectra the matrix of spectra
                        ncomp, ## number of selection components
-                      inVar=inVar ## Name of the response variable  
+                      inVar ## Name of the response variable  
                        ){
   B <- plsr.out$validation$coefficients[, , ncomp,, drop = FALSE]
   dB <- dim(B)
