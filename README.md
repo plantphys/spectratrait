@@ -1,5 +1,5 @@
 # PLSR modeling for the estimation of plant functional traits
-This repository provides examples of general best-practice scripts that illustrate how to fit, evaluate, and report spectra-trait reflectance spectroscopy PLSR models.  These scripts encompass several possibilities that you may encounter doing PLSR. Start by reading *Burnett et al. 2020*, then work through the scripts or vignettes.
+This repository contains example scripts illustrating "best-practices" for fitting, evaluating, and reporting leaf-level spectra-trait PLSR models. These scripts encompass several possibilities that you may encounter doing PLSR. Start by reading *Burnett et al. 2020*, then work through the scripts or vignettes.
 
 ### Article citation:
 Burnett AC, Anderson J, Davidson KD, Ely KS, Lamour J, Li Q, Morrison BD, Yang D, Rogers A, Serbin SP (2020) A best-practice guide to predicting plant traits from leaf-level hyperspectral data using partial least squares regression. Journal of Experimental Botany. In Review.
