@@ -330,9 +330,8 @@ ggsave(filename = file.path(outdir,paste0(inVar,"_Cal_Val_Scatterplots.png")),
 vips <- VIP(plsr.out)[nComps,]
 
 par(mfrow=c(2,1))
-plot(plsr.out, plottype = "coef",xlab="Wavelength (nm)",
-     ylab="Regression coefficients",legendpos = "bottomright",
-     ncomp=nComps,lwd=2)
+plot(plsr.out$coefficients[,,nComps], x=wv,xlab="Wavelength (nm)",
+     ylab="Regression coefficients",lwd=2,type='l')
 box(lwd=2.2)
 plot(seq(Start.wave,End.wave,1),vips,xlab="Wavelength (nm)",ylab="VIP",cex=0.01)
 lines(seq(Start.wave,End.wave,1),vips,lwd=3)
