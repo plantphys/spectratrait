@@ -38,7 +38,7 @@ ggplot2 (>= 3.3.2), remotes (>= 2.2.0), devtools (>= 2.3.1), readr (>= 1.3.1), R
 Target variable: SLA <br>
 EcoSIS URL: https://ecosis.org/package/leaf-reflectance-plant-functional-gradient-ifgg-kit <br>
 EcoSIS ID: 3cf6b27e-d80e-4bc7-b214-c95506e46daa <br>
-Rpubs example output: https://rpubs.com/sserbin/665543
+Rpubs example output: https://rpubs.com/sserbin/705140
 
 2) Fresh Leaf Spectra to Estimate LMA over NEON domains in eastern United States <br>
 Target variable: LMA <br>
