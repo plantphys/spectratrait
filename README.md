@@ -4,11 +4,13 @@ This repository contains example scripts illustrating "best-practices" for fitti
 ### Article citation:
 Burnett AC, Anderson J, Davidson KD, Ely KS, Lamour J, Li Q, Morrison BD, Yang D, Rogers A, Serbin SP (2020) A best-practice guide to predicting plant traits from leaf-level hyperspectral data using partial least squares regression. Journal of Experimental Botany. In Review.
 
+### Source code citation:
 [![DOI](https://zenodo.org/badge/222699149.svg)](https://zenodo.org/badge/latestdoi/222699149)
 
 ### EcoSML
 https://ecosml.org/package/github/TESTgroup-BNL/PLSR_for_plant_trait_prediction
 
+<br>
 ### Script authors:
 Julien Lamour, Jeremiah Anderson, Ken Davidson, Shawn P. Serbin
 
