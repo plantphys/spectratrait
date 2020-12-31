@@ -10,7 +10,6 @@ Burnett AC, Anderson J, Davidson KD, Ely KS, Lamour J, Li Q, Morrison BD, Yang D
 ### EcoSML
 https://ecosml.org/package/github/TESTgroup-BNL/PLSR_for_plant_trait_prediction
 
-<br>
 ### Script authors:
 Julien Lamour, Jeremiah Anderson, Ken Davidson, Shawn P. Serbin
 
