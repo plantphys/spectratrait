@@ -128,8 +128,7 @@ find_optimal_components <- function(dataset=NULL, method="pls", maxComps=20, ite
   set.seed(random_seed)
   if(method=="pls") {
     print("*** Running PLS permutation test ***")
-    maxComps <- maxComps
-    seg <- seg
+
     plsr.out <- pls::plsr(as.formula(paste(inVar,"~","Spectra")), scale=FALSE, center=TRUE, ncomp=maxComps, 
                      validation="CV", segments = seg, segment.type="interleaved", trace=FALSE, 
                      jackknife=TRUE, data=cal.plsr.data)
