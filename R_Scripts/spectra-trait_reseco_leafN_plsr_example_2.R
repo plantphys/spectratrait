@@ -355,7 +355,7 @@ if(grepl("Windows", sessionInfo()$running)){
   pls.options(parallel = parallel::detectCores()-1)
 }
 
-### PLSR permutation uncertainty analysis
+### PLSR bootstrap permutation uncertainty analysis
 iterations <- 1000    # how many permutation iterations to run
 prop <- 0.70          # fraction of training data to keep for each iteration
 plsr_permutation <- pls_permutation(dataset=cal.plsr.data, maxComps=nComps, iterations=iterations, prop=prop)
@@ -381,14 +381,14 @@ head(val.plsr.output)
 
 # JK regression coefficient plot
 f.plot.coef(Z = t(Jackknife_coef), wv = seq(Start.wave,End.wave,1), 
-            plot_label="Jackknife regression coefficients",position = 'bottomleft')
+            plot_label="Bootstrap regression coefficients",position = 'bottomleft')
 abline(h=0,lty=2,col="grey50")
 box(lwd=2.2)
 dev.copy(png,file.path(outdir,paste0(inVar,'_Jackknife_Regression_Coefficients.png')), 
          height=2100, width=3800, res=340)
 dev.off();
 
-# JK validation plot
+# validation plot
 RMSEP <- sqrt(mean(val.plsr.output$PLSR_Residuals^2))
 pecr_RMSEP <- RMSEP/mean(val.plsr.output[,inVar])*100
 r2 <- round(pls::R2(plsr.out, newdata = val.plsr.data)$val[nComps+1],2)
@@ -422,12 +422,12 @@ dev.off();
 
 
 #---------------- Output jackknife results --------------------------------------------------------#
-# JK Coefficents
+# Bstrap Coefficents
 out.jk.coefs <- data.frame(Iteration=seq(1,length(Jackknife_intercept),1),
                            Intercept=Jackknife_intercept,t(Jackknife_coef))
 names(out.jk.coefs) <- c("Iteration","Intercept",paste0("Wave_",wv))
 head(out.jk.coefs)[1:6]
-write.csv(out.jk.coefs,file=file.path(outdir,paste0(inVar,'_Jackkife_PLSR_Coefficients.csv')),
+write.csv(out.jk.coefs,file=file.path(outdir,paste0(inVar,'_Bootstrap_PLSR_Coefficients.csv')),
           row.names=FALSE)
 #--------------------------------------------------------------------------------------------------#
 
