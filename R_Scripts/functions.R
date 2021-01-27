@@ -109,7 +109,7 @@ pls_permutation <- function(dataset=NULL, maxComps=20, iterations=20, seg=100, p
     sq_resid <- (pred_val[,,]-val.sub.data[,inVar])^2
     press <- apply(X = sq_resid, MARGIN = 2, FUN = sum)
     press.out[i,] <- press
-    coefs[,i,] <- coef(plsr.out,intercept = TRUE, ncomp = 1:maxComps)
+    coefs[,i,] <- coef(plsr.out, intercept = TRUE, ncomp = 1:maxComps)
     rm(rows,sub.data,val.sub.data,plsr.out,pred_val,sq_resid,press)
   }
   # create a new list with PRESS and permuted coefficients x wavelength x component number
@@ -258,8 +258,8 @@ f.plot.coef <- function(
   lines(wv,mean_spec,lwd=2, lty=1, col="black")
   lines(wv,spectra_quantiles[1,], lty=3, col="grey60")
   lines(wv,spectra_quantiles[9,], lty=3, col="grey60")
-  legend(position,legend=c(paste("Mean",type),"Min/Max", "95% CI"),lty=c(1,3,1),
-         lwd=c(2,1,10),col=c("black","grey50","#99CC99"),bty="n")
+  legend(position,legend=c(paste("Mean",type),"Min/Max (range)", "95% CI"),lty=c(1,1,1),
+         lwd=c(2,10,10),col=c("black","grey50","#99CC99"),bty="n")
 }
 #--------------------------------------------------------------------------------------------------#
 
