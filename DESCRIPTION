@@ -1,0 +1,47 @@
+Package: spectratrait
+Title: A simple add-on package to aid in the fitting of leaf-level spectra-trait PLSR models
+Version: 0.9.9
+Authors@R:
+  c(person(given = "Julien",
+           family = "Lamour",
+           role = c("aut", "cre"),
+           email = "jlamour@bnl.gov",
+           comment = c(ORCID = "XXXXX")),
+    person(given = "Jeremiah",
+           family = "Anderson",
+           role = "ctb",
+           comment = c(ORCID = "XXXX")),
+    person(given = "Kenneth",
+           family = "Davidson",
+           role = "ctb",
+           comment = c(ORCID = "XXXX")),
+    person(given = "Shawn",
+           family = "Serbin",
+           role = c("aut", "cre"),
+           email = "sserbin@bnl.gov,
+           comment = c(ORCID = "XXXXX")))
+Maintainer: Shawn P. Serbin <sserbin@bnl.gov>
+Description: Provides functions to conduct standardized leaf-level spectra-trait PLSR model fitting including uncertainty analysis that follow DOI: https://doi.org/10.1111/nph.16123
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: true
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.1.1
+Imports: 
+    httr,
+    readr,
+    pls,
+    dplyr,
+    reshape2,
+    here,
+    plotrix,
+    ggplot2,
+    gridExtra
+Suggests:
+    devtools,
+    remotes,
+    RCurl
+Depends:
+    R (>= 2.10)
+VignetteBuilder: knitr
+NeedsCompilation: no
