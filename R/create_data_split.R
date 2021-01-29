@@ -2,7 +2,7 @@
 ##' 
 ##' @param dataset input full PLSR dataset to split into cal/val datasets
 ##' @param approach approach to splitting the dataset. Options: base or dplyr
-##' @param split_seed random or shared seed to use for splitting data
+##' @param split_seed random seed to use for splitting data
 ##' @param prop the proportion of data to preserve for calibration (e.g. 0.8) and validation (0.2). 
 ##' This sets the calibration proportion
 ##' @param group_variables Use factor variables to conduct a stratfied sampling for cal/val

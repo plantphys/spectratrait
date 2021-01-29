@@ -1,6 +1,12 @@
-##'
+##' Apply different methods to determing the optimal number of PLSR model components
+##' 
 ##' @param dataset input full PLSR dataset. Usually just the calibration dataset
 ##' @param method Which approach to use to find optimal components. Options: pls, firstPlateau, firstMin
+##' @param maxComps maximum number of components to consider
+##' @param iterations how many different permutations to run
+##' @param seg For the built-in pls method, how many different data segments to select from the input dataset
+##' @param prop proportion of data to preserve for each permutation
+##' @param random_seed random seed to use for splitting data
 ##' 
 ##' @author Julien Lamour, Jeremiah Anderson, Shawn P. Serbin
 ##' @export 
