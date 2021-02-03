@@ -131,8 +131,8 @@ plsr_data <- plsr_data[complete.cases(plsr_data[,names(plsr_data) %in%
 method <- "dplyr" #base/dplyr
 # base R - a bit slow
 # dplyr - much faster
-split_data <- create_data_split(approach=method, split_seed=1245565, prop=0.8, 
-                                group_variables="Species_Code")
+split_data <- spectratrait::create_data_split(dataset=plsr_data, approach=method, split_seed=1245565, 
+                                              prop=0.8, group_variables="Species_Code")
 names(split_data)
 cal.plsr.data <- split_data$cal_data
 head(cal.plsr.data)[1:8]
@@ -182,8 +182,8 @@ head(val.plsr.data)[1:5]
 #--------------------------------------------------------------------------------------------------#
 ### plot cal and val spectra
 par(mfrow=c(1,2)) # B, L, T, R
-f.plot.spec(Z=cal.plsr.data$Spectra,wv=seq(Start.wave,End.wave,1),plot_label="Calibration")
-f.plot.spec(Z=val.plsr.data$Spectra,wv=seq(Start.wave,End.wave,1),plot_label="Validation")
+spectratrait::f.plot.spec(Z=cal.plsr.data$Spectra,wv=seq(Start.wave,End.wave,1),plot_label="Calibration")
+spectratrait::f.plot.spec(Z=val.plsr.data$Spectra,wv=seq(Start.wave,End.wave,1),plot_label="Validation")
 
 dev.copy(png,file.path(outdir,paste0(inVar,'_Cal_Val_Spectra.png')), 
          height=2500,width=4900, res=340)
@@ -208,8 +208,8 @@ iterations <- 80
 prop <- 0.70
 if (method=="pls") {
   # pls package approach - faster but estimates more components....
-  nComps <- find_optimal_components(method=method, maxComps=maxComps, seg=seg, 
-                                    random_seed=random_seed)
+  nComps <- spectratrait::find_optimal_components(dataset=cal.plsr.data, method=method, maxComps=maxComps, 
+                                                  seg=seg, random_seed=random_seed)
   print(paste0("*** Optimal number of components: ", nComps))
 } else {
   nComps <- find_optimal_components(dataset=cal.plsr.data, method=method, maxComps=maxComps, 
@@ -323,7 +323,7 @@ ggsave(filename = file.path(outdir,paste0(inVar,"_Cal_Val_Scatterplots.png")),
 
 #--------------------------------------------------------------------------------------------------#
 ### Generate Coefficient and VIP plots
-vips <- VIP(plsr.out)[nComps,]
+vips <- spectratrait::VIP(plsr.out)[nComps,]
 
 par(mfrow=c(2,1))
 plot(plsr.out$coefficients[,,nComps], x=wv,xlab="Wavelength (nm)",
@@ -353,7 +353,7 @@ jk.plsr.out <- pls::plsr(as.formula(paste(inVar,"~","Spectra")), scale=FALSE,
                          data=cal.plsr.data)
 pls.options(parallel = NULL)
 
-Jackknife_coef <- f.coef.valid(plsr.out = jk.plsr.out, data_plsr = cal.plsr.data, 
+Jackknife_coef <- spectratrait::f.coef.valid(plsr.out = jk.plsr.out, data_plsr = cal.plsr.data, 
                                ncomp = nComps, inVar=inVar)
 Jackknife_intercept <- Jackknife_coef[1,,,]
 Jackknife_coef <- Jackknife_coef[2:dim(Jackknife_coef)[1],,,]
@@ -374,7 +374,7 @@ val.plsr.output$UPI <- val.plsr.output$PLSR_Predicted+1.96*sd_tot
 head(val.plsr.output)
 
 # JK regression coefficient plot
-f.plot.coef(Z = t(Jackknife_coef), wv = seq(Start.wave,End.wave,1), 
+spectratrait::f.plot.coef(Z = t(Jackknife_coef), wv = seq(Start.wave,End.wave,1), 
             plot_label="Jackknife regression coefficients",position = 'bottomleft')
 abline(h=0,lty=2,col="grey50")
 box(lwd=2.2)
@@ -392,7 +392,7 @@ expr[[2]] <- bquote(RMSEP==.(round(RMSEP,2)))
 expr[[3]] <- bquote("%RMSEP"==.(round(pecr_RMSEP,2)))
 rng_vals <- c(min(val.plsr.output$LPI), max(val.plsr.output$UPI))
 par(mfrow=c(1,1), mar=c(4.2,5.3,1,0.4), oma=c(0, 0.1, 0, 0.2))
-plotCI(val.plsr.output$PLSR_Predicted,val.plsr.output[,inVar], 
+plotrix::plotCI(val.plsr.output$PLSR_Predicted,val.plsr.output[,inVar], 
        li=val.plsr.output$LPI, ui=val.plsr.output$UPI, gap=0.009,sfrac=0.004, 
        lwd=1.6, xlim=c(rng_vals[1], rng_vals[2]), ylim=c(rng_vals[1], rng_vals[2]), 
        err="x", pch=21, col="black", pt.bg=alpha("grey70",0.7), scol="grey50",
