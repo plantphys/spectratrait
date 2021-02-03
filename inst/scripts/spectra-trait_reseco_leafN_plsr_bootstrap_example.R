@@ -332,24 +332,25 @@ if(grepl("Windows", sessionInfo()$running)){
   pls.options(parallel = parallel::detectCores()-1)
 }
 
-jk.plsr.out <- pls::plsr(as.formula(paste(inVar,"~","Spectra")), scale=FALSE, 
-                         center=TRUE, ncomp=nComps, validation="LOO", trace=FALSE, 
-                         jackknife=TRUE, 
-                         data=cal.plsr.data)
-pls.options(parallel = NULL)
+### PLSR bootstrap permutation uncertainty analysis
+iterations <- 500    # how many permutation iterations to run
+prop <- 0.70          # fraction of training data to keep for each iteration
+plsr_permutation <- spectratrait::pls_permutation(dataset=cal.plsr.data, maxComps=nComps, 
+                                                  iterations=iterations, prop=prop)
+bootstrap_intercept <- plsr_permutation$coef_array[1,,nComps]
+hist(bootstrap_intercept)
+bootstrap_coef <- plsr_permutation$coef_array[2:length(plsr_permutation$coef_array[,1,nComps]),
+                                                            ,nComps]
+rm(plsr_permutation)
 
-Jackknife_coef <- spectratrait::f.coef.valid(plsr.out = jk.plsr.out, data_plsr = cal.plsr.data, 
-                               ncomp = nComps, inVar=inVar)
-Jackknife_intercept <- Jackknife_coef[1,,,]
-Jackknife_coef <- Jackknife_coef[2:dim(Jackknife_coef)[1],,,]
-
+# apply coefficients to left-out validation data
 interval <- c(0.025,0.975)
-Jackknife_Pred <- val.plsr.data$Spectra %*% Jackknife_coef + 
-  matrix(rep(Jackknife_intercept, length(val.plsr.data[,inVar])), byrow=TRUE, 
-         ncol=length(Jackknife_intercept))
-Interval_Conf <- apply(X = Jackknife_Pred, MARGIN = 1, FUN = quantile, 
+Bootstrap_Pred <- val.plsr.data$Spectra %*% bootstrap_coef + 
+  matrix(rep(bootstrap_intercept, length(val.plsr.data[,inVar])), byrow=TRUE, 
+         ncol=length(bootstrap_intercept))
+Interval_Conf <- apply(X = Bootstrap_Pred, MARGIN = 1, FUN = quantile, 
                        probs=c(interval[1], interval[2]))
-sd_mean <- apply(X = Jackknife_Pred, MARGIN = 1, FUN =sd)
+sd_mean <- apply(X = Bootstrap_Pred, MARGIN = 1, FUN = sd)
 sd_res <- sd(val.plsr.output$PLSR_Residuals)
 sd_tot <- sqrt(sd_mean^2+sd_res^2)
 val.plsr.output$LCI <- Interval_Conf[1,]
@@ -358,16 +359,16 @@ val.plsr.output$LPI <- val.plsr.output$PLSR_Predicted-1.96*sd_tot
 val.plsr.output$UPI <- val.plsr.output$PLSR_Predicted+1.96*sd_tot
 head(val.plsr.output)
 
-# JK regression coefficient plot
-spectratrait::f.plot.coef(Z = t(Jackknife_coef), wv = seq(Start.wave,End.wave,1), 
-            plot_label="Jackknife regression coefficients",position = 'bottomleft')
+# Bootstrap regression coefficient plot
+spectratrait::f.plot.coef(Z = t(bootstrap_coef), wv = seq(Start.wave,End.wave,1), 
+            plot_label="Bootstrap regression coefficients",position = 'bottomleft')
 abline(h=0,lty=2,col="grey50")
 box(lwd=2.2)
-dev.copy(png,file.path(outdir,paste0(inVar,'_Jackknife_Regression_Coefficients.png')), 
+dev.copy(png,file.path(outdir,paste0(inVar,'_Bootstrap_Regression_Coefficients.png')), 
          height=2100, width=3800, res=340)
 dev.off();
 
-# JK validation plot
+# validation plot
 RMSEP <- sqrt(mean(val.plsr.output$PLSR_Residuals^2))
 pecr_RMSEP <- RMSEP/mean(val.plsr.output[,inVar])*100
 r2 <- round(pls::R2(plsr.out, newdata = val.plsr.data)$val[nComps+1],2)
@@ -378,13 +379,20 @@ expr[[3]] <- bquote("%RMSEP"==.(round(pecr_RMSEP,2)))
 rng_vals <- c(min(val.plsr.output$LPI), max(val.plsr.output$UPI))
 par(mfrow=c(1,1), mar=c(4.2,5.3,1,0.4), oma=c(0, 0.1, 0, 0.2))
 plotrix::plotCI(val.plsr.output$PLSR_Predicted,val.plsr.output[,inVar], 
-       li=val.plsr.output$LPI, ui=val.plsr.output$UPI, gap=0.009,sfrac=0.004, 
+       li=val.plsr.output$LPI, ui=val.plsr.output$UPI, gap=0.009,sfrac=0.000, 
        lwd=1.6, xlim=c(rng_vals[1], rng_vals[2]), ylim=c(rng_vals[1], rng_vals[2]), 
-       err="x", pch=21, col="black", pt.bg=alpha("grey70",0.7), scol="grey50",
+       err="x", pch=21, col="black", pt.bg=alpha("grey70",0.7), scol="grey80",
        cex=2, xlab=paste0("Predicted ", paste(inVar), " (units)"),
        ylab=paste0("Observed ", paste(inVar), " (units)"),
        cex.axis=1.5,cex.lab=1.8)
 abline(0,1,lty=2,lw=2)
+plotrix::plotCI(val.plsr.output$PLSR_Predicted,val.plsr.output[,inVar], 
+       li=val.plsr.output$LCI, ui=val.plsr.output$UCI, gap=0.009,sfrac=0.004, 
+       lwd=1.6, xlim=c(rng_vals[1], rng_vals[2]), ylim=c(rng_vals[1], rng_vals[2]), 
+       err="x", pch=21, col="black", pt.bg=alpha("grey70",0.7), scol="black",
+       cex=2, xlab=paste0("Predicted ", paste(inVar), " (units)"),
+       ylab=paste0("Observed ", paste(inVar), " (units)"),
+       cex.axis=1.5,cex.lab=1.8, add=T)
 legend("topleft", legend=expr, bty="n", cex=1.5)
 box(lwd=2.2)
 dev.copy(png,file.path(outdir,paste0(inVar,"_PLSR_Validation_Scatterplot.png")), 
@@ -394,11 +402,12 @@ dev.off();
 
 
 #---------------- Output jackknife results --------------------------------------------------------#
-# JK Coefficents
-out.jk.coefs <- data.frame(Iteration=seq(1,length(Jackknife_intercept),1),
-                           Intercept=Jackknife_intercept,t(Jackknife_coef))
+# Bootstrap Coefficients
+out.jk.coefs <- data.frame(Iteration=seq(1,length(bootstrap_intercept),1),
+                           Intercept=bootstrap_intercept,t(bootstrap_coef))
+names(out.jk.coefs) <- c("Iteration","Intercept",paste0("Wave_",wv))
 head(out.jk.coefs)[1:6]
-write.csv(out.jk.coefs,file=file.path(outdir,paste0(inVar,'_Jackkife_PLSR_Coefficients.csv')),
+write.csv(out.jk.coefs,file=file.path(outdir,paste0(inVar,'_Bootstrap_PLSR_Coefficients.csv')),
           row.names=FALSE)
 #--------------------------------------------------------------------------------------------------#
 
@@ -422,7 +431,7 @@ write.csv(coefs,file=file.path(outdir,paste0(inVar,'_PLSR_Coefficients_',nComps,
 # PLSR VIP
 write.csv(vips,file=file.path(outdir,paste0(inVar,'_PLSR_VIPs_',nComps,'comp.csv')))
 
-# confirm files were written to temp space
+# confirm files were written to temp space. display a list of the files generated
 print("**** PLSR output files: ")
 print(list.files(getwd())[grep(pattern = inVar, list.files(getwd()))])
 #--------------------------------------------------------------------------------------------------#
