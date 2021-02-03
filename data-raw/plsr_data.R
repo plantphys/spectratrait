@@ -1,5 +1,3 @@
-## code to prepare `DATASET` dataset goes here
-#usethis::use_data(DATASET, overwrite = TRUE)
 getwd()
 devtools::load_all()
 library(dplyr)
