@@ -28,8 +28,7 @@ if(length(new.packages)) install.packages(new.packages, dependencies=c("Depends"
 # install spectratrait package
 devtools::install_github(repo = "TESTgroup-BNL/PLSR_for_plant_trait_prediction", ref = "Rpackagify", 
                          dependencies=TRUE)
-list.of.packages <- c("readr","RCurl","httr","pls","dplyr","reshape2","here",
-                      "plotrix","ggplot2","gridExtra", "spectratrait")
+list.of.packages <- c("pls","dplyr","reshape2","here","plotrix","ggplot2","gridExtra","spectratrait")
 invisible(lapply(list.of.packages, library, character.only = TRUE))
 #--------------------------------------------------------------------------------------------------#
 
@@ -386,7 +385,7 @@ par(mfrow=c(1,1), mar=c(4.2,5.3,1,0.4), oma=c(0, 0.1, 0, 0.2))
 plotrix::plotCI(val.plsr.output$PLSR_Predicted,val.plsr.output[,inVar], 
        li=val.plsr.output$LPI, ui=val.plsr.output$UPI, gap=0.009,sfrac=0.000, 
        lwd=1.6, xlim=c(rng_vals[1], rng_vals[2]), ylim=c(rng_vals[1], rng_vals[2]), 
-       err="x", pch=21, col="black", pt.bg=alpha("grey70",0.7), scol="grey80",
+       err="x", pch=21, col="black", pt.bg=scales::alpha("grey70",0.7), scol="grey80",
        cex=2, xlab=paste0("Predicted ", paste(inVar), " (units)"),
        ylab=paste0("Observed ", paste(inVar), " (units)"),
        cex.axis=1.5,cex.lab=1.8)
@@ -394,7 +393,7 @@ abline(0,1,lty=2,lw=2)
 plotrix::plotCI(val.plsr.output$PLSR_Predicted,val.plsr.output[,inVar], 
        li=val.plsr.output$LCI, ui=val.plsr.output$UCI, gap=0.009,sfrac=0.004, 
        lwd=1.6, xlim=c(rng_vals[1], rng_vals[2]), ylim=c(rng_vals[1], rng_vals[2]), 
-       err="x", pch=21, col="black", pt.bg=alpha("grey70",0.7), scol="black",
+       err="x", pch=21, col="black", pt.bg=scales::alpha("grey70",0.7), scol="black",
        cex=2, xlab=paste0("Predicted ", paste(inVar), " (units)"),
        ylab=paste0("Observed ", paste(inVar), " (units)"),
        cex.axis=1.5,cex.lab=1.8, add=T)
