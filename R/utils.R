@@ -13,7 +13,7 @@ source_GitHubData <- function(url, sep = ",", header = TRUE) {
   #devtools::source_gist("gist.github.com/christophergandrud/4466237")
   request <- httr::GET(url)
   httr::stop_for_status(request)
-  handle <- textConnection(content(request, as = 'text'))
+  handle <- textConnection(httr::content(request, as = 'text'))
   on.exit(close(handle))
   read.table(handle, sep = sep, header = header)
 }
