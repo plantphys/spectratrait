@@ -35,6 +35,10 @@ if (!packageVersion("ggplot2") >= version_requirements[1]) {
                            dependencies=c("Depends", "Imports", "LinkingTo"), upgrade="ask",
                            quiet=TRUE)
 }
+# install spectratrait package
+devtools::install_github(repo = "TESTgroup-BNL/PLSR_for_plant_trait_prediction", ref = "Rpackagify", dependencies=TRUE)
+list.of.packages <- c("devtools","remotes","readr","RCurl","httr","pls","dplyr","reshape2","here",
+                      "plotrix","ggplot2","gridExtra","spectratrait")  # packages needed for script
 # Load libraries
 invisible(lapply(list.of.packages, library, character.only = TRUE))
 #--------------------------------------------------------------------------------------------------#
@@ -42,17 +46,6 @@ invisible(lapply(list.of.packages, library, character.only = TRUE))
 
 #--------------------------------------------------------------------------------------------------#
 ### Setup other functions and options
-github_dir <- file.path(here(),"R_Scripts")
-source_from_gh <- TRUE
-if (source_from_gh) {
-  # Source helper functions from GitHub
-  print("*** GitHub hash of functions.R file:")
-  devtools::source_url("https://raw.githubusercontent.com/TESTgroup-BNL/PLSR_for_plant_trait_prediction/master/R_Scripts/functions.R")
-} else {
-  functions <- file.path(github_dir,"functions.R")
-  source(functions)
-}
-
 # not in
 `%notin%` <- Negate(`%in%`)
 
@@ -92,7 +85,7 @@ getwd()  # check wd
 
 #--------------------------------------------------------------------------------------------------#
 ### Get source dataset from EcoSIS
-dat_raw <- get_ecosis_data(ecosis_id = ecosis_id)
+dat_raw <- spectratrait::get_ecosis_data(ecosis_id = ecosis_id)
 head(dat_raw)
 names(dat_raw)[1:40]
 #--------------------------------------------------------------------------------------------------#
