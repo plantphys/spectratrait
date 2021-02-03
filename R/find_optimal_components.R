@@ -8,6 +8,8 @@
 ##' @param prop proportion of data to preserve for each permutation
 ##' @param random_seed random seed to use for splitting data
 ##' 
+##' @return nComps the optimal number of PLSR components
+##' 
 ##' @author Julien Lamour, Jeremiah Anderson, Shawn P. Serbin
 ##' @export 
 find_optimal_components <- function(dataset=NULL, method="pls", maxComps=20, iterations=20, seg=100, 

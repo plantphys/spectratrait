@@ -7,10 +7,6 @@
 ##' This sets the calibration proportion
 ##' @param group_variables Use factor variables to conduct a stratfied sampling for cal/val
 ##' 
-##' @examples 
-##' \dontrun{
-##' print()
-##' }
 ##' @return output_list A list containing the calibration dataset (cal_data)
 ##' and validation dataset (val_data)
 ##' 
