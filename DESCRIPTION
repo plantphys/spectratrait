@@ -20,7 +20,7 @@ Authors@R:
            family = "Serbin",
            role = c("aut", "cre", "ctb"),
            email = "sserbin@bnl.gov",
-           comment = c(ORCID = "XXXXX")))
+           comment = c(ORCID = "0000-0003-4136-8971")))
 Maintainer: Shawn P. Serbin <sserbin@bnl.gov>
 Description: Provides functions to conduct standardized leaf-level spectra-trait PLSR model fitting including uncertainty analysis that follow DOI: https://doi.org/10.1111/nph.16123
 License: MIT + file LICENSE
@@ -37,12 +37,12 @@ Imports:
     here (>= 0.1),
     plotrix (>= 3.7-8),
     ggplot2 (>= 3.3.2),
-    gridExtra (>= 2.3)
+    gridExtra (>= 2.3),
+    scales (>= 1.1.1)
 Suggests:
     devtools (>= 2.3.1),
     remotes (>= 2.2.0),
-    RCurl (>= 1.98-1.2),
-    scales (>= 1.1.1)
+    RCurl (>= 1.98-1.2)
 Depends:
     R (>= 2.10)
 VignetteBuilder: knitr

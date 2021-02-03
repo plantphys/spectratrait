@@ -4,6 +4,8 @@
 ##' @param sep dataset file delimiter
 ##' @param header TRUE/FALSE does the file have a column header?
 ##' 
+##' @import httr
+##' 
 ##' @author gist.github.com/christophergandrud/4466237
 ##' @export
 source_GitHubData <- function(url, sep = ",", header = TRUE) {
