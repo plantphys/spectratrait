@@ -4,7 +4,7 @@ Version: 0.9.9
 Authors@R:
   c(person(given = "Julien",
            family = "Lamour",
-           role = c("aut", "cre"),
+           role = c("aut", "ctb"),
            email = "jlamour@bnl.gov",
            comment = c(ORCID = "XXXXX")),
     person(given = "Jeremiah",
@@ -14,11 +14,12 @@ Authors@R:
     person(given = "Kenneth",
            family = "Davidson",
            role = "ctb",
+           email = "XXX",
            comment = c(ORCID = "XXXX")),
     person(given = "Shawn",
            family = "Serbin",
-           role = c("aut", "cre"),
-           email = "sserbin@bnl.gov,
+           role = c("aut", "cre", "ctb"),
+           email = "sserbin@bnl.gov",
            comment = c(ORCID = "XXXXX")))
 Maintainer: Shawn P. Serbin <sserbin@bnl.gov>
 Description: Provides functions to conduct standardized leaf-level spectra-trait PLSR model fitting including uncertainty analysis that follow DOI: https://doi.org/10.1111/nph.16123
@@ -35,7 +36,7 @@ Imports:
     reshape2,
     here,
     plotrix,
-    ggplot2,
+    ggplot2 (>= 3.3.2),
     gridExtra
 Suggests:
     devtools,

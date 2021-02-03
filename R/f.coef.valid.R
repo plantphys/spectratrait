@@ -6,7 +6,7 @@
 ##' @param ncomp number of selection components
 ##' @param inVar Name of the PLSR model response variable
 ##' 
-##' @retrun B returns the intercept and the coefficients of the jackknife or bootstrap validation 
+##' @return B returns the intercept and the coefficients of the jackknife or bootstrap validation 
 ##' 
 ##' @author Julien Lamour
 ##' @export
