@@ -22,24 +22,12 @@ graphics.off()          # close any open graphics
 closeAllConnections()   # close any open connections to files
 
 #--------------------------------------------------------------------------------------------------#
-### Install and load required R packages
-list.of.packages <- c("devtools","remotes","readr","RCurl","httr","pls","dplyr","reshape2","here",
-                      "plotrix","ggplot2","gridExtra")  # packages needed for script
-# check for dependencies and install if needed
-new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
-if(length(new.packages)) install.packages(new.packages, dependencies=c("Depends", "Imports",
-                                                                       "LinkingTo"))
-version_requirements <- c("3.3.2")
-if (!packageVersion("ggplot2") >= version_requirements[1]) {
-  remotes::install_version(package="ggplot2", version=paste0(">= ", version_requirements), 
-                           dependencies=c("Depends", "Imports", "LinkingTo"), upgrade="ask",
-                           quiet=TRUE)
-}
+### Load libraries
 # install spectratrait package
-devtools::install_github(repo = "TESTgroup-BNL/PLSR_for_plant_trait_prediction", ref = "Rpackagify", dependencies=TRUE)
-list.of.packages <- c("devtools","remotes","readr","RCurl","httr","pls","dplyr","reshape2","here",
-                      "plotrix","ggplot2","gridExtra","spectratrait")  # packages needed for script
-# Load libraries
+devtools::install_github(repo = "TESTgroup-BNL/PLSR_for_plant_trait_prediction", ref = "Rpackagify", 
+                         dependencies=TRUE)
+list.of.packages <- c("readr","RCurl","httr","pls","dplyr","reshape2","here",
+                      "plotrix","ggplot2","gridExtra", "spectratrait")
 invisible(lapply(list.of.packages, library, character.only = TRUE))
 #--------------------------------------------------------------------------------------------------#
 
@@ -50,8 +38,8 @@ invisible(lapply(list.of.packages, library, character.only = TRUE))
 `%notin%` <- Negate(`%in%`)
 
 # Script options
-pls.options(plsralg = "oscorespls")
-pls.options("plsralg")
+pls::pls.options(plsralg = "oscorespls")
+pls::pls.options("plsralg")
 
 # Default par options
 opar <- par(no.readonly = T)
@@ -439,7 +427,7 @@ write.csv(vips,file=file.path(outdir,paste0(inVar,'_PLSR_VIPs_',nComps,'comp.csv
 
 # confirm files were written to temp space
 print("**** PLSR output files: ")
-list.files(getwd())[grep(pattern = inVar, list.files(getwd()))]
+print(list.files(getwd())[grep(pattern = inVar, list.files(getwd()))])
 #--------------------------------------------------------------------------------------------------#
 
 
