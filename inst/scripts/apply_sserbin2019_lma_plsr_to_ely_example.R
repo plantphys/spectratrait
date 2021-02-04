@@ -32,17 +32,21 @@ invisible(lapply(list.of.packages, library, character.only = TRUE))
 # Default par options
 opar <- par(no.readonly = T)
 
-# What is the target variable?
-inVar <- "LMA_gDW_m2"
-
-# What is the source dataset from EcoSIS?
-ecosis_id <- "5617da17-c925-49fb-b395-45a51291bd2d"
-
 # Specify output directory, output_dir 
 # Options: 
 # tempdir - use a OS-specified temporary directory 
 # user defined PATH - e.g. "~/scratch/PLSR"
 output_dir <- "tempdir"
+#--------------------------------------------------------------------------------------------------#
+
+
+#--------------------------------------------------------------------------------------------------#
+### Load Ely et al 2019 dataset
+data("ely_plsr_data")
+head(ely_plsr_data)[,1:8]
+
+# What is the target variable?
+inVar <- "LMA_g_m2"
 #--------------------------------------------------------------------------------------------------#
 
 
@@ -73,30 +77,11 @@ rm(githubURL)
 
 
 #--------------------------------------------------------------------------------------------------#
-### Get source dataset from EcoSIS
-dat_raw <- spectratrait::get_ecosis_data(ecosis_id = ecosis_id)
-head(dat_raw)
-names(dat_raw)[1:40]
-#--------------------------------------------------------------------------------------------------#
-
-
-#--------------------------------------------------------------------------------------------------#
-### Prepare new data for estimation
+### Ely et al spectral and trait data
 Start.wave <- 500
 End.wave <- 2400
 wv <- seq(Start.wave,End.wave,1)
-Spectra <- as.matrix(dat_raw[,names(dat_raw) %in% wv])
-colnames(Spectra) <- c(paste0("Wave_",wv))
-head(Spectra)[1:6,1:10]
-sample_info <- dat_raw[,names(dat_raw) %notin% seq(350,2500,1)]
-head(sample_info)
-
-sample_info2 <- sample_info %>%
-  select(Domain,Functional_type,Sample_ID,USDA_Species_Code=`USDA Symbol`,LMA_gDW_m2=LMA)
-head(sample_info2)
-
-plsr_data <- data.frame(sample_info2,Spectra)
-rm(sample_info,sample_info2,Spectra)
+plsr_data <- ely_plsr_data
 #--------------------------------------------------------------------------------------------------#
 
 
@@ -119,6 +104,7 @@ names(LeafLMA.plsr.coeffs) <- c("wavelength","coefs")
 LeafLMA.plsr.coeffs.vec <- as.vector(LeafLMA.plsr.coeffs[,2])
 sub_spec <- droplevels(plsr_data[,which(names(plsr_data) %in% 
                                                    paste0("Wave_",seq(Start.wave,End.wave,1)))])
+sub_spec <- sub_spec*0.01 # convert to 0-1
 plsr_pred <- as.matrix(sub_spec) %*% LeafLMA.plsr.coeffs.vec + LeafLMA.plsr.intercept[,2]
 leafLMA <- plsr_pred[,1]^2  # convert to standard LMA units from sqrt(LMA)
 names(leafLMA) <- "PLSR_LMA_gDW_m2"
@@ -171,7 +157,7 @@ par(mfrow=c(1,1), mar=c(4.2,5.3,1,0.4), oma=c(0, 0.1, 0, 0.2))
 plotrix::plotCI(LeafLMA.PLSR.dataset$PLSR_LMA_gDW_m2,LeafLMA.PLSR.dataset[,inVar], 
        li=LeafLMA.PLSR.dataset$LCI, ui=LeafLMA.PLSR.dataset$UCI, gap=0.009,sfrac=0.004, 
        lwd=1.6, xlim=c(rng_vals[1], rng_vals[2]), ylim=c(rng_vals[1], rng_vals[2]), 
-       err="x", pch=21, col="black", pt.bg=scales::alpha("grey70",0.7), scol="grey80",
+       err="x", pch=21, col="black", pt.bg=scales::alpha("grey70",0.7), scol="grey40",
        cex=2, xlab=paste0("Predicted ", paste(inVar), " (units)"),
        ylab=paste0("Observed ", paste(inVar), " (units)"),
        cex.axis=1.5,cex.lab=1.8)
