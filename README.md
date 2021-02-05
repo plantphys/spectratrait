@@ -14,7 +14,16 @@ https://ecosml.org/package/github/TESTgroup-BNL/PLSR_for_plant_trait_prediction
 Julien Lamour, Jeremiah Anderson, Ken Davidson, Shawn P. Serbin
 
 ### Depends: 
-ggplot2 (>= 3.3.2), remotes (>= 2.2.0), devtools (>= 2.3.1), readr (>= 1.3.1), RCurl (>= 1.98-1.2), httr (>= 1.4.2), pls (>= 2.7-2), dplyr (>= 1.0.1), reshape2 (>= 1.4.4), here (>= 0.1), plotrix (>= 3.7-8), gridExtra (>= 2.3), scales(>= 1.1.1)
+ggplot2 (>= 3.3.2), remotes (>= 2.2.0), devtools (>= 2.3.1), readr (>= 1.3.1), RCurl (>= 1.98-1.2), httr (>= 1.4.2), pls (>= 2.7-2), dplyr (>= 1.0.1), reshape2 (>= 1.4.4), here (>= 0.1), plotrix (>= 3.7-8), gridExtra (>= 2.3), scales (>= 1.1.1)
+
+### INSTALL
+spectratrait is not currently on CRAN, but you can install from GitHub using devtools():
+
+``` r
+# install.packages("devtools")
+devtools::install_github(repo = "TESTgroup-BNL/PLSR_for_plant_trait_prediction", ref = "Rpackagify", 
+dependencies=TRUE)
+```
 
 ## Contains:
 1. Example R script files that illustrate the "best-practices" of PLSR model fitting for the estimation of leaf functional traits with reflectance spectroscopy

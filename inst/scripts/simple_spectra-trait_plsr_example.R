@@ -17,48 +17,30 @@
 #
 ####################################################################################################
 
-rm(list=ls(all=TRUE))   # clear workspace
-graphics.off()          # close any open graphics
-closeAllConnections()   # close any open connections to files
 
 #--------------------------------------------------------------------------------------------------#
-### Install and load required R packages
-list.of.packages <- c("readr","scales","plotrix","httr","pls","dplyr",
-                      "reshape2","ggplot2","gridExtra")  # packages needed for script
-# check for dependencies and install if needed
-new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
+### Load libraries
+# make sure required tools are available 
+req.packages <- c("devtools")
+new.packages <- req.packages[!(req.packages %in% installed.packages()[,"Package"])]
 if(length(new.packages)) install.packages(new.packages, dependencies=c("Depends", "Imports",
                                                                        "LinkingTo"))
-version_requirements <- c("3.3.2")
-if (!packageVersion("ggplot2") >= version_requirements[1]) {
-  remotes::install_version(package="ggplot2", version=paste0(">= ", version_requirements), 
-                           dependencies=c("Depends", "Imports", "LinkingTo"), upgrade="ask",
-                           quiet=TRUE)
-}
-# Load libraries
+# install spectratrait package
+devtools::install_github(repo = "TESTgroup-BNL/PLSR_for_plant_trait_prediction", ref = "Rpackagify", 
+                         dependencies=TRUE)
+list.of.packages <- c("pls","dplyr","reshape2","here","plotrix","ggplot2","gridExtra","spectratrait")
 invisible(lapply(list.of.packages, library, character.only = TRUE))
 #--------------------------------------------------------------------------------------------------#
 
 
 #--------------------------------------------------------------------------------------------------#
 ### Setup other functions and options
-github_dir <- file.path(here(),"R_Scripts")
-source_from_gh <- TRUE
-if (source_from_gh) {
-  # Source helper functions from GitHub
-  print("*** GitHub hash of functions.R file:")
-  devtools::source_url("https://raw.githubusercontent.com/TESTgroup-BNL/PLSR_for_plant_trait_prediction/master/R_Scripts/functions.R")
-} else {
-  functions <- file.path(github_dir,"functions.R")
-  source(functions)
-}
-
 # not in
 `%notin%` <- Negate(`%in%`)
 
 # Script options
-pls.options(plsralg = "oscorespls")
-pls.options("plsralg")
+pls::pls.options(plsralg = "oscorespls")
+pls::pls.options("plsralg")
 
 # Default par options
 opar <- par(no.readonly = T)
@@ -92,7 +74,7 @@ getwd()  # check wd
 
 #--------------------------------------------------------------------------------------------------#
 ### Get source dataset from EcoSIS
-dat_raw <- get_ecosis_data(ecosis_id = ecosis_id)
+dat_raw <- spectratrait::get_ecosis_data(ecosis_id = ecosis_id)
 head(dat_raw)
 names(dat_raw)[1:40]
 #--------------------------------------------------------------------------------------------------#
@@ -140,7 +122,8 @@ head(plsr_data)[1:5]
 #--------------------------------------------------------------------------------------------------#
 ### plot cal and val spectra
 par(mfrow=c(1,1)) # B, L, T, R
-f.plot.spec(Z=plsr_data$Spectra,wv=seq(Start.wave,End.wave,1),plot_label="CONUS NEON Data")
+spectratrait::f.plot.spec(Z=plsr_data$Spectra,wv=seq(Start.wave,End.wave,1),
+                          plot_label="CONUS NEON Data")
 dev.copy(png,file.path(outdir,paste0(inVar,'_Cal_Val_Spectra.png')), 
          height=2500,width=4900, res=340)
 dev.off();
@@ -163,11 +146,11 @@ maxComps <- 20
 iterations <- 40
 prop <- 0.70
 if (method=="pls") {
-  nComps <- find_optimal_components(dataset=plsr_data, method=method, maxComps=maxComps, 
+  nComps <- spectratrait::find_optimal_components(dataset=plsr_data, method=method, maxComps=maxComps, 
                                     seg=seg, random_seed=random_seed)
   print(paste0("*** Optimal number of components: ", nComps))
 } else {
-  nComps <- find_optimal_components(dataset=plsr_data, method=method, maxComps=maxComps, 
+  nComps <- spectratrait::find_optimal_components(dataset=plsr_data, method=method, maxComps=maxComps, 
                                     iterations=iterations, seg=seg, prop=prop, 
                                     random_seed=random_seed)
 }
@@ -187,13 +170,13 @@ pls.options(parallel = NULL)
 
 # External validation fit stats
 par(mfrow=c(1,2)) # B, L, T, R
-RMSEP(plsr.out)
-plot(RMSEP(plsr.out), main="MODEL RMSEP",
+pls::RMSEP(plsr.out)
+plot(pls::RMSEP(plsr.out), main="MODEL RMSEP",
      xlab="Number of Components",ylab="Model RMSEP",lty=1,col="black",cex=1.5,lwd=2)
 box(lwd=2.2)
 
-R2(plsr.out)
-plot(R2(plsr.out), main="MODEL R2",
+pls::R2(plsr.out)
+plot(pls::R2(plsr.out), main="MODEL R2",
      xlab="Number of Components",ylab="Model R2",lty=1,col="black",cex=1.5,lwd=2)
 box(lwd=2.2)
 dev.copy(png,file.path(outdir,paste0(paste0(inVar,"_RMSEP_R2_by_Component.png"))), 

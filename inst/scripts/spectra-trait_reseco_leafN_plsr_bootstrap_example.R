@@ -17,48 +17,30 @@
 #
 ####################################################################################################
 
-rm(list=ls(all=TRUE))   # clear workspace
-graphics.off()          # close any open graphics
-closeAllConnections()   # close any open connections to files
 
 #--------------------------------------------------------------------------------------------------#
-### Install and load required R packages
-list.of.packages <- c("devtools","remotes","readr","RCurl","httr","pls","dplyr","reshape2","here",
-                      "plotrix","ggplot2","gridExtra")  # packages needed for script
-# check for dependencies and install if needed
-new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
+### Load libraries
+# make sure required tools are available 
+req.packages <- c("devtools")
+new.packages <- req.packages[!(req.packages %in% installed.packages()[,"Package"])]
 if(length(new.packages)) install.packages(new.packages, dependencies=c("Depends", "Imports",
                                                                        "LinkingTo"))
-version_requirements <- c("3.3.2")
-if (!packageVersion("ggplot2") >= version_requirements[1]) {
-  remotes::install_version(package="ggplot2", version=paste0(">= ", version_requirements), 
-                           dependencies=c("Depends", "Imports", "LinkingTo"), upgrade="ask",
-                           quiet=TRUE)
-}
-# Load libraries
+# install spectratrait package
+devtools::install_github(repo = "TESTgroup-BNL/PLSR_for_plant_trait_prediction", ref = "Rpackagify", 
+                         dependencies=TRUE)
+list.of.packages <- c("pls","dplyr","reshape2","here","plotrix","ggplot2","gridExtra","spectratrait")
 invisible(lapply(list.of.packages, library, character.only = TRUE))
 #--------------------------------------------------------------------------------------------------#
 
 
 #--------------------------------------------------------------------------------------------------#
 ### Setup other functions and options
-github_dir <- file.path(here(),"R_Scripts")
-source_from_gh <- TRUE
-if (source_from_gh) {
-  # Source helper functions from GitHub
-  print("*** GitHub hash of functions.R file:")
-  devtools::source_url("https://raw.githubusercontent.com/TESTgroup-BNL/PLSR_for_plant_trait_prediction/master/R_Scripts/functions.R")
-} else {
-  functions <- file.path(github_dir,"functions.R")
-  source(functions)
-}
-
 # not in
 `%notin%` <- Negate(`%in%`)
 
 # Script options
-pls.options(plsralg = "oscorespls")
-pls.options("plsralg")
+pls::pls.options(plsralg = "oscorespls")
+pls::pls.options("plsralg")
 
 # Default par options
 opar <- par(no.readonly = T)
@@ -74,7 +56,6 @@ ecosis_id <- "9db4c5a2-7eac-4e1e-8859-009233648e89"
 # tempdir - use a OS-specified temporary directory 
 # user defined PATH - e.g. "~/scratch/PLSR"
 output_dir <- "tempdir"
-#output_dir <- "~/scratch/PLSR"
 #--------------------------------------------------------------------------------------------------#
 
 
@@ -93,7 +74,7 @@ getwd()  # check wd
 
 #--------------------------------------------------------------------------------------------------#
 ### Get source dataset from EcoSIS
-dat_raw <- get_ecosis_data(ecosis_id = ecosis_id)
+dat_raw <- spectratrait::get_ecosis_data(ecosis_id = ecosis_id)
 head(dat_raw)
 names(dat_raw)[1:40]
 #--------------------------------------------------------------------------------------------------#
@@ -139,8 +120,8 @@ plsr_data <- plsr_data[complete.cases(plsr_data[,names(plsr_data) %in%
 method <- "dplyr" #base/dplyr
 # base R - a bit slow
 # dplyr - much faster
-split_data <- create_data_split(approach=method, split_seed=1245565, prop=0.8, 
-                                group_variables="Species_Code")
+split_data <- spectratrait::create_data_split(dataset=plsr_data, approach=method, split_seed=1245565, 
+                                              prop=0.8, group_variables="Species_Code")
 names(split_data)
 cal.plsr.data <- split_data$cal_data
 head(cal.plsr.data)[1:8]
@@ -190,8 +171,8 @@ head(val.plsr.data)[1:5]
 #--------------------------------------------------------------------------------------------------#
 ### plot cal and val spectra
 par(mfrow=c(1,2)) # B, L, T, R
-f.plot.spec(Z=cal.plsr.data$Spectra,wv=seq(Start.wave,End.wave,1),plot_label="Calibration")
-f.plot.spec(Z=val.plsr.data$Spectra,wv=seq(Start.wave,End.wave,1),plot_label="Validation")
+spectratrait::f.plot.spec(Z=cal.plsr.data$Spectra,wv=seq(Start.wave,End.wave,1),plot_label="Calibration")
+spectratrait::f.plot.spec(Z=val.plsr.data$Spectra,wv=seq(Start.wave,End.wave,1),plot_label="Validation")
 
 dev.copy(png,file.path(outdir,paste0(inVar,'_Cal_Val_Spectra.png')), 
          height=2500,width=4900, res=340)
@@ -216,11 +197,11 @@ iterations <- 80
 prop <- 0.70
 if (method=="pls") {
   # pls package approach - faster but estimates more components....
-  nComps <- find_optimal_components(method=method, maxComps=maxComps, seg=seg, 
-                                    random_seed=random_seed)
+  nComps <- spectratrait::find_optimal_components(dataset=cal.plsr.data, method=method, maxComps=maxComps, 
+                                                  seg=seg, random_seed=random_seed)
   print(paste0("*** Optimal number of components: ", nComps))
 } else {
-  nComps <- find_optimal_components(dataset=cal.plsr.data, method=method, maxComps=maxComps, 
+  nComps <- spectratrait::find_optimal_components(dataset=cal.plsr.data, method=method, maxComps=maxComps, 
                                     iterations=iterations, seg=seg, prop=prop, 
                                     random_seed=random_seed)
 }
@@ -239,13 +220,13 @@ pls.options(parallel = NULL)
 
 # External validation fit stats
 par(mfrow=c(1,2)) # B, L, T, R
-RMSEP(plsr.out, newdata = val.plsr.data)
-plot(RMSEP(plsr.out,estimate=c("test"),newdata = val.plsr.data), main="MODEL RMSEP",
+pls::RMSEP(plsr.out, newdata = val.plsr.data)
+plot(pls::RMSEP(plsr.out,estimate=c("test"),newdata = val.plsr.data), main="MODEL RMSEP",
      xlab="Number of Components",ylab="Model Validation RMSEP",lty=1,col="black",cex=1.5,lwd=2)
 box(lwd=2.2)
 
 R2(plsr.out, newdata = val.plsr.data)
-plot(R2(plsr.out,estimate=c("test"),newdata = val.plsr.data), main="MODEL R2",
+plot(pls::R2(plsr.out,estimate=c("test"),newdata = val.plsr.data), main="MODEL R2",
      xlab="Number of Components",ylab="Model Validation R2",lty=1,col="black",cex=1.5,lwd=2)
 box(lwd=2.2)
 dev.copy(png,file.path(outdir,paste0(paste0(inVar,"_Validation_RMSEP_R2_by_Component.png"))), 
@@ -331,7 +312,7 @@ ggsave(filename = file.path(outdir,paste0(inVar,"_Cal_Val_Scatterplots.png")),
 
 #--------------------------------------------------------------------------------------------------#
 ### Generate Coefficient and VIP plots
-vips <- VIP(plsr.out)[nComps,]
+vips <- spectratrait::VIP(plsr.out)[nComps,]
 
 par(mfrow=c(2,1))
 plot(plsr.out$coefficients[,,nComps], x=wv,xlab="Wavelength (nm)",
@@ -356,12 +337,15 @@ if(grepl("Windows", sessionInfo()$running)){
 }
 
 ### PLSR bootstrap permutation uncertainty analysis
-iterations <- 1000    # how many permutation iterations to run
+iterations <- 500    # how many permutation iterations to run
 prop <- 0.70          # fraction of training data to keep for each iteration
-plsr_permutation <- pls_permutation(dataset=cal.plsr.data, maxComps=nComps, iterations=iterations, prop=prop)
+plsr_permutation <- spectratrait::pls_permutation(dataset=cal.plsr.data, maxComps=nComps, 
+                                                  iterations=iterations, prop=prop)
 bootstrap_intercept <- plsr_permutation$coef_array[1,,nComps]
 hist(bootstrap_intercept)
-bootstrap_coef <- plsr_permutation$coef_array[2:length(plsr_permutation$coef_array[,1,nComps]),,nComps]
+bootstrap_coef <- plsr_permutation$coef_array[2:length(plsr_permutation$coef_array[,1,nComps]),
+                                                            ,nComps]
+rm(plsr_permutation)
 
 # apply coefficients to left-out validation data
 interval <- c(0.025,0.975)
@@ -380,7 +364,7 @@ val.plsr.output$UPI <- val.plsr.output$PLSR_Predicted+1.96*sd_tot
 head(val.plsr.output)
 
 # Bootstrap regression coefficient plot
-f.plot.coef(Z = t(bootstrap_coef), wv = seq(Start.wave,End.wave,1), 
+spectratrait::f.plot.coef(Z = t(bootstrap_coef), wv = seq(Start.wave,End.wave,1), 
             plot_label="Bootstrap regression coefficients",position = 'bottomleft')
 abline(h=0,lty=2,col="grey50")
 box(lwd=2.2)
@@ -398,18 +382,18 @@ expr[[2]] <- bquote(RMSEP==.(round(RMSEP,2)))
 expr[[3]] <- bquote("%RMSEP"==.(round(pecr_RMSEP,2)))
 rng_vals <- c(min(val.plsr.output$LPI), max(val.plsr.output$UPI))
 par(mfrow=c(1,1), mar=c(4.2,5.3,1,0.4), oma=c(0, 0.1, 0, 0.2))
-plotCI(val.plsr.output$PLSR_Predicted,val.plsr.output[,inVar], 
+plotrix::plotCI(val.plsr.output$PLSR_Predicted,val.plsr.output[,inVar], 
        li=val.plsr.output$LPI, ui=val.plsr.output$UPI, gap=0.009,sfrac=0.000, 
        lwd=1.6, xlim=c(rng_vals[1], rng_vals[2]), ylim=c(rng_vals[1], rng_vals[2]), 
-       err="x", pch=21, col="black", pt.bg=alpha("grey70",0.7), scol="grey80",
+       err="x", pch=21, col="black", pt.bg=scales::alpha("grey70",0.7), scol="grey80",
        cex=2, xlab=paste0("Predicted ", paste(inVar), " (units)"),
        ylab=paste0("Observed ", paste(inVar), " (units)"),
        cex.axis=1.5,cex.lab=1.8)
 abline(0,1,lty=2,lw=2)
-plotCI(val.plsr.output$PLSR_Predicted,val.plsr.output[,inVar], 
+plotrix::plotCI(val.plsr.output$PLSR_Predicted,val.plsr.output[,inVar], 
        li=val.plsr.output$LCI, ui=val.plsr.output$UCI, gap=0.009,sfrac=0.004, 
        lwd=1.6, xlim=c(rng_vals[1], rng_vals[2]), ylim=c(rng_vals[1], rng_vals[2]), 
-       err="x", pch=21, col="black", pt.bg=alpha("grey70",0.7), scol="black",
+       err="x", pch=21, col="black", pt.bg=scales::alpha("grey70",0.7), scol="black",
        cex=2, xlab=paste0("Predicted ", paste(inVar), " (units)"),
        ylab=paste0("Observed ", paste(inVar), " (units)"),
        cex.axis=1.5,cex.lab=1.8, add=T)

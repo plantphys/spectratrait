@@ -8,42 +8,24 @@
 #
 ####################################################################################################
 
-rm(list=ls(all=TRUE))   # clear workspace
-graphics.off()          # close any open graphics
-closeAllConnections()   # close any open connections to files
 
 #--------------------------------------------------------------------------------------------------#
-### Install and load required R packages
-list.of.packages <- list.of.packages <- c("readr","scales","plotrix","httr","devtools",
-                                          "dplyr","here")
-# check for dependencies and install if needed
-new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
+### Load libraries
+# make sure required tools are available 
+req.packages <- c("devtools")
+new.packages <- req.packages[!(req.packages %in% installed.packages()[,"Package"])]
 if(length(new.packages)) install.packages(new.packages, dependencies=c("Depends", "Imports",
                                                                        "LinkingTo"))
-version_requirements <- c("3.3.2")
-if (!packageVersion("ggplot2") >= version_requirements[1]) {
-  remotes::install_version(package="ggplot2", version=paste0(">= ", version_requirements), 
-                           dependencies=c("Depends", "Imports", "LinkingTo"), upgrade="ask",
-                           quiet=TRUE)
-}
-# Load libraries
+# install spectratrait package
+devtools::install_github(repo = "TESTgroup-BNL/PLSR_for_plant_trait_prediction", ref = "Rpackagify", 
+                         dependencies=TRUE)
+list.of.packages <- c("httr","dplyr","here","plotrix","spectratrait")
 invisible(lapply(list.of.packages, library, character.only = TRUE))
 #--------------------------------------------------------------------------------------------------#
 
 
 #--------------------------------------------------------------------------------------------------#
 ### Setup other functions and options
-github_dir <- file.path(here(),"R_Scripts")
-source_from_gh <- TRUE
-if (source_from_gh) {
-  # Source helper functions from GitHub
-  print("*** GitHub hash of functions.R file:")
-  devtools::source_url("https://raw.githubusercontent.com/TESTgroup-BNL/PLSR_for_plant_trait_prediction/master/R_Scripts/functions.R")
-} else {
-  functions <- file.path(github_dir,"functions.R")
-  source(functions)
-}
-
 # not in
 `%notin%` <- Negate(`%in%`)
 
@@ -82,16 +64,17 @@ getwd()  # check wd
 git_repo <- "https://raw.githubusercontent.com/serbinsh/SSerbin_etal_2019_NewPhytologist/master/"
 print("**** Downloading PLSR coefficients ****")
 githubURL <- paste0(git_repo,"SSerbin_multibiome_lma_plsr_model/sqrt_LMA_gDW_m2_PLSR_Coefficients_10comp.csv")
-LeafLMA.plsr.coeffs <- source_GitHubData(githubURL)
+LeafLMA.plsr.coeffs <- spectratrait::source_GitHubData(githubURL)
 rm(githubURL)
 githubURL <- paste0(git_repo,"SSerbin_multibiome_lma_plsr_model/sqrt_LMA_gDW_m2_Jackkife_PLSR_Coefficients.csv")
-LeafLMA.plsr.jk.coeffs <- source_GitHubData(githubURL)
+LeafLMA.plsr.jk.coeffs <- spectratrait::source_GitHubData(githubURL)
+rm(githubURL)
 #--------------------------------------------------------------------------------------------------#
 
 
 #--------------------------------------------------------------------------------------------------#
 ### Get source dataset from EcoSIS
-dat_raw <- get_ecosis_data(ecosis_id = ecosis_id)
+dat_raw <- spectratrait::get_ecosis_data(ecosis_id = ecosis_id)
 head(dat_raw)
 names(dat_raw)[1:40]
 #--------------------------------------------------------------------------------------------------#
@@ -114,7 +97,6 @@ head(sample_info2)
 
 plsr_data <- data.frame(sample_info2,Spectra)
 rm(sample_info,sample_info2,Spectra)
-dim(plsr_data)
 #--------------------------------------------------------------------------------------------------#
 
 
@@ -186,16 +168,19 @@ expr[[2]] <- bquote(RMSEP==.(round(RMSEP,2)))
 expr[[3]] <- bquote("%RMSEP"==.(round(pecr_RMSEP,2)))
 rng_vals <- c(min(LeafLMA.PLSR.dataset$LPI), max(LeafLMA.PLSR.dataset$UPI))
 par(mfrow=c(1,1), mar=c(4.2,5.3,1,0.4), oma=c(0, 0.1, 0, 0.2))
-plotCI(LeafLMA.PLSR.dataset$PLSR_LMA_gDW_m2,LeafLMA.PLSR.dataset[,inVar], 
+plotrix::plotCI(LeafLMA.PLSR.dataset$PLSR_LMA_gDW_m2,LeafLMA.PLSR.dataset[,inVar], 
        li=LeafLMA.PLSR.dataset$LCI, ui=LeafLMA.PLSR.dataset$UCI, gap=0.009,sfrac=0.004, 
        lwd=1.6, xlim=c(rng_vals[1], rng_vals[2]), ylim=c(rng_vals[1], rng_vals[2]), 
-       err="x", pch=21, col="black", pt.bg=alpha("grey70",0.7), scol="grey80",
+       err="x", pch=21, col="black", pt.bg=scales::alpha("grey70",0.7), scol="grey80",
        cex=2, xlab=paste0("Predicted ", paste(inVar), " (units)"),
        ylab=paste0("Observed ", paste(inVar), " (units)"),
        cex.axis=1.5,cex.lab=1.8)
 abline(0,1,lty=2,lw=2)
 legend("topleft", legend=expr, bty="n", cex=1.5)
 box(lwd=2.2)
+dev.copy(png,file.path(outdir,paste0(inVar,"_PLSR_Validation_Scatterplot.png")), 
+         height=2800, width=3200,  res=340)
+dev.off();
 #--------------------------------------------------------------------------------------------------#
 
 #--------------------------------------------------------------------------------------------------#
