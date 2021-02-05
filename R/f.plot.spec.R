@@ -31,4 +31,5 @@ f.plot.spec <- function(
   lines(wv,spectra_quantiles[7,]*100, lty=3, col="grey40")
   legend(position,legend=c(paste("Mean",type),"Min/Max", "95% CI"),lty=c(1,3,1),
          lwd=c(2,1,10),col=c("black","grey40","#99CC99"),bty="n")
+  box(lwd=2.2)
 }
