@@ -19,6 +19,7 @@
 
 # produced vignettes
 vignettes/*.html
+vignettes/*.nb.html
 ## commented out to preserve pdf for display in GitHub
 #vignettes/*.pdf
 #vignettes/*_files/

@@ -69,7 +69,7 @@ EcoSIS URL: https://ecosis.org/package/leaf-spectra-of-36-species-growing-in-ros
 EcoSIS ID: 9db4c5a2-7eac-4e1e-8859-009233648e89 <br>
 DOI: https://doi.org/doi:10.21232/9nr6-sq54 <br>
 Rpubs LMA example output: XXXX <br>
-Rpubs LeafN example output: https://rpubs.com/sserbin/721872 <br>
+Rpubs LeafN example output: https://rpubs.com/sserbin/721878 <br>
 Rpubs LeafN bootstrap example output: XXXXX
 
 

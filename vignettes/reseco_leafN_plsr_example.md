@@ -15,7 +15,7 @@ leaf nitrogen content (Narea, g/m2)
 
 ### Installation
 
-    ## Skipping install of 'spectratrait' from a github remote, the SHA1 (94e85df9) has not changed since last install.
+    ## Skipping install of 'spectratrait' from a github remote, the SHA1 (8e168d5e) has not changed since last install.
     ##   Use `force = TRUE` to force installation
 
     ## 
@@ -79,7 +79,7 @@ output_dir <- "tempdir"
 
 ### Set working directory (scratch space)
 
-    ## [1] "/private/var/folders/xp/h3k9vf3n2jx181ts786_yjrn9c2gjq/T/RtmpdzSd1H"
+    ## [1] "/private/var/folders/xp/h3k9vf3n2jx181ts786_yjrn9c2gjq/T/Rtmpn7Jk9v"
 
 ### Grab data from EcoSIS
 
@@ -87,7 +87,7 @@ output_dir <- "tempdir"
 print(paste0("Output directory: ",getwd()))  # check wd
 ```
 
-    ## [1] "Output directory: /Users/sserbin/Data/GitHub/PLSR_for_plant_trait_prediction/vignettes/vignettes"
+    ## [1] "Output directory: /Users/sserbin/Data/GitHub/PLSR_for_plant_trait_prediction/vignettes"
 
 ``` r
 dat_raw <- spectratrait::get_ecosis_data(ecosis_id = ecosis_id)
@@ -342,7 +342,7 @@ histograms <- grid.arrange(cal_hist_plot, val_hist_plot, ncol=2)
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-![](spectra-trait_reseco_leafN_plsr_example_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
+![](reseco_leafN_plsr_example_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
 
 ``` r
 ggsave(filename = file.path(outdir,paste0(inVar,"_Cal_Val_Histograms.png")), plot = histograms, 
@@ -397,7 +397,7 @@ spectratrait::f.plot.spec(Z=cal.plsr.data$Spectra,wv=wv,plot_label="Calibration"
 spectratrait::f.plot.spec(Z=val.plsr.data$Spectra,wv=wv,plot_label="Validation")
 ```
 
-![](spectra-trait_reseco_leafN_plsr_example_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
+![](reseco_leafN_plsr_example_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
 
 ``` r
 dev.copy(png,file.path(outdir,paste0(inVar,'_Cal_Val_Spectra.png')), 
@@ -450,7 +450,7 @@ if (method=="pls") {
 
     ## [1] "*** Running PLS permutation test ***"
 
-![](spectra-trait_reseco_leafN_plsr_example_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
+![](reseco_leafN_plsr_example_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
 
     ## [1] "*** Optimal number of components: 10"
 
@@ -506,7 +506,7 @@ plot(pls::R2(plsr.out,estimate=c("test"),newdata = val.plsr.data), main="MODEL R
 box(lwd=2.2)
 ```
 
-![](spectra-trait_reseco_leafN_plsr_example_files/figure-gfm/unnamed-chunk-11-1.png)<!-- -->
+![](reseco_leafN_plsr_example_files/figure-gfm/unnamed-chunk-11-1.png)<!-- -->
 
 ``` r
 dev.copy(png,file.path(outdir,paste0(paste0(inVar,"_Validation_RMSEP_R2_by_Component.png"))), 
@@ -646,7 +646,7 @@ scatterplots <- grid.arrange(cal_scatter_plot, val_scatter_plot, cal_resid_histo
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-![](spectra-trait_reseco_leafN_plsr_example_files/figure-gfm/unnamed-chunk-12-1.png)<!-- -->
+![](reseco_leafN_plsr_example_files/figure-gfm/unnamed-chunk-12-1.png)<!-- -->
 
 ``` r
 ggsave(filename = file.path(outdir,paste0(inVar,"_Cal_Val_Scatterplots.png")), 
@@ -671,7 +671,7 @@ abline(h=0.8,lty=2,col="dark grey")
 box(lwd=2.2)
 ```
 
-![](spectra-trait_reseco_leafN_plsr_example_files/figure-gfm/unnamed-chunk-13-1.png)<!-- -->
+![](reseco_leafN_plsr_example_files/figure-gfm/unnamed-chunk-13-1.png)<!-- -->
 
 ``` r
 dev.copy(png,file.path(outdir,paste0(inVar,'_Coefficient_VIP_plot.png')), 
@@ -769,7 +769,7 @@ abline(h=0,lty=2,col="grey50")
 box(lwd=2.2)
 ```
 
-![](spectra-trait_reseco_leafN_plsr_example_files/figure-gfm/unnamed-chunk-15-1.png)<!-- -->
+![](reseco_leafN_plsr_example_files/figure-gfm/unnamed-chunk-15-1.png)<!-- -->
 
 ``` r
 dev.copy(png,file.path(outdir,paste0(inVar,'_Jackknife_Regression_Coefficients.png')), 
@@ -810,7 +810,7 @@ legend("topleft", legend=expr, bty="n", cex=1.5)
 box(lwd=2.2)
 ```
 
-![](spectra-trait_reseco_leafN_plsr_example_files/figure-gfm/unnamed-chunk-16-1.png)<!-- -->
+![](reseco_leafN_plsr_example_files/figure-gfm/unnamed-chunk-16-1.png)<!-- -->
 
 ``` r
 dev.copy(png,file.path(outdir,paste0(inVar,"_PLSR_Validation_Scatterplot.png")), 
@@ -856,7 +856,7 @@ write.csv(out.jk.coefs,file=file.path(outdir,
 print(paste("Output directory: ", outdir))
 ```
 
-    ## [1] "Output directory:  /var/folders/xp/h3k9vf3n2jx181ts786_yjrn9c2gjq/T//RtmpdzSd1H"
+    ## [1] "Output directory:  /var/folders/xp/h3k9vf3n2jx181ts786_yjrn9c2gjq/T//Rtmpn7Jk9v"
 
 ``` r
 # Observed versus predicted

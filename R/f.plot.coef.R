@@ -33,4 +33,5 @@ f.plot.coef <- function(
   lines(wv,spectra_quantiles[9,], lty=3, col="grey60")
   legend(position,legend=c(paste("Mean",type),"Min/Max (range)", "95% CI"),lty=c(1,1,1),
          lwd=c(2,10,10),col=c("black","grey50","#99CC99"),bty="n")
+  box(lwd=2.2)
 }
