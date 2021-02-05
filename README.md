@@ -68,8 +68,6 @@ Target variable: LMA, leaf nitrogen <br>
 EcoSIS URL: https://ecosis.org/package/leaf-spectra-of-36-species-growing-in-rosa-rugosa-invaded-coastal-grassland-communities-in-belgium <br>
 EcoSIS ID: 9db4c5a2-7eac-4e1e-8859-009233648e89 <br>
 DOI: https://doi.org/doi:10.21232/9nr6-sq54 <br>
-Rpubs LMA example output: XXXX <br>
+Rpubs LMA example output: https://rpubs.com/sserbin/721898 <br>
 Rpubs LeafN example output: https://rpubs.com/sserbin/721878 <br>
-Rpubs LeafN bootstrap example output: XXXXX
-
-
+Rpubs LeafN bootstrap example output: https://rpubs.com/sserbin/721908
