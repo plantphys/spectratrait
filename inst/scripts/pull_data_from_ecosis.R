@@ -37,7 +37,7 @@ invisible(lapply(list.of.packages, library, character.only = TRUE))
 `%notin%` <- Negate(`%in%`)
 
 # What is the source dataset from EcoSIS?
-ecosis_id <- "22dc6b53-5d4a-45c6-9d02-000d0f0ec5a0"
+ecosis_id <- "960dbb0c-144e-4563-8117-9e23d14f4aa9"
 
 # Specify output directory, output_dir 
 # Options: 
@@ -64,7 +64,7 @@ getwd()  # check wd
 ### Example dataset
 # 
 # URL:
-# https://ecosis.org/package/ngee-tropics-leaf-spectral-reflectance-measured-in-panama-collected-february-to-april-2016
+# https://ecosis.org/package/ngee-arctic-2016-leaf-spectral-reflectance-kougarok-road-watershed-seward-peninsula-alaska
 #
 #--------------------------------------------------------------------------------------------------#
 
@@ -94,8 +94,8 @@ names(sample_info)
 
 #--------------------------------------------------------------------------------------------------#
 ### Plot spectra
-spectratrait::f.plot.spec(Z=spectra,wv=wv,plot_label="Panama Leaf Spectra")
-dev.copy(png,file.path(outdir,paste0(inVar,'Leaf_Spectra.png')), 
+spectratrait::f.plot.spec(Z=spectra,wv=wv,plot_label="NGEE-Arctic Leaf Spectra")
+dev.copy(png,file.path(outdir,'Leaf_Spectra.png'), 
          height=2500,width=4900, res=340)
 dev.off();
 par(mfrow=c(1,1))
@@ -108,17 +108,16 @@ print("**** Plotting Ecosis trait data. Writing to scratch space ****")
 
 # Organize leaf trait data
 trait_data <- sample_info %>%
-  select(Site=`Location Name`,Sample_ID=Barcode,USDA_Species_Code=Species_Code,
-         Measurement_Date=`Measurement Date`,Canopy_position,N_mass_pc,N_area_g_m2,
-         CN_Ratio,LMA_gDW_m2,LWP_bar)
+  select(Site,Sample_ID,USDA_Species_Code=`USDA Symbol`,
+         Measurement_Date=`Sample Collection Date`,Cmass_g_g,Nmass_g_g,CN_Ratio,
+         LMA_g_m2)
 head(trait_data)        
 
 # Prepare data for ggplot
-trait_data <- melt(data = trait_data, id.vars = "USDA_Species_Code", measure.vars = c("LMA_gDW_m2",
-                                                                                      "N_mass_pc",
-                                                                                      "N_area_g_m2",
-                                                                                      "CN_Ratio",
-                                                                                      "LWP_bar"))
+trait_data <- melt(data = trait_data, id.vars = "USDA_Species_Code", measure.vars = c("LMA_g_m2",
+                                                                                      "Cmass_g_g",
+                                                                                      "Nmass_g_g",
+                                                                                      "CN_Ratio"))
 head(trait_data)
 
 # Graph the trait data and save a file to the scratch space
