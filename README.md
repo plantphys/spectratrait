@@ -21,7 +21,10 @@ spectratrait is not currently on CRAN, but you can install from GitHub using dev
 
 ``` r
 # install.packages("devtools")
-devtools::install_github(repo = "TESTgroup-BNL/PLSR_for_plant_trait_prediction", ref = "Rpackagify", 
+devtools::install_github(repo = "TESTgroup-BNL/PLSR_for_plant_trait_prediction", dependencies=TRUE)
+
+# or a specific branch, e.g. a branch named devbranch
+devtools::install_github(repo = "TESTgroup-BNL/PLSR_for_plant_trait_prediction", ref = "devbranch", 
 dependencies=TRUE)
 ```
 
