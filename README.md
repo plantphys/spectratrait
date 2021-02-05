@@ -54,14 +54,14 @@ dependencies=TRUE)
 Target variable: SLA <br>
 EcoSIS URL: https://ecosis.org/package/leaf-reflectance-plant-functional-gradient-ifgg-kit <br>
 EcoSIS ID: 3cf6b27e-d80e-4bc7-b214-c95506e46daa <br>
-Rpubs example output: XXXXX
+Rpubs example output: https://rpubs.com/sserbin/722040
 
 2) Fresh Leaf Spectra to Estimate LMA over NEON domains in eastern United States <br>
 Target variable: LMA <br>
 EcoSIS URL: https://ecosis.org/package/fresh-leaf-spectra-to-estimate-lma-over-neon-domains-in-eastern-united-states <br>
 EcoSIS ID: 5617da17-c925-49fb-b395-45a51291bd2d <br>
 DOI: https://doi.org/doi:10.21232/9831-rq60 <br>
-Rpubs example output: XXXX
+Rpubs example output: https://rpubs.com/sserbin/722017
 
 3) Leaf spectra of 36 species growing in Rosa rugosa invaded coastal grassland communities in Belgium <br>
 Target variable: LMA, leaf nitrogen <br>

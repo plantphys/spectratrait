@@ -18,21 +18,8 @@ basis (the timestamp is included in the dataset).
 
 ### Installation
 
-    ## Loading required package: usethis
-
-    ## 
-    ## Attaching package: 'remotes'
-
-    ## The following objects are masked from 'package:devtools':
-    ## 
-    ##     dev_package_deps, install_bioc, install_bitbucket, install_cran,
-    ##     install_deps, install_dev, install_git, install_github,
-    ##     install_gitlab, install_local, install_svn, install_url,
-    ##     install_version, update_packages
-
-    ## The following object is masked from 'package:usethis':
-    ## 
-    ##     git_credentials
+    ## Skipping install of 'spectratrait' from a github remote, the SHA1 (d00228f2) has not changed since last install.
+    ##   Use `force = TRUE` to force installation
 
     ## 
     ## Attaching package: 'pls'
@@ -65,23 +52,6 @@ basis (the timestamp is included in the dataset).
 
 ``` r
 ### Setup other functions and options
-github_dir <- file.path(here::here(),"R_Scripts")
-source_from_gh <- TRUE
-if (source_from_gh) {
-  # Source helper functions from GitHub
-  print("*** GitHub hash of functions.R file:")
-  devtools::source_url("https://raw.githubusercontent.com/TESTgroup-BNL/PLSR_for_plant_trait_prediction/master/R_Scripts/functions.R")
-} else {
-  functions <- file.path(github_dir,"functions.R")
-  source(functions)
-}
-```
-
-    ## [1] "*** GitHub hash of functions.R file:"
-
-    ## SHA-1 hash of file is 8c6b457e931a5879e8c975f4d6529f61b52c4453
-
-``` r
 # not in
 `%notin%` <- Negate(`%in%`)
 
@@ -112,7 +82,7 @@ output_dir <- "tempdir"
 
 ### Set working directory (scratch space)
 
-    ## [1] "Output directory: /private/var/folders/xp/h3k9vf3n2jx181ts786_yjrn9c2gjq/T/RtmpaNU5lH"
+    ## [1] "Output directory: /private/var/folders/xp/h3k9vf3n2jx181ts786_yjrn9c2gjq/T/RtmpH1BTHj"
 
 ### Grab data from EcoSIS
 
@@ -124,7 +94,7 @@ print(paste0("Output directory: ",getwd()))  # check wd
 
 ``` r
 ### Get source dataset from EcoSIS
-dat_raw <- get_ecosis_data(ecosis_id = ecosis_id)
+dat_raw <- spectratrait::get_ecosis_data(ecosis_id = ecosis_id)
 ```
 
     ## [1] "**** Downloading Ecosis data ****"
@@ -252,9 +222,10 @@ plsr_data <- data.frame(sample_info2,Spectra)
 rm(sample_info,sample_info2,Spectra)
 ```
 
-### Example data cleaning. End user needs to do what’s appropriate for their data. This may be an iterative process.
+### Example data cleaning
 
 ``` r
+#### End user needs to do what's appropriate for their data.  This may be an iterative process.
 # Keep only complete rows of inVar and spec data before fitting
 plsr_data <- plsr_data[complete.cases(plsr_data[,names(plsr_data) %in% c(inVar,wv)]),]
 # Remove suspect high values
@@ -270,8 +241,8 @@ plsr_data <- plsr_data[ plsr_data[,inVar] <= 500, ]
 method <- "base" #base/dplyr
 # base R - a bit slow
 # dplyr - much faster
-split_data <- create_data_split(approach=method, split_seed=2356812, prop=0.8, 
-                                group_variables="Plant_Species")
+split_data <- spectratrait::create_data_split(dataset=plsr_data, approach=method, split_seed=2356812, 
+                                              prop=0.8, group_variables="Plant_Species")
 ```
 
     ## Calamagrostis epigejos   Cal: 80%
@@ -441,7 +412,7 @@ histograms <- grid.arrange(cal_hist_plot, val_hist_plot, ncol=2)
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-![](spectra-trait_kit_sla_plsr_example_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
+![](kit_sla_plsr_example_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
 
 ``` r
 ggsave(filename = file.path(outdir,paste0(inVar,"_Cal_Val_Histograms.png")), 
@@ -491,11 +462,11 @@ head(val.plsr.data)[1:5]
 
 ``` r
 par(mfrow=c(1,2)) # B, L, T, R
-f.plot.spec(Z=cal.plsr.data$Spectra,wv=seq(Start.wave,End.wave,1),plot_label="Calibration")
-f.plot.spec(Z=val.plsr.data$Spectra,wv=seq(Start.wave,End.wave,1),plot_label="Validation")
+spectratrait::f.plot.spec(Z=cal.plsr.data$Spectra,wv=wv,plot_label="Calibration")
+spectratrait::f.plot.spec(Z=val.plsr.data$Spectra,wv=wv,plot_label="Validation")
 ```
 
-![](spectra-trait_kit_sla_plsr_example_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
+![](kit_sla_plsr_example_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
 
 ``` r
 dev.copy(png,file.path(outdir,paste0(inVar,'_Cal_Val_Spectra.png')), 
@@ -534,19 +505,22 @@ iterations <- 50
 prop <- 0.70
 if (method=="pls") {
   # pls package approach - faster but estimates more components....
-  nComps <- find_optimal_components(method=method, maxComps=maxComps, seg=seg, 
-                                    random_seed=random_seed)
+  nComps <- spectratrait::find_optimal_components(dataset=cal.plsr.data,method=method, 
+                                                  maxComps=maxComps, seg=seg, 
+                                                  random_seed=random_seed)
   print(paste0("*** Optimal number of components: ", nComps))
 } else {
-  nComps <- find_optimal_components(dataset=cal.plsr.data, method=method, maxComps=maxComps, 
-                                    iterations=iterations, seg=seg, prop=prop, 
-                                    random_seed=random_seed)
+  nComps <- spectratrait::find_optimal_components(dataset=cal.plsr.data, method=method, 
+                                                  maxComps=maxComps, 
+                                                  iterations=iterations, 
+                                                  seg=seg, prop=prop, 
+                                                  random_seed=random_seed)
 }
 ```
 
     ## [1] "*** Running PLS permutation test ***"
 
-![](spectra-trait_kit_sla_plsr_example_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
+![](kit_sla_plsr_example_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
 
     ## [1] "*** Optimal number of components: 10"
 
@@ -576,7 +550,7 @@ pls.options(parallel = NULL)
 
 # External validation fit stats
 par(mfrow=c(1,2)) # B, L, T, R
-RMSEP(plsr.out, newdata = val.plsr.data)
+pls::RMSEP(plsr.out, newdata = val.plsr.data)
 ```
 
     ## (Intercept)      1 comps      2 comps      3 comps      4 comps      5 comps  
@@ -585,11 +559,11 @@ RMSEP(plsr.out, newdata = val.plsr.data)
     ##       66.16        63.13        61.74        61.53        60.73
 
 ``` r
-plot(RMSEP(plsr.out,estimate=c("test"),newdata = val.plsr.data), main="MODEL RMSEP",
+plot(pls::RMSEP(plsr.out,estimate=c("test"),newdata = val.plsr.data), main="MODEL RMSEP",
      xlab="Number of Components",ylab="Model Validation RMSEP",lty=1,col="black",cex=1.5,lwd=2)
 box(lwd=2.2)
 
-R2(plsr.out, newdata = val.plsr.data)
+pls::R2(plsr.out, newdata = val.plsr.data)
 ```
 
     ## (Intercept)      1 comps      2 comps      3 comps      4 comps      5 comps  
@@ -603,7 +577,7 @@ plot(R2(plsr.out,estimate=c("test"),newdata = val.plsr.data), main="MODEL R2",
 box(lwd=2.2)
 ```
 
-![](spectra-trait_kit_sla_plsr_example_files/figure-gfm/unnamed-chunk-11-1.png)<!-- -->
+![](kit_sla_plsr_example_files/figure-gfm/unnamed-chunk-11-1.png)<!-- -->
 
 ``` r
 dev.copy(png,file.path(outdir,paste0(paste0(inVar,"_Validation_RMSEP_R2_by_Component.png"))), 
@@ -664,20 +638,20 @@ val.plsr.output <- val.plsr.output %>%
 head(val.plsr.output)
 ```
 
-    ##           Plant_Species Growth_Form       timestamp SLA_g_cm CalVal
-    ## 1         Urtica dioica        forb 5/25/2016 12:37 284.6788    Val
-    ## 2       Stellaria media        forb 5/25/2016 13:21 418.4284    Val
-    ## 3  Alopecurus pratensis   graminoid  6/1/2016 11:32 218.2117    Val
-    ## 4  Alopecurus pratensis   graminoid   6/8/2016 8:37 216.7568    Val
-    ## 5   Agrostis capillaris   graminoid   6/8/2016 9:05 231.5292    Val
-    ## 6 Aegopodium podagraria        forb   6/7/2016 9:05 311.4018    Val
-    ##   PLSR_Predicted PLSR_Residuals
-    ## 1       240.6023     -44.076512
-    ## 2       248.6923    -169.736117
-    ## 3       211.4638      -6.747881
-    ## 4       275.4544      58.697587
-    ## 5       290.4019      58.872672
-    ## 6       274.2311     -37.170622
+    ##            Plant_Species Growth_Form       timestamp SLA_g_cm CalVal
+    ## 9          Urtica dioica        forb 5/25/2016 12:37 284.6788    Val
+    ## 15       Stellaria media        forb 5/25/2016 13:21 418.4284    Val
+    ## 23  Alopecurus pratensis   graminoid  6/1/2016 11:32 218.2117    Val
+    ## 44  Alopecurus pratensis   graminoid   6/8/2016 8:37 216.7568    Val
+    ## 46   Agrostis capillaris   graminoid   6/8/2016 9:05 231.5292    Val
+    ## 47 Aegopodium podagraria        forb   6/7/2016 9:05 311.4018    Val
+    ##    PLSR_Predicted PLSR_Residuals
+    ## 9        240.6023     -44.076512
+    ## 15       248.6923    -169.736117
+    ## 23       211.4638      -6.747881
+    ## 44       275.4544      58.697587
+    ## 46       290.4019      58.872672
+    ## 47       274.2311     -37.170622
 
 ``` r
 val.R2 <- round(pls::R2(plsr.out,newdata=val.plsr.data)[[1]][nComps],2)
@@ -743,7 +717,7 @@ scatterplots <- grid.arrange(cal_scatter_plot, val_scatter_plot, cal_resid_histo
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-![](spectra-trait_kit_sla_plsr_example_files/figure-gfm/unnamed-chunk-12-1.png)<!-- -->
+![](kit_sla_plsr_example_files/figure-gfm/unnamed-chunk-12-1.png)<!-- -->
 
 ``` r
 ggsave(filename = file.path(outdir,paste0(inVar,"_Cal_Val_Scatterplots.png")), 
@@ -754,7 +728,7 @@ ggsave(filename = file.path(outdir,paste0(inVar,"_Cal_Val_Scatterplots.png")),
 ### Generate Coefficient and VIP plots
 
 ``` r
-vips <- VIP(plsr.out)[nComps,]
+vips <- spectratrait::VIP(plsr.out)[nComps,]
 
 par(mfrow=c(2,1))
 plot(plsr.out, plottype = "coef",xlab="Wavelength (nm)",
@@ -767,7 +741,7 @@ abline(h=0.8,lty=2,col="dark grey")
 box(lwd=2.2)
 ```
 
-![](spectra-trait_kit_sla_plsr_example_files/figure-gfm/unnamed-chunk-13-1.png)<!-- -->
+![](kit_sla_plsr_example_files/figure-gfm/unnamed-chunk-13-1.png)<!-- -->
 
 ``` r
 dev.copy(png,file.path(outdir,paste0(inVar,'_Coefficient_VIP_plot.png')), 
@@ -825,31 +799,31 @@ val.plsr.output$UPI <- val.plsr.output$PLSR_Predicted+1.96*sd_tot
 head(val.plsr.output)
 ```
 
-    ##           Plant_Species Growth_Form       timestamp SLA_g_cm CalVal
-    ## 1         Urtica dioica        forb 5/25/2016 12:37 284.6788    Val
-    ## 2       Stellaria media        forb 5/25/2016 13:21 418.4284    Val
-    ## 3  Alopecurus pratensis   graminoid  6/1/2016 11:32 218.2117    Val
-    ## 4  Alopecurus pratensis   graminoid   6/8/2016 8:37 216.7568    Val
-    ## 5   Agrostis capillaris   graminoid   6/8/2016 9:05 231.5292    Val
-    ## 6 Aegopodium podagraria        forb   6/7/2016 9:05 311.4018    Val
-    ##   PLSR_Predicted PLSR_Residuals      LCI      UCI      LPI      UPI
-    ## 1       240.6023     -44.076512 237.5315 250.4949 121.3665 359.8380
-    ## 2       248.6923    -169.736117 246.6740 250.9811 129.6378 367.7468
-    ## 3       211.4638      -6.747881 207.9159 212.8904  92.4012 330.5265
-    ## 4       275.4544      58.697587 272.8887 276.9933 156.4053 394.5035
-    ## 5       290.4019      58.872672 288.2699 291.6463 171.3562 409.4475
-    ## 6       274.2311     -37.170622 272.4991 276.1200 155.1831 393.2792
+    ##            Plant_Species Growth_Form       timestamp SLA_g_cm CalVal
+    ## 9          Urtica dioica        forb 5/25/2016 12:37 284.6788    Val
+    ## 15       Stellaria media        forb 5/25/2016 13:21 418.4284    Val
+    ## 23  Alopecurus pratensis   graminoid  6/1/2016 11:32 218.2117    Val
+    ## 44  Alopecurus pratensis   graminoid   6/8/2016 8:37 216.7568    Val
+    ## 46   Agrostis capillaris   graminoid   6/8/2016 9:05 231.5292    Val
+    ## 47 Aegopodium podagraria        forb   6/7/2016 9:05 311.4018    Val
+    ##    PLSR_Predicted PLSR_Residuals      LCI      UCI      LPI      UPI
+    ## 9        240.6023     -44.076512 237.5315 250.4949 121.3665 359.8380
+    ## 15       248.6923    -169.736117 246.6740 250.9811 129.6378 367.7468
+    ## 23       211.4638      -6.747881 207.9159 212.8904  92.4012 330.5265
+    ## 44       275.4544      58.697587 272.8887 276.9933 156.4053 394.5035
+    ## 46       290.4019      58.872672 288.2699 291.6463 171.3562 409.4475
+    ## 47       274.2311     -37.170622 272.4991 276.1200 155.1831 393.2792
 
 ### Jackknife coefficient plot
 
 ``` r
-f.plot.coef(Z = t(Jackknife_coef), wv = seq(Start.wave,End.wave,1), 
+spectratrait::f.plot.coef(Z = t(Jackknife_coef), wv = wv, 
             plot_label="Jackknife regression coefficients",position = 'bottomleft')
 abline(h=0,lty=2,col="grey50")
 box(lwd=2.2)
 ```
 
-![](spectra-trait_kit_sla_plsr_example_files/figure-gfm/unnamed-chunk-15-1.png)<!-- -->
+![](kit_sla_plsr_example_files/figure-gfm/unnamed-chunk-15-1.png)<!-- -->
 
 ``` r
 dev.copy(png,file.path(outdir,paste0(inVar,'_Jackknife_Regression_Coefficients.png')), 
@@ -878,10 +852,10 @@ expr[[2]] <- bquote(RMSEP==.(round(RMSEP,2)))
 expr[[3]] <- bquote("%RMSEP"==.(round(pecr_RMSEP,2)))
 rng_vals <- c(min(val.plsr.output$LPI), max(val.plsr.output$UPI))
 par(mfrow=c(1,1), mar=c(4.2,5.3,1,0.4), oma=c(0, 0.1, 0, 0.2))
-plotCI(val.plsr.output$PLSR_Predicted,val.plsr.output[,inVar], 
+plotrix::plotCI(val.plsr.output$PLSR_Predicted,val.plsr.output[,inVar], 
        li=val.plsr.output$LPI, ui=val.plsr.output$UPI, gap=0.009,sfrac=0.004, 
        lwd=1.6, xlim=c(rng_vals[1], rng_vals[2]), ylim=c(rng_vals[1], rng_vals[2]), 
-       err="x", pch=21, col="black", pt.bg=alpha("grey70",0.7), scol="grey50",
+       err="x", pch=21, col="black", pt.bg=scales::alpha("grey70",0.7), scol="grey50",
        cex=2, xlab=paste0("Predicted ", paste(inVar), " (units)"),
        ylab=paste0("Observed ", paste(inVar), " (units)"),
        cex.axis=1.5,cex.lab=1.8)
@@ -890,7 +864,7 @@ legend("topleft", legend=expr, bty="n", cex=1.5)
 box(lwd=2.2)
 ```
 
-![](spectra-trait_kit_sla_plsr_example_files/figure-gfm/unnamed-chunk-16-1.png)<!-- -->
+![](kit_sla_plsr_example_files/figure-gfm/unnamed-chunk-16-1.png)<!-- -->
 
 ``` r
 dev.copy(png,file.path(outdir,paste0(inVar,"_PLSR_Validation_Scatterplot.png")), 
@@ -973,7 +947,7 @@ print("**** PLSR output files: ")
     ## [1] "**** PLSR output files: "
 
 ``` r
-list.files(outdir)[grep(pattern = inVar, list.files(outdir))]
+print(list.files(outdir)[grep(pattern = inVar, list.files(outdir))])
 ```
 
     ##  [1] "SLA_g_cm_Cal_PLSR_Dataset.csv"                 

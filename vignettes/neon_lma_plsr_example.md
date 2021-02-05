@@ -14,21 +14,8 @@ leaf-mass area (LMA)
 
 ### Installation
 
-    ## Loading required package: usethis
-
-    ## 
-    ## Attaching package: 'remotes'
-
-    ## The following objects are masked from 'package:devtools':
-    ## 
-    ##     dev_package_deps, install_bioc, install_bitbucket, install_cran,
-    ##     install_deps, install_dev, install_git, install_github,
-    ##     install_gitlab, install_local, install_svn, install_url,
-    ##     install_version, update_packages
-
-    ## The following object is masked from 'package:usethis':
-    ## 
-    ##     git_credentials
+    ## Skipping install of 'spectratrait' from a github remote, the SHA1 (d00228f2) has not changed since last install.
+    ##   Use `force = TRUE` to force installation
 
     ## 
     ## Attaching package: 'pls'
@@ -61,23 +48,6 @@ leaf-mass area (LMA)
 
 ``` r
 ### Setup other functions and options
-github_dir <- file.path(here::here(),"R_Scripts")
-source_from_gh <- TRUE
-if (source_from_gh) {
-  # Source helper functions from GitHub
-  print("*** GitHub hash of functions.R file:")
-  devtools::source_url("https://raw.githubusercontent.com/TESTgroup-BNL/PLSR_for_plant_trait_prediction/master/R_Scripts/functions.R")
-} else {
-  functions <- file.path(github_dir,"functions.R")
-  source(functions)
-}
-```
-
-    ## [1] "*** GitHub hash of functions.R file:"
-
-    ## SHA-1 hash of file is 8c6b457e931a5879e8c975f4d6529f61b52c4453
-
-``` r
 # not in
 `%notin%` <- Negate(`%in%`)
 
@@ -108,7 +78,7 @@ output_dir <- "tempdir"
 
 ### Set working directory (scratch space)
 
-    ## [1] "/private/var/folders/xp/h3k9vf3n2jx181ts786_yjrn9c2gjq/T/RtmpsqkePg"
+    ## [1] "/private/var/folders/xp/h3k9vf3n2jx181ts786_yjrn9c2gjq/T/RtmpB2Xa3G"
 
 ### Grab data from EcoSIS
 
@@ -122,7 +92,7 @@ print(paste0("Output directory: ",getwd()))  # check wd
 
 ``` r
 ### Get source dataset from EcoSIS
-dat_raw <- get_ecosis_data(ecosis_id = ecosis_id)
+dat_raw <- spectratrait::get_ecosis_data(ecosis_id = ecosis_id)
 ```
 
     ## [1] "**** Downloading Ecosis data ****"
@@ -253,8 +223,8 @@ rm(sample_info,sample_info2,Spectra)
 method <- "dplyr" #base/dplyr
 # base R - a bit slow
 # dplyr - much faster
-split_data <- create_data_split(approach=method, split_seed=2356812, prop=0.8, 
-                                group_variables=c("USDA_Species_Code","Domain"))
+split_data <- spectratrait::create_data_split(dataset=plsr_data,approach=method, split_seed=2356812, 
+                                              prop=0.8, group_variables=c("USDA_Species_Code","Domain"))
 names(split_data)
 ```
 
@@ -330,7 +300,7 @@ histograms <- grid.arrange(cal_hist_plot, val_hist_plot, ncol=2)
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-![](spectra-trait_neon_lma_plsr_example_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
+![](neon_lma_plsr_example_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
 
 ``` r
 ggsave(filename = file.path(outdir,paste0(inVar,"_Cal_Val_Histograms.png")), 
@@ -380,11 +350,11 @@ head(val.plsr.data)[1:5]
 
 ``` r
 par(mfrow=c(1,2)) # B, L, T, R
-f.plot.spec(Z=cal.plsr.data$Spectra,wv=seq(Start.wave,End.wave,1),plot_label="Calibration")
-f.plot.spec(Z=val.plsr.data$Spectra,wv=seq(Start.wave,End.wave,1),plot_label="Validation")
+spectratrait::f.plot.spec(Z=cal.plsr.data$Spectra,wv=wv,plot_label="Calibration")
+spectratrait::f.plot.spec(Z=val.plsr.data$Spectra,wv=wv,plot_label="Validation")
 ```
 
-![](spectra-trait_neon_lma_plsr_example_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
+![](neon_lma_plsr_example_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
 
 ``` r
 dev.copy(png,file.path(outdir,paste0(inVar,'_Cal_Val_Spectra.png')), 
@@ -422,13 +392,15 @@ maxComps <- 20
 iterations <- 40
 prop <- 0.70
 if (method=="pls") {
-  nComps <- find_optimal_components(dataset=cal.plsr.data, method=method, maxComps=maxComps, 
-                                    seg=seg, random_seed=random_seed)
+  nComps <- spectratrait::find_optimal_components(dataset=cal.plsr.data, method=method, 
+                                                  maxComps=maxComps, seg=seg, 
+                                                  random_seed=random_seed)
   print(paste0("*** Optimal number of components: ", nComps))
 } else {
-  nComps <- find_optimal_components(dataset=cal.plsr.data, method=method, maxComps=maxComps, 
-                                    iterations=iterations, seg=seg, prop=prop, 
-                                    random_seed=random_seed)
+  nComps <- spectratrait::find_optimal_components(dataset=cal.plsr.data, method=method, 
+                                                  maxComps=maxComps, iterations=iterations, 
+                                                  seg=seg, prop=prop, 
+                                                  random_seed=random_seed)
 }
 ```
 
@@ -519,7 +491,7 @@ if (method=="pls") {
 
     ## [1] "*** Optimal number of components based on t.test: 12"
 
-![](spectra-trait_neon_lma_plsr_example_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
+![](neon_lma_plsr_example_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
 
 ``` r
 dev.copy(png,file.path(outdir,paste0(paste0(inVar,"_PLSR_Component_Selection.png"))), 
@@ -550,7 +522,7 @@ pls.options(parallel = NULL)
 
 # External validation fit stats
 par(mfrow=c(1,2)) # B, L, T, R
-RMSEP(plsr.out, newdata = val.plsr.data)
+pls::RMSEP(plsr.out, newdata = val.plsr.data)
 ```
 
     ## (Intercept)      1 comps      2 comps      3 comps      4 comps      5 comps  
@@ -561,13 +533,13 @@ RMSEP(plsr.out, newdata = val.plsr.data)
     ##       9.515
 
 ``` r
-plot(RMSEP(plsr.out,estimate=c("test"),newdata = val.plsr.data), 
+plot(pls::RMSEP(plsr.out,estimate=c("test"),newdata = val.plsr.data), 
      main="MODEL RMSEP",
      xlab="Number of Components",ylab="Model Validation RMSEP",lty=1,col="black",
      cex=1.5,lwd=2)
 box(lwd=2.2)
 
-R2(plsr.out, newdata = val.plsr.data)
+pls::R2(plsr.out, newdata = val.plsr.data)
 ```
 
     ## (Intercept)      1 comps      2 comps      3 comps      4 comps      5 comps  
@@ -578,13 +550,13 @@ R2(plsr.out, newdata = val.plsr.data)
     ##    0.876368
 
 ``` r
-plot(R2(plsr.out,estimate=c("test"),newdata = val.plsr.data), main="MODEL R2",
+plot(pls::R2(plsr.out,estimate=c("test"),newdata = val.plsr.data), main="MODEL R2",
      xlab="Number of Components",ylab="Model Validation R2",lty=1,col="black",
      cex=1.5,lwd=2)
 box(lwd=2.2)
 ```
 
-![](spectra-trait_neon_lma_plsr_example_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
+![](neon_lma_plsr_example_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
 
 ``` r
 par(opar)
@@ -630,20 +602,20 @@ val.plsr.output <- val.plsr.output %>%
 head(val.plsr.output)
 ```
 
-    ##   Domain Functional_type Sample_ID USDA_Species_Code LMA_gDW_m2 PLSR_Predicted
-    ## 1    D08       broadleaf     P2462              <NA>      21.10       21.14155
-    ## 2    D08       broadleaf     L2462              SANI     100.72       89.65467
-    ## 3    D08       broadleaf     P2463              <NA>      29.59       27.94765
-    ## 4    D08       broadleaf     L2463              SANI      96.48       92.46121
-    ## 5    D08       broadleaf     P2464              <NA>      31.08       40.73367
-    ## 6    D08       broadleaf     L2464              SANI      61.40       65.94687
-    ##   PLSR_Residuals
-    ## 1     0.04155041
-    ## 2   -11.06533484
-    ## 3    -1.64234512
-    ## 4    -4.01879017
-    ## 5     9.65367301
-    ## 6     4.54686556
+    ##      Domain Functional_type Sample_ID USDA_Species_Code LMA_gDW_m2
+    ## 4923    D08       broadleaf     P2462              <NA>      21.10
+    ## 4924    D08       broadleaf     L2462              SANI     100.72
+    ## 4925    D08       broadleaf     P2463              <NA>      29.59
+    ## 4926    D08       broadleaf     L2463              SANI      96.48
+    ## 4927    D08       broadleaf     P2464              <NA>      31.08
+    ## 4928    D08       broadleaf     L2464              SANI      61.40
+    ##      PLSR_Predicted PLSR_Residuals
+    ## 4923       21.14155     0.04155041
+    ## 4924       89.65467   -11.06533484
+    ## 4925       27.94765    -1.64234512
+    ## 4926       92.46121    -4.01879017
+    ## 4927       40.73367     9.65367301
+    ## 4928       65.94687     4.54686556
 
 ``` r
 val.R2 <- round(pls::R2(plsr.out,newdata=val.plsr.data)[[1]][nComps],2)
@@ -722,7 +694,7 @@ scatterplots <- grid.arrange(cal_scatter_plot, val_scatter_plot, cal_resid_histo
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-![](spectra-trait_neon_lma_plsr_example_files/figure-gfm/unnamed-chunk-11-1.png)<!-- -->
+![](neon_lma_plsr_example_files/figure-gfm/unnamed-chunk-11-1.png)<!-- -->
 
 ``` r
 ggsave(filename = file.path(outdir,paste0(inVar,"_Cal_Val_scatterplots.png")), 
@@ -733,7 +705,7 @@ ggsave(filename = file.path(outdir,paste0(inVar,"_Cal_Val_scatterplots.png")),
 ### Generate Coefficient and VIP plots
 
 ``` r
-vips <- VIP(plsr.out)[nComps,]
+vips <- spectratrait::VIP(plsr.out)[nComps,]
 
 par(mfrow=c(2,1))
 plot(plsr.out, plottype = "coef",xlab="Wavelength (nm)",
@@ -746,7 +718,7 @@ abline(h=0.8,lty=2,col="dark grey")
 box(lwd=2.2)
 ```
 
-![](spectra-trait_neon_lma_plsr_example_files/figure-gfm/unnamed-chunk-12-1.png)<!-- -->
+![](neon_lma_plsr_example_files/figure-gfm/unnamed-chunk-12-1.png)<!-- -->
 
 ``` r
 dev.copy(png,file.path(outdir,paste0(inVar,'_Coefficient_VIP_plot.png')), 
@@ -784,7 +756,7 @@ jk.plsr.out <- pls::plsr(as.formula(paste(inVar,"~","Spectra")), scale=FALSE,
                       jackknife=TRUE, data=cal.plsr.data)
 pls.options(parallel = NULL)
 
-Jackknife_coef <- f.coef.valid(plsr.out = jk.plsr.out, data_plsr = cal.plsr.data, 
+Jackknife_coef <- spectratrait::f.coef.valid(plsr.out = jk.plsr.out, data_plsr = cal.plsr.data, 
                                ncomp = nComps, inVar=inVar)
 Jackknife_intercept <- Jackknife_coef[1,,,]
 Jackknife_coef <- Jackknife_coef[2:dim(Jackknife_coef)[1],,,]
@@ -805,31 +777,31 @@ val.plsr.output$UPI <- val.plsr.output$PLSR_Predicted+1.96*sd_tot
 head(val.plsr.output)
 ```
 
-    ##   Domain Functional_type Sample_ID USDA_Species_Code LMA_gDW_m2 PLSR_Predicted
-    ## 1    D08       broadleaf     P2462              <NA>      21.10       21.14155
-    ## 2    D08       broadleaf     L2462              SANI     100.72       89.65467
-    ## 3    D08       broadleaf     P2463              <NA>      29.59       27.94765
-    ## 4    D08       broadleaf     L2463              SANI      96.48       92.46121
-    ## 5    D08       broadleaf     P2464              <NA>      31.08       40.73367
-    ## 6    D08       broadleaf     L2464              SANI      61.40       65.94687
-    ##   PLSR_Residuals      LCI      UCI       LPI       UPI
-    ## 1     0.04155041 20.94847 21.30604  2.789108  39.49399
-    ## 2   -11.06533484 89.45021 89.97246 71.301221 108.00811
-    ## 3    -1.64234512 27.73172 28.16789  9.594597  46.30071
-    ## 4    -4.01879017 92.26489 92.73225 74.107998 110.81442
-    ## 5     9.65367301 40.50065 40.92588 22.380204  59.08714
-    ## 6     4.54686556 65.77618 66.17712 47.594178  84.29955
+    ##      Domain Functional_type Sample_ID USDA_Species_Code LMA_gDW_m2
+    ## 4923    D08       broadleaf     P2462              <NA>      21.10
+    ## 4924    D08       broadleaf     L2462              SANI     100.72
+    ## 4925    D08       broadleaf     P2463              <NA>      29.59
+    ## 4926    D08       broadleaf     L2463              SANI      96.48
+    ## 4927    D08       broadleaf     P2464              <NA>      31.08
+    ## 4928    D08       broadleaf     L2464              SANI      61.40
+    ##      PLSR_Predicted PLSR_Residuals      LCI      UCI       LPI       UPI
+    ## 4923       21.14155     0.04155041 20.94847 21.30604  2.789108  39.49399
+    ## 4924       89.65467   -11.06533484 89.45021 89.97246 71.301221 108.00811
+    ## 4925       27.94765    -1.64234512 27.73172 28.16789  9.594597  46.30071
+    ## 4926       92.46121    -4.01879017 92.26489 92.73225 74.107998 110.81442
+    ## 4927       40.73367     9.65367301 40.50065 40.92588 22.380204  59.08714
+    ## 4928       65.94687     4.54686556 65.77618 66.17712 47.594178  84.29955
 
 ### Jackknife coefficient plot
 
 ``` r
-f.plot.coef(Z = t(Jackknife_coef), wv = seq(Start.wave,End.wave,1), 
+spectratrait::f.plot.coef(Z = t(Jackknife_coef), wv = wv, 
             plot_label="Jackknife regression coefficients",position = 'bottomleft')
 abline(h=0,lty=2,col="grey50")
 box(lwd=2.2)
 ```
 
-![](spectra-trait_neon_lma_plsr_example_files/figure-gfm/unnamed-chunk-14-1.png)<!-- -->
+![](neon_lma_plsr_example_files/figure-gfm/unnamed-chunk-14-1.png)<!-- -->
 
 ``` r
 dev.copy(png,file.path(outdir,paste0(inVar,'_Jackknife_Regression_Coefficients.png')), 
@@ -858,10 +830,10 @@ expr[[2]] <- bquote(RMSEP==.(round(RMSEP,2)))
 expr[[3]] <- bquote("%RMSEP"==.(round(pecr_RMSEP,2)))
 rng_vals <- c(min(val.plsr.output$LPI), max(val.plsr.output$UPI))
 par(mfrow=c(1,1), mar=c(4.2,5.3,1,0.4), oma=c(0, 0.1, 0, 0.2))
-plotCI(val.plsr.output$PLSR_Predicted,val.plsr.output[,inVar], 
+plotrix::plotCI(val.plsr.output$PLSR_Predicted,val.plsr.output[,inVar], 
        li=val.plsr.output$LPI, ui=val.plsr.output$UPI, gap=0.009,sfrac=0.004, 
        lwd=1.6, xlim=c(rng_vals[1], rng_vals[2]), ylim=c(rng_vals[1], rng_vals[2]), 
-       err="x", pch=21, col="black", pt.bg=alpha("grey70",0.7), scol="grey50",
+       err="x", pch=21, col="black", pt.bg=scales::alpha("grey70",0.7), scol="grey50",
        cex=2, xlab=paste0("Predicted ", paste(inVar), " (units)"),
        ylab=paste0("Observed ", paste(inVar), " (units)"),
        cex.axis=1.5,cex.lab=1.8)
@@ -870,7 +842,7 @@ legend("topleft", legend=expr, bty="n", cex=1.5)
 box(lwd=2.2)
 ```
 
-![](spectra-trait_neon_lma_plsr_example_files/figure-gfm/unnamed-chunk-15-1.png)<!-- -->
+![](neon_lma_plsr_example_files/figure-gfm/unnamed-chunk-15-1.png)<!-- -->
 
 ``` r
 dev.copy(png,file.path(outdir,paste0(inVar,"_PLSR_Validation_Scatterplot.png")), 
@@ -954,7 +926,7 @@ print("**** PLSR output files: ")
     ## [1] "**** PLSR output files: "
 
 ``` r
-list.files(outdir)[grep(pattern = inVar, list.files(outdir))]
+print(list.files(outdir)[grep(pattern = inVar, list.files(outdir))])
 ```
 
     ##  [1] "LMA_gDW_m2_Cal_PLSR_Dataset.csv"                 
