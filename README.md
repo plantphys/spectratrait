@@ -13,6 +13,12 @@ https://ecosml.org/package/github/TESTgroup-BNL/PLSR_for_plant_trait_prediction
 ### Package authors:
 Julien Lamour, Jeremiah Anderson, Ken Davidson, Shawn P. Serbin
 
+### Getting started:
+Software requirements: R software (version xxx or above) and preferred operating environment (e.g. RStudio). 
+Load code into operating environment: how should this be done? Can someone add? (I hacked my way around this by cut and paste, but is there a better way?).
+Initial run to install packages: Step 1 in the example code will check for tools and packages and install what is required. An internet connection is required to run this step. The user will be required to respond to several prompts. (Suggested responses for standard set up; 1, Yes). 
+Dealing with errors: This code was tested across a variety of operating systems and environments. In the case where most packages were being installed for the first time running subsequent Steps resulted in "could not fund function" errors in some instances. To avoid these errors it is recommended that the user restart their operating environment after installing packages in Step 1.  
+
 ### Depends: 
 ggplot2 (>= 3.3.2), remotes (>= 2.2.0), devtools (>= 2.3.1), readr (>= 1.3.1), RCurl (>= 1.98-1.2), httr (>= 1.4.2), pls (>= 2.7-2), 
 dplyr (>= 1.0.1), reshape2 (>= 1.4.4), here (>= 0.1), plotrix (>= 3.7-8), gridExtra (>= 2.3), scales (>= 1.1.1)
