@@ -13,8 +13,9 @@ https://ecosml.org/package/github/TESTgroup-BNL/PLSR_for_plant_trait_prediction
 ### Package authors:
 Julien Lamour, Jeremiah Anderson, Ken Davidson, Shawn P. Serbin
 
-### Getting started:
-* Software requirements: R software (version xxx or above) and preferred operating environment (e.g. RStudio). 
+### Getting started, tips and tricks:
+* If you are new to R you should start by reading https://support.rstudio.com/hc/en-us/articles/201141096-Getting-Started-with-R && https://www.dataquest.io/blog/tutorial-getting-started-with-r-and-rstudio/
+* Software requirements: R software (version 4.0 or above) and preferred operating environment (e.g. RStudio). 
 * Load code into operating environment: how should this be done? Can someone add? (I hacked my way around this by cut and paste, but is there a better way?).
 * Initial run to install packages: Step 1 in the example code will check for tools and packages and install what is required. An internet connection is required to run this step. The user will be required to respond to several prompts. (Suggested responses for standard set up; 1, Yes). 
 * Dealing with errors: This code was tested across a variety of operating systems and environments. In the case where most packages were being installed for the first time running subsequent Steps resulted in "could not fund function" errors in some instances. To avoid these errors it is recommended that the user restart their operating environment after installing packages in Step 1.  
@@ -77,3 +78,15 @@ DOI: https://doi.org/doi:10.21232/9nr6-sq54 <br>
 Rpubs LMA example output: https://rpubs.com/sserbin/721898 <br>
 Rpubs LeafN example output: https://rpubs.com/sserbin/721878 <br>
 Rpubs LeafN bootstrap example output: https://rpubs.com/sserbin/721908
+
+4) Leaf spectra, structural and biochemical leaf traits of eight crop species <br>
+EcoSIS URL: https://ecosis.org/package/leaf-spectra--structural-and-biochemical-leaf-traits-of-eight-crop-species <br>
+EcoSIS ID: 25770ad9-d47c-428b-bf99-d1543a4b0ec9 <br>
+DOI: https://doi.org/doi:10.21232/C2GM2Z <br>
+
+5) Canopy Spectra to Map Foliar Functional Traits over NEON domains in eastern United States <br>
+Target variable: leaf nitrogen <br>
+EcoSIS URL: https://ecosis.org/package/canopy-spectra-to-map-foliar-functional-traits-over-neon-domains-in-eastern-united-states <br>
+EcoSIS ID: b9dbf3db-5b9c-4ab2-88c2-26c8b39d0903 <br>
+DOI: https://doi.org/doi:10.21232/e2jt-5209 <br>
+Rpubs leaf nitrogen example output: https://rpubs.com/sserbin/728124
