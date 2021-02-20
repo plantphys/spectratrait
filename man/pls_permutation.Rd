@@ -9,8 +9,8 @@ pls_permutation(
   dataset = NULL,
   maxComps = 20,
   iterations = 20,
-  seg = 100,
-  prop = 0.7
+  prop = 0.7,
+  verbose = FALSE
 )
 }
 \arguments{
@@ -20,9 +20,9 @@ pls_permutation(
 
 \item{iterations}{how many different permutations to run}
 
-\item{seg}{currently unused - should be removed from this function call}
-
 \item{prop}{proportion of data to preserve for each permutation}
+
+\item{verbose}{Report to terminal current iteration or run silently? TRUE/FALSE}
 }
 \description{
 See Serbin et al. (2019). DOI: https://doi.org/10.1111/nph.16123

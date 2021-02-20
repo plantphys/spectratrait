@@ -25,7 +25,7 @@ find_optimal_components <- function(dataset=NULL, method="pls", maxComps=20, ite
   }
   if(method=="firstPlateau") {
     press.out <- pls_permutation(dataset=dataset, maxComps=maxComps, iterations=iterations, 
-                                 seg=seg, prop=prop)
+                                 prop=prop)
     # PRESS plot
     pressDF <- as.data.frame(press.out$PRESS)
     names(pressDF) <- as.character(seq(maxComps))
@@ -51,7 +51,7 @@ find_optimal_components <- function(dataset=NULL, method="pls", maxComps=20, ite
   }
   if(method=="firstMin") {
     press.out <- pls_permutation(dataset=dataset, maxComps=maxComps, iterations=iterations, 
-                                 seg=seg, prop=prop)
+                                 prop=prop)
     # PRESS plot
     pressDF <- as.data.frame(press.out$PRESS)
     names(pressDF) <- as.character(seq(maxComps))

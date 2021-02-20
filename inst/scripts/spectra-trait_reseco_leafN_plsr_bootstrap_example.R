@@ -20,14 +20,8 @@
 
 #--------------------------------------------------------------------------------------------------#
 ### Load libraries
-# make sure required tools are available 
-req.packages <- c("devtools")
-new.packages <- req.packages[!(req.packages %in% installed.packages()[,"Package"])]
-if(length(new.packages)) install.packages(new.packages, dependencies=c("Depends", "Imports",
-                                                                       "LinkingTo"))
-# install spectratrait package
-devtools::install_github(repo = "TESTgroup-BNL/PLSR_for_plant_trait_prediction", dependencies=TRUE)
-list.of.packages <- c("pls","dplyr","reshape2","here","plotrix","ggplot2","gridExtra","spectratrait")
+list.of.packages <- c("pls","dplyr","reshape2","here","plotrix","ggplot2","gridExtra",
+                      "spectratrait")
 invisible(lapply(list.of.packages, library, character.only = TRUE))
 #--------------------------------------------------------------------------------------------------#
 
@@ -339,7 +333,8 @@ if(grepl("Windows", sessionInfo()$running)){
 iterations <- 500    # how many permutation iterations to run
 prop <- 0.70          # fraction of training data to keep for each iteration
 plsr_permutation <- spectratrait::pls_permutation(dataset=cal.plsr.data, maxComps=nComps, 
-                                                  iterations=iterations, prop=prop)
+                                                  iterations=iterations, prop=prop, 
+                                                  verbose=FALSE)
 bootstrap_intercept <- plsr_permutation$coef_array[1,,nComps]
 hist(bootstrap_intercept)
 bootstrap_coef <- plsr_permutation$coef_array[2:length(plsr_permutation$coef_array[,1,nComps]),
