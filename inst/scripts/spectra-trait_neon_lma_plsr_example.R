@@ -187,12 +187,13 @@ iterations <- 40
 prop <- 0.70
 if (method=="pls") {
   nComps <- spectratrait::find_optimal_components(dataset=cal.plsr.data, method=method, 
-                                                  maxComps=maxComps, seg=seg, random_seed=random_seed)
+                                                  maxComps=maxComps, seg=seg, 
+                                                  random_seed=random_seed)
   print(paste0("*** Optimal number of components: ", nComps))
 } else {
   nComps <- spectratrait::find_optimal_components(dataset=cal.plsr.data, method=method, 
-                                                  maxComps=maxComps, iterations=iterations, seg=seg, 
-                                                  prop=prop, random_seed=random_seed)
+                                                  maxComps=maxComps, iterations=iterations, 
+                                                  seg=seg, prop=prop, random_seed=random_seed)
 }
 dev.copy(png,file.path(outdir,paste0(paste0(inVar,"_PLSR_Component_Selection.png"))), 
          height=2800, width=3400,  res=340)
@@ -251,11 +252,13 @@ val.RMSEP <- round(sqrt(mean(val.plsr.output$PLSR_Residuals^2)),2)
 rng_quant <- quantile(cal.plsr.output[,inVar], probs = c(0.001, 0.999))
 cal_scatter_plot <- ggplot(cal.plsr.output, aes(x=PLSR_CV_Predicted, y=get(inVar))) + 
   theme_bw() + geom_point() + geom_abline(intercept = 0, slope = 1, color="dark grey", 
-                                          linetype="dashed", size=1.5) + xlim(rng_quant[1], rng_quant[2]) + 
+                                          linetype="dashed", size=1.5) + xlim(rng_quant[1], 
+                                                                              rng_quant[2]) + 
   ylim(rng_quant[1], rng_quant[2]) +
   labs(x=paste0("Predicted ", paste(inVar), " (units)"),
        y=paste0("Observed ", paste(inVar), " (units)"),
-       title=paste0("Calibration: ", paste0("Rsq = ", cal.R2), "; ", paste0("RMSEP = ", cal.RMSEP))) +
+       title=paste0("Calibration: ", paste0("Rsq = ", cal.R2), "; ", paste0("RMSEP = ", 
+                                                                            cal.RMSEP))) +
   theme(axis.text=element_text(size=18), legend.position="none",
         axis.title=element_text(size=20, face="bold"), 
         axis.text.x = element_text(angle = 0,vjust = 0.5),
@@ -273,11 +276,13 @@ cal_resid_histogram <- ggplot(cal.plsr.output, aes(x=PLSR_CV_Residuals)) +
 rng_quant <- quantile(val.plsr.output[,inVar], probs = c(0.001, 0.999))
 val_scatter_plot <- ggplot(val.plsr.output, aes(x=PLSR_Predicted, y=get(inVar))) + 
   theme_bw() + geom_point() + geom_abline(intercept = 0, slope = 1, color="dark grey", 
-                                          linetype="dashed", size=1.5) + xlim(rng_quant[1], rng_quant[2]) + 
+                                          linetype="dashed", size=1.5) + xlim(rng_quant[1], 
+                                                                              rng_quant[2]) + 
   ylim(rng_quant[1], rng_quant[2]) +
   labs(x=paste0("Predicted ", paste(inVar), " (units)"),
        y=paste0("Observed ", paste(inVar), " (units)"),
-       title=paste0("Validation: ", paste0("Rsq = ", val.R2), "; ", paste0("RMSEP = ", val.RMSEP))) +
+       title=paste0("Validation: ", paste0("Rsq = ", val.R2), "; ", paste0("RMSEP = ", 
+                                                                           val.RMSEP))) +
   theme(axis.text=element_text(size=18), legend.position="none",
         axis.title=element_text(size=20, face="bold"), 
         axis.text.x = element_text(angle = 0,vjust = 0.5),
@@ -332,7 +337,7 @@ jk.plsr.out <- pls::plsr(as.formula(paste(inVar,"~","Spectra")), scale=FALSE,
                          center=TRUE, ncomp=nComps, 
                          validation="CV", segments = seg, 
                          segment.type="interleaved", trace=FALSE, 
-                      jackknife=TRUE, data=cal.plsr.data)
+                         jackknife=TRUE, data=cal.plsr.data)
 pls.options(parallel = NULL)
 
 Jackknife_coef <- spectratrait::f.coef.valid(plsr.out = jk.plsr.out, data_plsr = cal.plsr.data, 

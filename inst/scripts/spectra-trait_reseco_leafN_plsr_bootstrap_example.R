@@ -334,7 +334,7 @@ iterations <- 500    # how many permutation iterations to run
 prop <- 0.70          # fraction of training data to keep for each iteration
 plsr_permutation <- spectratrait::pls_permutation(dataset=cal.plsr.data, maxComps=nComps, 
                                                   iterations=iterations, prop=prop, 
-                                                  verbose=FALSE)
+                                                  verbose=TRUE)
 bootstrap_intercept <- plsr_permutation$coef_array[1,,nComps]
 hist(bootstrap_intercept)
 bootstrap_coef <- plsr_permutation$coef_array[2:length(plsr_permutation$coef_array[,1,nComps]),

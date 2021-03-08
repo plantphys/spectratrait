@@ -2,11 +2,11 @@
 title: Spectra-trait PLSR example using leaf-level spectra and specific leaf area (SLA) data from more than 40 species grassland species comprising both herbs and graminoids. 
 author: "Shawn P. Serbin, Julien Lamour, & Jeremiah Anderson"
 output:
-  pdf_document: default
+  github_document: default
   html_document:
     df_print: paged
   html_notebook: default
-  github_document: default
+  pdf_document: default
 params:
   date: !r Sys.Date()
 ---
@@ -19,16 +19,10 @@ knitr::opts_chunk$set(echo = TRUE)
 This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook to illustrate how to retrieve a dataset from the EcoSIS spectral database, choose the "optimal" number of plsr components, and fit a plsr model for specific leaf area (SLA). In this example, the plants were cultivated in an outdoor setting in the botanical garden of the KIT using 40x40 cm pots with an standardized substrate. The data was measured on a weekly basis (the timestamp is included in the dataset). 
 
 ### Getting Started
-### Installation
-```{r, eval=TRUE, echo=FALSE}
-### Install and load required R packages
-req.packages <- c("devtools")
-new.packages <- req.packages[!(req.packages %in% installed.packages()[,"Package"])]
-if(length(new.packages)) install.packages(new.packages, dependencies=c("Depends", "Imports",
-                                                                       "LinkingTo"))
-# install spectratrait package
-devtools::install_github(repo = "TESTgroup-BNL/PLSR_for_plant_trait_prediction", dependencies=TRUE)
-list.of.packages <- c("pls","dplyr","reshape2","here","plotrix","ggplot2","gridExtra","spectratrait")
+### Load libraries
+```{r, eval=TRUE, echo=TRUE}
+list.of.packages <- c("pls","dplyr","reshape2","here","plotrix","ggplot2","gridExtra",
+                      "spectratrait")
 invisible(lapply(list.of.packages, library, character.only = TRUE))
 ```
 

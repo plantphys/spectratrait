@@ -16,10 +16,13 @@ basis (the timestamp is included in the dataset).
 
 ### Getting Started
 
-### Installation
+### Load libraries
 
-    ## Skipping install of 'spectratrait' from a github remote, the SHA1 (d00228f2) has not changed since last install.
-    ##   Use `force = TRUE` to force installation
+``` r
+list.of.packages <- c("pls","dplyr","reshape2","here","plotrix","ggplot2","gridExtra",
+                      "spectratrait")
+invisible(lapply(list.of.packages, library, character.only = TRUE))
+```
 
     ## 
     ## Attaching package: 'pls'
@@ -82,7 +85,7 @@ output_dir <- "tempdir"
 
 ### Set working directory (scratch space)
 
-    ## [1] "Output directory: /private/var/folders/xp/h3k9vf3n2jx181ts786_yjrn9c2gjq/T/RtmpH1BTHj"
+    ## [1] "Output directory: /private/var/folders/xp/h3k9vf3n2jx181ts786_yjrn9c2gjq/T/RtmpDEk1zE"
 
 ### Grab data from EcoSIS
 
@@ -118,36 +121,33 @@ head(dat_raw)
 ```
 
     ## # A tibble: 6 x 2,114
-    ##   `Anthocyanin co… `Anthocyanin co… `Carotenoid con… `Carotenoid con…
-    ##              <dbl>            <dbl>            <dbl>            <dbl>
-    ## 1          0.00106            0.997          0.00799             7.49
-    ## 2          0.00357            1.22           0.0221              7.53
-    ## 3          0.00252            1.14           0.0188              8.55
-    ## 4          0.00310            2.26           0.0158             11.5 
-    ## 5          0.00412            1.73           0.0216              9.08
-    ## 6          0.00397            1.02           0.0336              8.66
-    ## # … with 2,110 more variables: `Chlorophyll concentration (mg/g)` <dbl>,
-    ## #   `Chlorophyll content ( g/cm )` <dbl>, `LDMC (g/g)` <dbl>, `LFA (mg/cm
-    ## #   )` <dbl>, `LWC (mg/cm )` <dbl>, `SLA (g/cm )` <dbl>, `growth form` <chr>,
-    ## #   species <chr>, timestamp <chr>, `400` <dbl>, `401` <dbl>, `402` <dbl>,
-    ## #   `403` <dbl>, `404` <dbl>, `405` <dbl>, `406` <dbl>, `407` <dbl>,
-    ## #   `408` <dbl>, `409` <dbl>, `410` <dbl>, `411` <dbl>, `412` <dbl>,
-    ## #   `413` <dbl>, `414` <dbl>, `415` <dbl>, `416` <dbl>, `417` <dbl>,
-    ## #   `418` <dbl>, `419` <dbl>, `420` <dbl>, `421` <dbl>, `422` <dbl>,
-    ## #   `423` <dbl>, `424` <dbl>, `425` <dbl>, `426` <dbl>, `427` <dbl>,
-    ## #   `428` <dbl>, `429` <dbl>, `430` <dbl>, `431` <dbl>, `432` <dbl>,
-    ## #   `433` <dbl>, `434` <dbl>, `435` <dbl>, `436` <dbl>, `437` <dbl>,
-    ## #   `438` <dbl>, `439` <dbl>, `440` <dbl>, `441` <dbl>, `442` <dbl>,
-    ## #   `443` <dbl>, `444` <dbl>, `445` <dbl>, `446` <dbl>, `447` <dbl>,
-    ## #   `448` <dbl>, `449` <dbl>, `450` <dbl>, `451` <dbl>, `452` <dbl>,
-    ## #   `453` <dbl>, `454` <dbl>, `455` <dbl>, `456` <dbl>, `457` <dbl>,
-    ## #   `458` <dbl>, `459` <dbl>, `460` <dbl>, `461` <dbl>, `462` <dbl>,
-    ## #   `463` <dbl>, `464` <dbl>, `465` <dbl>, `466` <dbl>, `467` <dbl>,
-    ## #   `468` <dbl>, `469` <dbl>, `470` <dbl>, `471` <dbl>, `472` <dbl>,
-    ## #   `473` <dbl>, `474` <dbl>, `475` <dbl>, `476` <dbl>, `477` <dbl>,
-    ## #   `478` <dbl>, `479` <dbl>, `480` <dbl>, `481` <dbl>, `482` <dbl>,
-    ## #   `483` <dbl>, `484` <dbl>, `485` <dbl>, `486` <dbl>, `487` <dbl>,
-    ## #   `488` <dbl>, `489` <dbl>, `490` <dbl>, …
+    ##   `Anthocyanin concen… `Anthocyanin cont… `Carotenoid concen… `Carotenoid conte…
+    ##                  <dbl>              <dbl>               <dbl>              <dbl>
+    ## 1              0.00106              0.997             0.00799               7.49
+    ## 2              0.00357              1.22              0.0221                7.53
+    ## 3              0.00252              1.14              0.0188                8.55
+    ## 4              0.00310              2.26              0.0158               11.5 
+    ## 5              0.00412              1.73              0.0216                9.08
+    ## 6              0.00397              1.02              0.0336                8.66
+    ## # … with 2,110 more variables: Chlorophyll concentration (mg/g) <dbl>,
+    ## #   Chlorophyll content ( g/cm ) <dbl>, LDMC (g/g) <dbl>, LFA (mg/cm ) <dbl>,
+    ## #   LWC (mg/cm ) <dbl>, SLA (g/cm ) <dbl>, growth form <chr>, species <chr>,
+    ## #   timestamp <chr>, 400 <dbl>, 401 <dbl>, 402 <dbl>, 403 <dbl>, 404 <dbl>,
+    ## #   405 <dbl>, 406 <dbl>, 407 <dbl>, 408 <dbl>, 409 <dbl>, 410 <dbl>,
+    ## #   411 <dbl>, 412 <dbl>, 413 <dbl>, 414 <dbl>, 415 <dbl>, 416 <dbl>,
+    ## #   417 <dbl>, 418 <dbl>, 419 <dbl>, 420 <dbl>, 421 <dbl>, 422 <dbl>,
+    ## #   423 <dbl>, 424 <dbl>, 425 <dbl>, 426 <dbl>, 427 <dbl>, 428 <dbl>,
+    ## #   429 <dbl>, 430 <dbl>, 431 <dbl>, 432 <dbl>, 433 <dbl>, 434 <dbl>,
+    ## #   435 <dbl>, 436 <dbl>, 437 <dbl>, 438 <dbl>, 439 <dbl>, 440 <dbl>,
+    ## #   441 <dbl>, 442 <dbl>, 443 <dbl>, 444 <dbl>, 445 <dbl>, 446 <dbl>,
+    ## #   447 <dbl>, 448 <dbl>, 449 <dbl>, 450 <dbl>, 451 <dbl>, 452 <dbl>,
+    ## #   453 <dbl>, 454 <dbl>, 455 <dbl>, 456 <dbl>, 457 <dbl>, 458 <dbl>,
+    ## #   459 <dbl>, 460 <dbl>, 461 <dbl>, 462 <dbl>, 463 <dbl>, 464 <dbl>,
+    ## #   465 <dbl>, 466 <dbl>, 467 <dbl>, 468 <dbl>, 469 <dbl>, 470 <dbl>,
+    ## #   471 <dbl>, 472 <dbl>, 473 <dbl>, 474 <dbl>, 475 <dbl>, 476 <dbl>,
+    ## #   477 <dbl>, 478 <dbl>, 479 <dbl>, 480 <dbl>, 481 <dbl>, 482 <dbl>,
+    ## #   483 <dbl>, 484 <dbl>, 485 <dbl>, 486 <dbl>, 487 <dbl>, 488 <dbl>,
+    ## #   489 <dbl>, 490 <dbl>, …
 
 ``` r
 names(dat_raw)[1:40]
@@ -188,18 +188,18 @@ head(sample_info)
 ```
 
     ## # A tibble: 6 x 13
-    ##   `Anthocyanin co… `Anthocyanin co… `Carotenoid con… `Carotenoid con…
-    ##              <dbl>            <dbl>            <dbl>            <dbl>
-    ## 1          0.00106            0.997          0.00799             7.49
-    ## 2          0.00357            1.22           0.0221              7.53
-    ## 3          0.00252            1.14           0.0188              8.55
-    ## 4          0.00310            2.26           0.0158             11.5 
-    ## 5          0.00412            1.73           0.0216              9.08
-    ## 6          0.00397            1.02           0.0336              8.66
-    ## # … with 9 more variables: `Chlorophyll concentration (mg/g)` <dbl>,
-    ## #   `Chlorophyll content ( g/cm )` <dbl>, `LDMC (g/g)` <dbl>, `LFA (mg/cm
-    ## #   )` <dbl>, `LWC (mg/cm )` <dbl>, `SLA (g/cm )` <dbl>, `growth form` <chr>,
-    ## #   species <chr>, timestamp <chr>
+    ##   `Anthocyanin concen… `Anthocyanin cont… `Carotenoid concen… `Carotenoid conte…
+    ##                  <dbl>              <dbl>               <dbl>              <dbl>
+    ## 1              0.00106              0.997             0.00799               7.49
+    ## 2              0.00357              1.22              0.0221                7.53
+    ## 3              0.00252              1.14              0.0188                8.55
+    ## 4              0.00310              2.26              0.0158               11.5 
+    ## 5              0.00412              1.73              0.0216                9.08
+    ## 6              0.00397              1.02              0.0336                8.66
+    ## # … with 9 more variables: Chlorophyll concentration (mg/g) <dbl>,
+    ## #   Chlorophyll content ( g/cm ) <dbl>, LDMC (g/g) <dbl>, LFA (mg/cm ) <dbl>,
+    ## #   LWC (mg/cm ) <dbl>, SLA (g/cm ) <dbl>, growth form <chr>, species <chr>,
+    ## #   timestamp <chr>
 
 ``` r
 sample_info2 <- sample_info %>%

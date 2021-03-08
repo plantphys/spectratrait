@@ -1,6 +1,6 @@
-Spectra-trait PLSR example using leaf-level spectra and leaf mass per
-area (LMA) data from 36 species growing in Rosa rugosa invaded coastal
-grassland communities in Belgium
+Spectra-trait PLSR example using leaf-level spectra and leaf nitrogen
+content (Narea, g/m2) data from 36 species growing in Rosa rugosa
+invaded coastal grassland communities in Belgium
 ================
 Shawn P. Serbin, Julien Lamour, & Jeremiah Anderson
 
@@ -9,11 +9,11 @@ Shawn P. Serbin, Julien Lamour, & Jeremiah Anderson
 This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook to
 illustrate how to retrieve a dataset from the EcoSIS spectral database,
 choose the “optimal” number of plsr components, and fit a plsr model for
-leaf-mass area (LMA)
+leaf nitrogen content (Narea, g/m2)
 
 ### Getting Started
 
-### Step 1. Load libraries to run example script
+### Load libraries
 
 ``` r
 list.of.packages <- c("pls","dplyr","reshape2","here","plotrix","ggplot2","gridExtra",
@@ -48,7 +48,7 @@ invisible(lapply(list.of.packages, library, character.only = TRUE))
     ## 
     ##     combine
 
-### Step 2. Setup other functions and options
+### Setup other functions and options
 
 ``` r
 ### Setup other functions and options
@@ -68,7 +68,7 @@ pls::pls.options("plsralg")
 opar <- par(no.readonly = T)
 
 # What is the target variable?
-inVar <- "LMA_g_m2"
+inVar <- "Narea_g_m2"
 
 # What is the source dataset from EcoSIS?
 ecosis_id <- "9db4c5a2-7eac-4e1e-8859-009233648e89"
@@ -80,11 +80,11 @@ ecosis_id <- "9db4c5a2-7eac-4e1e-8859-009233648e89"
 output_dir <- "tempdir"
 ```
 
-### Step 3. Set working directory (scratch space)
+### Set working directory (scratch space)
 
-    ## [1] "/private/var/folders/xp/h3k9vf3n2jx181ts786_yjrn9c2gjq/T/Rtmp1Hsn79"
+    ## [1] "/private/var/folders/xp/h3k9vf3n2jx181ts786_yjrn9c2gjq/T/RtmprDWsoy"
 
-### Step 4. Pull example dataset from EcoSIS (ecosis.org)
+### Grab data from EcoSIS
 
 ``` r
 print(paste0("Output directory: ",getwd()))  # check wd
@@ -93,7 +93,6 @@ print(paste0("Output directory: ",getwd()))  # check wd
     ## [1] "Output directory: /Users/sserbin/Data/GitHub/PLSR_for_plant_trait_prediction/vignettes"
 
 ``` r
-### Get source dataset from EcoSIS
 dat_raw <- spectratrait::get_ecosis_data(ecosis_id = ecosis_id)
 ```
 
@@ -196,7 +195,7 @@ names(dat_raw)[1:40]
     ## [39] "375"                                           
     ## [40] "376"
 
-### Step 5. Create full plsr dataset
+### Create full plsr dataset
 
 ``` r
 ### Create plsr dataset
@@ -229,44 +228,48 @@ head(sample_info)
 ``` r
 sample_info2 <- sample_info %>%
   select(Plant_Species=`Latin Species`,Species_Code=`species code`,Plot=`plot code`,
-         LMA_g_cm2=`Leaf mass per area (g/cm2)`)
+         Narea_mg_mm2=`Leaf nitrogen content per leaf area (mg/mm2)`)
 sample_info2 <- sample_info2 %>%
-  mutate(LMA_g_m2=LMA_g_cm2*10000)
+#  mutate(Narea_g_m2=Narea_mg_mm2*(0.001/1e-6)) # based on orig units should be this but conversion wrong
+  mutate(Narea_g_m2=Narea_mg_mm2*100) # this assumes orig units were g/mm2 or mg/cm2
 head(sample_info2)
 ```
 
     ## # A tibble: 6 x 5
-    ##   Plant_Species         Species_Code Plot  LMA_g_cm2 LMA_g_m2
-    ##   <chr>                 <chr>        <chr>     <dbl>    <dbl>
-    ## 1 Arrhenatherum elatius Arrela       DC1     0.00342     34.2
-    ## 2 Bromus sterilis       Broste       DC1     0.00282     28.2
-    ## 3 Jacobaea vulgaris     Jacvul       DC1     0.00417     41.7
-    ## 4 Rubus caesius         Rubcae       DC1     0.00566     56.6
-    ## 5 Arrhenatherum elatius Arrela       DC2     0.00361     36.1
-    ## 6 Crepis capillaris     Creves       DC2     0.00283     28.3
+    ##   Plant_Species         Species_Code Plot  Narea_mg_mm2 Narea_g_m2
+    ##   <chr>                 <chr>        <chr>        <dbl>      <dbl>
+    ## 1 Arrhenatherum elatius Arrela       DC1        0.0126       1.26 
+    ## 2 Bromus sterilis       Broste       DC1        0.00682      0.682
+    ## 3 Jacobaea vulgaris     Jacvul       DC1        0.0102       1.02 
+    ## 4 Rubus caesius         Rubcae       DC1        0.0121       1.21 
+    ## 5 Arrhenatherum elatius Arrela       DC2        0.0117       1.17 
+    ## 6 Crepis capillaris     Creves       DC2        0.00877      0.877
 
 ``` r
 plsr_data <- data.frame(sample_info2,Spectra)
 rm(sample_info,sample_info2,Spectra)
 ```
 
-### Step 6. Example data cleaning.
+#### Example data cleaning.
 
 ``` r
-#### Example data cleaning.  End user needs to do what's appropriate for their 
-#### data.  This may be an iterative process.
+#### End user needs to do what's appropriate for their data.  
+#### This may be an iterative process.
 # Keep only complete rows of inVar and spec data before fitting
 plsr_data <- plsr_data[complete.cases(plsr_data[,names(plsr_data) %in% 
                                                   c(inVar,paste0("Wave_",wv))]),]
 ```
 
-### Step 7. Create cal/val datasets
+### Create cal/val datasets
 
 ``` r
+### Create cal/val datasets
+## Make a stratified random sampling in the strata USDA_Species_Code and Domain
+
 method <- "dplyr" #base/dplyr
 # base R - a bit slow
 # dplyr - much faster
-split_data <- spectratrait::create_data_split(dataset=plsr_data, approach=method, split_seed=7529075, 
+split_data <- spectratrait::create_data_split(dataset=plsr_data, approach=method, split_seed=1245565, 
                                 prop=0.8, group_variables="Species_Code")
 names(split_data)
 ```
@@ -278,33 +281,33 @@ cal.plsr.data <- split_data$cal_data
 head(cal.plsr.data)[1:8]
 ```
 
-    ##        Plant_Species Species_Code Plot  LMA_g_cm2 LMA_g_m2 Wave_500 Wave_501
-    ## 1 Ammophila arenaria       Ammare  MC2 0.01679492 167.9492 0.135785  0.13685
-    ## 2 Ammophila arenaria       Ammare  WC3 0.01844376 184.4376 0.151750  0.15275
-    ## 3 Ammophila arenaria       Ammare  MC4 0.02030190 203.0190 0.156830  0.15790
-    ## 4 Ammophila arenaria       Ammare  ZC2 0.01591894 159.1894 0.144450  0.14525
-    ## 5 Ammophila arenaria       Ammare  ZC1 0.01483469 148.3469 0.147665  0.14910
-    ## 6 Ammophila arenaria       Ammare  ZC3 0.01802409 180.2409 0.130885  0.13175
-    ##   Wave_502
-    ## 1 0.138150
-    ## 2 0.154150
-    ## 3 0.159065
-    ## 4 0.146220
-    ## 5 0.150330
-    ## 6 0.132750
+    ##        Plant_Species Species_Code Plot Narea_mg_mm2 Narea_g_m2 Wave_500
+    ## 1 Ammophila arenaria       Ammare  ZC3   0.03240495   3.240495 0.130885
+    ## 2 Ammophila arenaria       Ammare  MC2   0.02806279   2.806279 0.135785
+    ## 3 Ammophila arenaria       Ammare  ZC1   0.02041612   2.041612 0.147665
+    ## 4 Ammophila arenaria       Ammare  MC1   0.02426549   2.426549 0.142765
+    ## 5 Ammophila arenaria       Ammare  WC3   0.02807281   2.807281 0.151750
+    ## 6 Ammophila arenaria       Ammare  WR3   0.02286678   2.286678 0.150850
+    ##   Wave_501 Wave_502
+    ## 1  0.13175 0.132750
+    ## 2  0.13685 0.138150
+    ## 3  0.14910 0.150330
+    ## 4  0.14390 0.145200
+    ## 5  0.15275 0.154150
+    ## 6  0.15185 0.152815
 
 ``` r
 val.plsr.data <- split_data$val_data
 head(val.plsr.data)[1:8]
 ```
 
-    ##          Plant_Species Species_Code Plot   LMA_g_cm2  LMA_g_m2   Wave_500
-    ## 184  Jacobaea vulgaris       Jacvul  WC2 0.003551614  35.51614 0.06736887
-    ## 185 Potentilla reptans       Potrep  WC2 0.005586320  55.86320 0.07125000
-    ## 186      Rubus caesius       Rubcae  WC2 0.005803902  58.03902 0.05993560
-    ## 187      Urtica dioica       Urtdio  WC2 0.005215705  52.15705 0.06508300
-    ## 188 Ammophila arenaria       Ammare  WC3 0.018443757 184.43757 0.15175000
-    ## 189  Jacobaea vulgaris       Jacvul  WC3 0.004980002  49.80002 0.06805547
+    ##          Plant_Species Species_Code Plot Narea_mg_mm2 Narea_g_m2   Wave_500
+    ## 184  Jacobaea vulgaris       Jacvul  WC2  0.008756996  0.8756996 0.06736887
+    ## 185 Potentilla reptans       Potrep  WC2  0.010313464  1.0313464 0.07125000
+    ## 186      Rubus caesius       Rubcae  WC2  0.007968454  0.7968454 0.05993560
+    ## 187      Urtica dioica       Urtdio  WC2  0.012737560  1.2737560 0.06508300
+    ## 188 Ammophila arenaria       Ammare  WC3  0.028072806  2.8072806 0.15175000
+    ## 189  Jacobaea vulgaris       Jacvul  WC3  0.010251687  1.0251687 0.06805547
     ##       Wave_501   Wave_502
     ## 184 0.06870667 0.07014220
     ## 185 0.07235000 0.07368350
@@ -329,15 +332,12 @@ print(paste("Val observations: ",dim(val.plsr.data)[1],sep=""))
     ## [1] "Val observations: 73"
 
 ``` r
-text_loc <- c(max(hist(cal.plsr.data[,paste0(inVar)], plot=FALSE)$counts),
-              max(hist(cal.plsr.data[,paste0(inVar)], plot=FALSE)$mids))
 cal_hist_plot <- qplot(cal.plsr.data[,paste0(inVar)],geom="histogram",
-                       main = paste0("Calibration Histogram for ",inVar),
+                       main = paste0("Cal. Histogram for ",inVar),
                        xlab = paste0(inVar),ylab = "Count",fill=I("grey50"),col=I("black"),
-                       alpha=I(.7)) + 
-  annotate("text", x=text_loc[2], y=text_loc[1], label= "1.",size=10)
+                       alpha=I(.7))
 val_hist_plot <- qplot(val.plsr.data[,paste0(inVar)],geom="histogram",
-                       main = paste0("Validation Histogram for ",inVar),
+                       main = paste0("Val. Histogram for ",inVar),
                        xlab = paste0(inVar),ylab = "Count",fill=I("grey50"),col=I("black"),
                        alpha=I(.7))
 histograms <- grid.arrange(cal_hist_plot, val_hist_plot, ncol=2)
@@ -346,11 +346,13 @@ histograms <- grid.arrange(cal_hist_plot, val_hist_plot, ncol=2)
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-![](reseco_lma_plsr_example_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
+![](reseco_leafN_bootstrap_plsr_example_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
 
 ``` r
 ggsave(filename = file.path(outdir,paste0(inVar,"_Cal_Val_Histograms.png")), plot = histograms, 
-       device="png", width = 30, height = 12, units = "cm", dpi = 300)
+       device="png", width = 30, 
+       height = 12, units = "cm",
+       dpi = 300)
 # output cal/val data
 write.csv(cal.plsr.data,file=file.path(outdir,paste0(inVar,'_Cal_PLSR_Dataset.csv')),
           row.names=FALSE)
@@ -358,7 +360,7 @@ write.csv(val.plsr.data,file=file.path(outdir,paste0(inVar,'_Val_PLSR_Dataset.cs
           row.names=FALSE)
 ```
 
-### Step 8. Create calibration and validation PLSR datasets
+### Create calibration and validation PLSR datasets
 
 ``` r
 ### Format PLSR data for model fitting 
@@ -368,13 +370,13 @@ cal.plsr.data <- data.frame(cal.plsr.data[, which(names(cal.plsr.data) %notin% p
 head(cal.plsr.data)[1:5]
 ```
 
-    ##        Plant_Species Species_Code Plot  LMA_g_cm2 LMA_g_m2
-    ## 1 Ammophila arenaria       Ammare  MC2 0.01679492 167.9492
-    ## 2 Ammophila arenaria       Ammare  WC3 0.01844376 184.4376
-    ## 3 Ammophila arenaria       Ammare  MC4 0.02030190 203.0190
-    ## 4 Ammophila arenaria       Ammare  ZC2 0.01591894 159.1894
-    ## 5 Ammophila arenaria       Ammare  ZC1 0.01483469 148.3469
-    ## 6 Ammophila arenaria       Ammare  ZC3 0.01802409 180.2409
+    ##        Plant_Species Species_Code Plot Narea_mg_mm2 Narea_g_m2
+    ## 1 Ammophila arenaria       Ammare  ZC3   0.03240495   3.240495
+    ## 2 Ammophila arenaria       Ammare  MC2   0.02806279   2.806279
+    ## 3 Ammophila arenaria       Ammare  ZC1   0.02041612   2.041612
+    ## 4 Ammophila arenaria       Ammare  MC1   0.02426549   2.426549
+    ## 5 Ammophila arenaria       Ammare  WC3   0.02807281   2.807281
+    ## 6 Ammophila arenaria       Ammare  WR3   0.02286678   2.286678
 
 ``` r
 val_spec <- as.matrix(val.plsr.data[, which(names(val.plsr.data) %in% paste0("Wave_",wv))])
@@ -383,26 +385,23 @@ val.plsr.data <- data.frame(val.plsr.data[, which(names(val.plsr.data) %notin% p
 head(val.plsr.data)[1:5]
 ```
 
-    ##          Plant_Species Species_Code Plot   LMA_g_cm2  LMA_g_m2
-    ## 184  Jacobaea vulgaris       Jacvul  WC2 0.003551614  35.51614
-    ## 185 Potentilla reptans       Potrep  WC2 0.005586320  55.86320
-    ## 186      Rubus caesius       Rubcae  WC2 0.005803902  58.03902
-    ## 187      Urtica dioica       Urtdio  WC2 0.005215705  52.15705
-    ## 188 Ammophila arenaria       Ammare  WC3 0.018443757 184.43757
-    ## 189  Jacobaea vulgaris       Jacvul  WC3 0.004980002  49.80002
+    ##          Plant_Species Species_Code Plot Narea_mg_mm2 Narea_g_m2
+    ## 184  Jacobaea vulgaris       Jacvul  WC2  0.008756996  0.8756996
+    ## 185 Potentilla reptans       Potrep  WC2  0.010313464  1.0313464
+    ## 186      Rubus caesius       Rubcae  WC2  0.007968454  0.7968454
+    ## 187      Urtica dioica       Urtdio  WC2  0.012737560  1.2737560
+    ## 188 Ammophila arenaria       Ammare  WC3  0.028072806  2.8072806
+    ## 189  Jacobaea vulgaris       Jacvul  WC3  0.010251687  1.0251687
 
-### Step 9. Calibration and Validation spectra plot
+### plot cal and val spectra
 
 ``` r
 par(mfrow=c(1,2)) # B, L, T, R
-spectratrait::f.plot.spec(Z=cal.plsr.data$Spectra,wv=wv,
-            plot_label="Calibration")
-text(550,95,labels = "2.",cex=3)
-spectratrait::f.plot.spec(Z=val.plsr.data$Spectra,wv=wv,
-            plot_label="Validation")
+spectratrait::f.plot.spec(Z=cal.plsr.data$Spectra,wv=wv,plot_label="Calibration")
+spectratrait::f.plot.spec(Z=val.plsr.data$Spectra,wv=wv,plot_label="Validation")
 ```
 
-![](reseco_lma_plsr_example_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
+![](reseco_leafN_bootstrap_plsr_example_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
 
 ``` r
 dev.copy(png,file.path(outdir,paste0(inVar,'_Cal_Val_Spectra.png')), 
@@ -423,7 +422,7 @@ dev.off();
 par(mfrow=c(1,1))
 ```
 
-### Step 10. Use permutation to determine the optimal number of components
+### Use permutation to determine optimal number of components
 
 ``` r
 ### Use permutation to determine the optimal number of components
@@ -433,45 +432,34 @@ if(grepl("Windows", sessionInfo()$running)){
   pls.options(parallel = parallel::detectCores()-1)
 }
 
-method <- "firstMin" #pls, firstPlateau, firstMin
-random_seed <- 7529075
-seg <- 80
+method <- "pls" #pls, firstPlateau, firstMin
+random_seed <- 1245565
+seg <- 50
 maxComps <- 16
-iterations <- 50
+iterations <- 80
 prop <- 0.70
 if (method=="pls") {
+  # pls package approach - faster but estimates more components....
   nComps <- spectratrait::find_optimal_components(dataset=cal.plsr.data, method=method, 
                                                   maxComps=maxComps, seg=seg, 
                                                   random_seed=random_seed)
   print(paste0("*** Optimal number of components: ", nComps))
 } else {
-  nComps <- spectratrait::find_optimal_components(dataset=cal.plsr.data, method=method, 
+  nComps <- spectratrait::find_optimal_components(dataset=cal.plsr.data, method=method,
                                                   maxComps=maxComps, iterations=iterations, 
                                                   seg=seg, prop=prop, 
                                                   random_seed=random_seed)
 }
 ```
 
-    ## [1] "*** Running permutation test.  Please hang tight, this can take awhile ***"
-    ## [1] "Options:"
-    ## [1] "Max Components: 16 Iterations: 50 Data Proportion (percent): 70"
-    ## [1] "*** Providing PRESS and coefficient array output ***"
+    ## [1] "*** Running PLS permutation test ***"
 
-    ## No id variables; using all as measure variables
+![](reseco_leafN_bootstrap_plsr_example_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
 
-    ## [1] "*** Optimal number of components based on t.test: 11"
-
-![](reseco_lma_plsr_example_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
+    ## [1] "*** Optimal number of components: 10"
 
 ``` r
-print("*** Figure 3. Optimal PLSR component selection ***")
-```
-
-    ## [1] "*** Figure 3. Optimal PLSR component selection ***"
-
-``` r
-dev.copy(png,file.path(outdir,paste0(paste0("Figure_3_",inVar,
-                                            "_PLSR_Component_Selection.png"))), 
+dev.copy(png,file.path(outdir,paste0(paste0(inVar,"_PLSR_Component_Selection.png"))), 
          height=2800, width=3400,  res=340)
 ```
 
@@ -485,40 +473,36 @@ dev.off();
     ## quartz_off_screen 
     ##                 2
 
-### Step 11. Fit final model
+### Fit final model
 
 ``` r
-### Fit final model - using leave-one-out cross validation
 plsr.out <- plsr(as.formula(paste(inVar,"~","Spectra")),scale=FALSE,ncomp=nComps,validation="LOO",
                  trace=FALSE,data=cal.plsr.data)
 fit <- plsr.out$fitted.values[,1,nComps]
 pls.options(parallel = NULL)
 
 # External validation fit stats
-text_loc <- c(max(RMSEP(plsr.out, newdata = val.plsr.data)$comps),
-              RMSEP(plsr.out, newdata = val.plsr.data)$val[1])
 par(mfrow=c(1,2)) # B, L, T, R
 pls::RMSEP(plsr.out, newdata = val.plsr.data)
 ```
 
     ## (Intercept)      1 comps      2 comps      3 comps      4 comps      5 comps  
-    ##       37.79        32.71        30.36        23.51        21.58        18.46  
-    ##     6 comps      7 comps      8 comps      9 comps     10 comps     11 comps  
-    ##       15.89        15.44        15.52        15.19        15.14        13.68
+    ##      0.6346       0.5045       0.4645       0.3415       0.3296       0.3037  
+    ##     6 comps      7 comps      8 comps      9 comps     10 comps  
+    ##      0.2703       0.2659       0.2524       0.2450       0.2452
 
 ``` r
 plot(pls::RMSEP(plsr.out,estimate=c("test"),newdata = val.plsr.data), main="MODEL RMSEP",
      xlab="Number of Components",ylab="Model Validation RMSEP",lty=1,col="black",cex=1.5,lwd=2)
-text(text_loc[1],text_loc[2],labels = "4.", cex=2)
 box(lwd=2.2)
 
 pls::R2(plsr.out, newdata = val.plsr.data)
 ```
 
     ## (Intercept)      1 comps      2 comps      3 comps      4 comps      5 comps  
-    ##    -0.06195      0.20461      0.31467      0.58911      0.65365      0.74649  
-    ##     6 comps      7 comps      8 comps      9 comps     10 comps     11 comps  
-    ##     0.81222      0.82276      0.82084      0.82841      0.82945      0.86090
+    ##    -0.05977      0.33000      0.43217      0.69298      0.71415      0.75732  
+    ##     6 comps      7 comps      8 comps      9 comps     10 comps  
+    ##     0.80776      0.81389      0.83228      0.84198      0.84176
 
 ``` r
 plot(pls::R2(plsr.out,estimate=c("test"),newdata = val.plsr.data), main="MODEL R2",
@@ -526,7 +510,7 @@ plot(pls::R2(plsr.out,estimate=c("test"),newdata = val.plsr.data), main="MODEL R
 box(lwd=2.2)
 ```
 
-![](reseco_lma_plsr_example_files/figure-gfm/unnamed-chunk-11-1.png)<!-- -->
+![](reseco_leafN_bootstrap_plsr_example_files/figure-gfm/unnamed-chunk-11-1.png)<!-- -->
 
 ``` r
 dev.copy(png,file.path(outdir,paste0(paste0(inVar,"_Validation_RMSEP_R2_by_Component.png"))), 
@@ -547,7 +531,7 @@ dev.off();
 par(opar)
 ```
 
-### Step 12. PLSR fit observed vs. predicted plot data
+### PLSR fit observed vs. predicted plot data
 
 ``` r
 #calibration
@@ -559,20 +543,20 @@ cal.plsr.output <- cal.plsr.output %>%
 head(cal.plsr.output)
 ```
 
-    ##        Plant_Species Species_Code Plot  LMA_g_cm2 LMA_g_m2 PLSR_Predicted
-    ## 1 Ammophila arenaria       Ammare  MC2 0.01679492 167.9492       154.1892
-    ## 2 Ammophila arenaria       Ammare  WC3 0.01844376 184.4376       147.0878
-    ## 3 Ammophila arenaria       Ammare  MC4 0.02030190 203.0190       153.8674
-    ## 4 Ammophila arenaria       Ammare  ZC2 0.01591894 159.1894       161.6047
-    ## 5 Ammophila arenaria       Ammare  ZC1 0.01483469 148.3469       144.9268
-    ## 6 Ammophila arenaria       Ammare  ZC3 0.01802409 180.2409       148.2100
+    ##        Plant_Species Species_Code Plot Narea_mg_mm2 Narea_g_m2 PLSR_Predicted
+    ## 1 Ammophila arenaria       Ammare  ZC3   0.03240495   3.240495       2.672029
+    ## 2 Ammophila arenaria       Ammare  MC2   0.02806279   2.806279       2.651863
+    ## 3 Ammophila arenaria       Ammare  ZC1   0.02041612   2.041612       2.178056
+    ## 4 Ammophila arenaria       Ammare  MC1   0.02426549   2.426549       2.412013
+    ## 5 Ammophila arenaria       Ammare  WC3   0.02807281   2.807281       2.452711
+    ## 6 Ammophila arenaria       Ammare  WR3   0.02286678   2.286678       2.792340
     ##   PLSR_CV_Predicted PLSR_CV_Residuals
-    ## 1          151.7161        -16.233027
-    ## 2          137.3863        -47.051273
-    ## 3          144.2584        -58.760574
-    ## 4          162.6250          3.435614
-    ## 5          142.9101         -5.436767
-    ## 6          142.5160        -37.724928
+    ## 1          2.598245      -0.642250440
+    ## 2          2.652066      -0.154212969
+    ## 3          2.200588       0.158975634
+    ## 4          2.435784       0.009234491
+    ## 5          2.384049      -0.423231444
+    ## 6          2.943186       0.656508493
 
 ``` r
 cal.R2 <- round(pls::R2(plsr.out)[[1]][nComps],2)
@@ -587,20 +571,20 @@ val.plsr.output <- val.plsr.output %>%
 head(val.plsr.output)
 ```
 
-    ##          Plant_Species Species_Code Plot   LMA_g_cm2  LMA_g_m2 PLSR_Predicted
-    ## 184  Jacobaea vulgaris       Jacvul  WC2 0.003551614  35.51614       43.51586
-    ## 185 Potentilla reptans       Potrep  WC2 0.005586320  55.86320       61.41726
-    ## 186      Rubus caesius       Rubcae  WC2 0.005803902  58.03902       45.55789
-    ## 187      Urtica dioica       Urtdio  WC2 0.005215705  52.15705       46.65139
-    ## 188 Ammophila arenaria       Ammare  WC3 0.018443757 184.43757      147.08781
-    ## 189  Jacobaea vulgaris       Jacvul  WC3 0.004980002  49.80002       53.09532
+    ##          Plant_Species Species_Code Plot Narea_mg_mm2 Narea_g_m2 PLSR_Predicted
+    ## 184  Jacobaea vulgaris       Jacvul  WC2  0.008756996  0.8756996      0.9462916
+    ## 185 Potentilla reptans       Potrep  WC2  0.010313464  1.0313464      1.5386676
+    ## 186      Rubus caesius       Rubcae  WC2  0.007968454  0.7968454      0.8790482
+    ## 187      Urtica dioica       Urtdio  WC2  0.012737560  1.2737560      1.1241560
+    ## 188 Ammophila arenaria       Ammare  WC3  0.028072806  2.8072806      2.4527108
+    ## 189  Jacobaea vulgaris       Jacvul  WC3  0.010251687  1.0251687      1.1553688
     ##     PLSR_Residuals
-    ## 184       7.999719
-    ## 185       5.554059
-    ## 186     -12.481126
-    ## 187      -5.505664
-    ## 188     -37.349758
-    ## 189       3.295298
+    ## 184     0.07059201
+    ## 185     0.50732119
+    ## 186     0.08220284
+    ## 187    -0.14959995
+    ## 188    -0.35456980
+    ## 189     0.13020008
 
 ``` r
 val.R2 <- round(pls::R2(plsr.out,newdata=val.plsr.data)[[1]][nComps],2)
@@ -619,8 +603,7 @@ cal_scatter_plot <- ggplot(cal.plsr.output, aes(x=PLSR_CV_Predicted, y=get(inVar
   theme(axis.text=element_text(size=18), legend.position="none",
         axis.title=element_text(size=20, face="bold"), 
         axis.text.x = element_text(angle = 0,vjust = 0.5),
-        panel.border = element_rect(linetype = "solid", fill = NA, size=1.5)) + 
-  annotate("text", x=rng_quant[1], y=rng_quant[2], label= "5.",size=10)
+        panel.border = element_rect(linetype = "solid", fill = NA, size=1.5))
 
 cal_resid_histogram <- ggplot(cal.plsr.output, aes(x=PLSR_CV_Residuals)) +
   geom_histogram(alpha=.5, position="identity") + 
@@ -657,34 +640,34 @@ val_resid_histogram <- ggplot(val.plsr.output, aes(x=PLSR_Residuals)) +
 
 # plot cal/val side-by-side
 scatterplots <- grid.arrange(cal_scatter_plot, val_scatter_plot, cal_resid_histogram, 
-                             val_resid_histogram, nrow=2, ncol=2)
+                             val_resid_histogram, nrow=2,ncol=2)
 ```
 
-    ## Warning: Removed 6 rows containing missing values (geom_point).
+    ## Warning: Removed 2 rows containing missing values (geom_point).
 
-    ## Warning: Removed 6 rows containing missing values (geom_point).
+    ## Warning: Removed 3 rows containing missing values (geom_point).
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-![](reseco_lma_plsr_example_files/figure-gfm/unnamed-chunk-12-1.png)<!-- -->
+![](reseco_leafN_bootstrap_plsr_example_files/figure-gfm/unnamed-chunk-12-1.png)<!-- -->
 
 ``` r
 ggsave(filename = file.path(outdir,paste0(inVar,"_Cal_Val_Scatterplots.png")), 
-       plot = scatterplots, device="png", width = 32, height = 30, units = "cm",
+       plot = scatterplots, device="png", 
+       width = 32, 
+       height = 30, units = "cm",
        dpi = 300)
 ```
 
-### Step 13. Generate Coefficient and VIP plots
+### Generate Coefficient and VIP plots
 
 ``` r
 vips <- spectratrait::VIP(plsr.out)[nComps,]
-
 par(mfrow=c(2,1))
 plot(plsr.out, plottype = "coef",xlab="Wavelength (nm)",
      ylab="Regression coefficients",legendpos = "bottomright",
      ncomp=nComps,lwd=2)
-legend("topleft",legend = "6.", cex=2, bty="n")
 box(lwd=2.2)
 plot(seq(Start.wave,End.wave,1),vips,xlab="Wavelength (nm)",ylab="VIP",cex=0.01)
 lines(seq(Start.wave,End.wave,1),vips,lwd=3)
@@ -692,7 +675,7 @@ abline(h=0.8,lty=2,col="dark grey")
 box(lwd=2.2)
 ```
 
-![](reseco_lma_plsr_example_files/figure-gfm/unnamed-chunk-13-1.png)<!-- -->
+![](reseco_leafN_bootstrap_plsr_example_files/figure-gfm/unnamed-chunk-13-1.png)<!-- -->
 
 ``` r
 dev.copy(png,file.path(outdir,paste0(inVar,'_Coefficient_VIP_plot.png')), 
@@ -709,7 +692,7 @@ dev.off();
     ## quartz_off_screen 
     ##                 2
 
-### Step 14. Permutation analysis to derive uncertainty estimates
+### Bootstrap validation
 
 ``` r
 if(grepl("Windows", sessionInfo()$running)){
@@ -718,24 +701,33 @@ if(grepl("Windows", sessionInfo()$running)){
   pls.options(parallel = parallel::detectCores()-1)
 }
 
-jk.plsr.out <- pls::plsr(as.formula(paste(inVar,"~","Spectra")), scale=FALSE, 
-                         center=TRUE, ncomp=nComps, validation="LOO", trace=FALSE, 
-                         jackknife=TRUE, 
-                         data=cal.plsr.data)
-pls.options(parallel = NULL)
+### PLSR bootstrap permutation uncertainty analysis
+iterations <- 500    # how many permutation iterations to run
+prop <- 0.70          # fraction of training data to keep for each iteration
+plsr_permutation <- spectratrait::pls_permutation(dataset=cal.plsr.data, maxComps=nComps, 
+                                                  iterations=iterations, prop=prop,
+                                                  verbose = FALSE)
+```
 
-Jackknife_coef <- spectratrait::f.coef.valid(plsr.out = jk.plsr.out, data_plsr = cal.plsr.data, 
-                               ncomp = nComps, inVar=inVar)
-Jackknife_intercept <- Jackknife_coef[1,,,]
-Jackknife_coef <- Jackknife_coef[2:dim(Jackknife_coef)[1],,,]
+    ## [1] "*** Running permutation test.  Please hang tight, this can take awhile ***"
+    ## [1] "Options:"
+    ## [1] "Max Components: 10 Iterations: 500 Data Proportion (percent): 70"
+    ## [1] "*** Providing PRESS and coefficient array output ***"
 
+``` r
+bootstrap_intercept <- plsr_permutation$coef_array[1,,nComps]
+bootstrap_coef <- plsr_permutation$coef_array[2:length(plsr_permutation$coef_array[,1,nComps]),
+                                              ,nComps]
+rm(plsr_permutation)
+
+# apply coefficients to left-out validation data
 interval <- c(0.025,0.975)
-Jackknife_Pred <- val.plsr.data$Spectra %*% Jackknife_coef + 
-  matrix(rep(Jackknife_intercept, length(val.plsr.data[,inVar])), byrow=TRUE, 
-         ncol=length(Jackknife_intercept))
-Interval_Conf <- apply(X = Jackknife_Pred, MARGIN = 1, FUN = quantile, 
+Bootstrap_Pred <- val.plsr.data$Spectra %*% bootstrap_coef + 
+  matrix(rep(bootstrap_intercept, length(val.plsr.data[,inVar])), byrow=TRUE, 
+         ncol=length(bootstrap_intercept))
+Interval_Conf <- apply(X = Bootstrap_Pred, MARGIN = 1, FUN = quantile, 
                        probs=c(interval[1], interval[2]))
-sd_mean <- apply(X = Jackknife_Pred, MARGIN = 1, FUN =sd)
+sd_mean <- apply(X = Bootstrap_Pred, MARGIN = 1, FUN = sd)
 sd_res <- sd(val.plsr.output$PLSR_Residuals)
 sd_tot <- sqrt(sd_mean^2+sd_res^2)
 val.plsr.output$LCI <- Interval_Conf[1,]
@@ -745,34 +737,35 @@ val.plsr.output$UPI <- val.plsr.output$PLSR_Predicted+1.96*sd_tot
 head(val.plsr.output)
 ```
 
-    ##          Plant_Species Species_Code Plot   LMA_g_cm2  LMA_g_m2 PLSR_Predicted
-    ## 184  Jacobaea vulgaris       Jacvul  WC2 0.003551614  35.51614       43.51586
-    ## 185 Potentilla reptans       Potrep  WC2 0.005586320  55.86320       61.41726
-    ## 186      Rubus caesius       Rubcae  WC2 0.005803902  58.03902       45.55789
-    ## 187      Urtica dioica       Urtdio  WC2 0.005215705  52.15705       46.65139
-    ## 188 Ammophila arenaria       Ammare  WC3 0.018443757 184.43757      147.08781
-    ## 189  Jacobaea vulgaris       Jacvul  WC3 0.004980002  49.80002       53.09532
-    ##     PLSR_Residuals       LCI       UCI       LPI       UPI
-    ## 184       7.999719  42.58086  44.15724  16.70642  70.32530
-    ## 185       5.554059  60.10507  62.52674  34.59536  88.23916
-    ## 186     -12.481126  44.66849  48.22967  18.70489  72.41090
-    ## 187      -5.505664  45.70375  47.84938  19.82512  73.47765
-    ## 188     -37.349758 145.09309 148.61694 120.18052 173.99510
-    ## 189       3.295298  52.40880  53.97806  26.28498  79.90565
+    ##          Plant_Species Species_Code Plot Narea_mg_mm2 Narea_g_m2 PLSR_Predicted
+    ## 184  Jacobaea vulgaris       Jacvul  WC2  0.008756996  0.8756996      0.9462916
+    ## 185 Potentilla reptans       Potrep  WC2  0.010313464  1.0313464      1.5386676
+    ## 186      Rubus caesius       Rubcae  WC2  0.007968454  0.7968454      0.8790482
+    ## 187      Urtica dioica       Urtdio  WC2  0.012737560  1.2737560      1.1241560
+    ## 188 Ammophila arenaria       Ammare  WC3  0.028072806  2.8072806      2.4527108
+    ## 189  Jacobaea vulgaris       Jacvul  WC3  0.010251687  1.0251687      1.1553688
+    ##     PLSR_Residuals       LCI      UCI       LPI      UPI
+    ## 184     0.07059201 0.8915898 1.008806 0.4588988 1.433684
+    ## 185     0.50732119 1.4007173 1.636452 1.0403747 2.036960
+    ## 186     0.08220284 0.6861219 1.160030 0.3405908 1.417506
+    ## 187    -0.14959995 0.9651982 1.245464 0.6198291 1.628483
+    ## 188    -0.35456980 2.1911406 2.619696 1.9245720 2.980850
+    ## 189     0.13020008 1.0735154 1.233082 0.6651011 1.645636
+
+### Jackknife coefficient plot
 
 ``` r
-### Permutation coefficient plot
-spectratrait::f.plot.coef(Z = t(Jackknife_coef), wv = wv, 
-            plot_label="Jackknife regression coefficients",position = 'bottomleft')
+# Bootstrap regression coefficient plot
+spectratrait::f.plot.coef(Z = t(bootstrap_coef), wv = wv, 
+            plot_label="Bootstrap regression coefficients",position = 'bottomleft')
 abline(h=0,lty=2,col="grey50")
-legend("topleft",legend = "7.", cex=2, bty="n")
 box(lwd=2.2)
 ```
 
-![](reseco_lma_plsr_example_files/figure-gfm/unnamed-chunk-15-1.png)<!-- -->
+![](reseco_leafN_bootstrap_plsr_example_files/figure-gfm/unnamed-chunk-15-1.png)<!-- -->
 
 ``` r
-dev.copy(png,file.path(outdir,paste0(inVar,'_Jackknife_Regression_Coefficients.png')), 
+dev.copy(png,file.path(outdir,paste0(inVar,'_Bootstrap_Regression_Coefficients.png')), 
          height=2100, width=3800, res=340)
 ```
 
@@ -786,8 +779,9 @@ dev.off();
     ## quartz_off_screen 
     ##                 2
 
+### Bootstrap validation plot
+
 ``` r
-### Permutation validation plot
 RMSEP <- sqrt(mean(val.plsr.output$PLSR_Residuals^2))
 pecr_RMSEP <- RMSEP/mean(val.plsr.output[,inVar])*100
 r2 <- round(pls::R2(plsr.out, newdata = val.plsr.data)$val[nComps+1],2)
@@ -798,19 +792,25 @@ expr[[3]] <- bquote("%RMSEP"==.(round(pecr_RMSEP,2)))
 rng_vals <- c(min(val.plsr.output$LPI), max(val.plsr.output$UPI))
 par(mfrow=c(1,1), mar=c(4.2,5.3,1,0.4), oma=c(0, 0.1, 0, 0.2))
 plotrix::plotCI(val.plsr.output$PLSR_Predicted,val.plsr.output[,inVar], 
-       li=val.plsr.output$LPI, ui=val.plsr.output$UPI, gap=0.009,sfrac=0.004, 
+       li=val.plsr.output$LPI, ui=val.plsr.output$UPI, gap=0.009,sfrac=0.000, 
        lwd=1.6, xlim=c(rng_vals[1], rng_vals[2]), ylim=c(rng_vals[1], rng_vals[2]), 
-       err="x", pch=21, col="black", pt.bg=scales::alpha("grey70",0.7), scol="grey50",
+       err="x", pch=21, col="black", pt.bg=scales::alpha("grey70",0.7), scol="grey80",
        cex=2, xlab=paste0("Predicted ", paste(inVar), " (units)"),
        ylab=paste0("Observed ", paste(inVar), " (units)"),
        cex.axis=1.5,cex.lab=1.8)
 abline(0,1,lty=2,lw=2)
+plotrix::plotCI(val.plsr.output$PLSR_Predicted,val.plsr.output[,inVar], 
+       li=val.plsr.output$LCI, ui=val.plsr.output$UCI, gap=0.009,sfrac=0.004, 
+       lwd=1.6, xlim=c(rng_vals[1], rng_vals[2]), ylim=c(rng_vals[1], rng_vals[2]), 
+       err="x", pch=21, col="black", pt.bg=scales::alpha("grey70",0.7), scol="black",
+       cex=2, xlab=paste0("Predicted ", paste(inVar), " (units)"),
+       ylab=paste0("Observed ", paste(inVar), " (units)"),
+       cex.axis=1.5,cex.lab=1.8, add=T)
 legend("topleft", legend=expr, bty="n", cex=1.5)
-legend("bottomright", legend="8.", bty="n", cex=2.2)
 box(lwd=2.2)
 ```
 
-![](reseco_lma_plsr_example_files/figure-gfm/unnamed-chunk-16-1.png)<!-- -->
+![](reseco_leafN_bootstrap_plsr_example_files/figure-gfm/unnamed-chunk-16-1.png)<!-- -->
 
 ``` r
 dev.copy(png,file.path(outdir,paste0(inVar,"_PLSR_Validation_Scatterplot.png")), 
@@ -827,35 +827,37 @@ dev.off();
     ## quartz_off_screen 
     ##                 2
 
-### Step 15. Output permutation coefficients for later use
+### Output bootstrap results
 
 ``` r
-out.jk.coefs <- data.frame(Iteration=seq(1,length(Jackknife_intercept),1),
-                           Intercept=Jackknife_intercept,t(Jackknife_coef))
+# Bootstrap Coefficients
+out.jk.coefs <- data.frame(Iteration=seq(1,length(bootstrap_intercept),1),
+                           Intercept=bootstrap_intercept,t(bootstrap_coef))
+names(out.jk.coefs) <- c("Iteration","Intercept",paste0("Wave_",wv))
 head(out.jk.coefs)[1:6]
 ```
 
-    ##       Iteration Intercept   Wave_500   Wave_501   Wave_502   Wave_503
-    ## Seg 1         1  18.33909  -7.580446  -6.724083  -5.886226  -4.984744
-    ## Seg 2         2  21.22164  -8.574931  -7.084795  -6.255716  -5.384000
-    ## Seg 3         3  19.63843 -18.104491 -17.260522 -16.154983 -14.960119
-    ## Seg 4         4  15.90905 -10.715594  -9.874766  -8.926979  -8.007834
-    ## Seg 5         5  17.51805  -8.952143  -8.305344  -7.136167  -6.221407
-    ## Seg 6         6  12.18563  -7.702160  -7.128890  -6.532276  -5.840220
+    ##   Iteration   Intercept   Wave_500  Wave_501  Wave_502  Wave_503
+    ## 1         1 -0.13686765 0.29141489 0.3287594 0.3654695 0.3999712
+    ## 2         2 -0.17612080 0.24114488 0.2827001 0.3182992 0.3552505
+    ## 3         3  0.34135463 0.21939317 0.2562451 0.2984578 0.3330333
+    ## 4         4  0.01511507 0.09404839 0.1299058 0.1792805 0.2240698
+    ## 5         5  0.06136605 0.12835311 0.1662322 0.2116938 0.2539193
+    ## 6         6  0.10925409 0.28154095 0.3107509 0.3539714 0.3932620
 
 ``` r
-write.csv(out.jk.coefs,file=file.path(outdir,
-                                      paste0(inVar,'_Jackkife_PLSR_Coefficients.csv')),
+write.csv(out.jk.coefs,file=file.path(outdir,paste0(inVar,
+                                                    '_Bootstrap_PLSR_Coefficients.csv')),
           row.names=FALSE)
 ```
 
-### Step 16. Output remaining core PLSR outputs
+### Create core PLSR outputs
 
 ``` r
 print(paste("Output directory: ", outdir))
 ```
 
-    ## [1] "Output directory:  /var/folders/xp/h3k9vf3n2jx181ts786_yjrn9c2gjq/T//Rtmp1Hsn79"
+    ## [1] "Output directory:  /var/folders/xp/h3k9vf3n2jx181ts786_yjrn9c2gjq/T//RtmprDWsoy"
 
 ``` r
 # Observed versus predicted
@@ -883,7 +885,7 @@ write.csv(vips,file=file.path(outdir,
                                      nComps,'comp.csv')))
 ```
 
-### Step 17. Confirm files were written to temp space
+### Confirm files were written to temp space
 
 ``` r
 print("**** PLSR output files: ")
@@ -895,18 +897,18 @@ print("**** PLSR output files: ")
 print(list.files(outdir)[grep(pattern = inVar, list.files(outdir))])
 ```
 
-    ##  [1] "Figure_3_LMA_g_m2_PLSR_Component_Selection.png"
-    ##  [2] "LMA_g_m2_Cal_PLSR_Dataset.csv"                 
-    ##  [3] "LMA_g_m2_Cal_Val_Histograms.png"               
-    ##  [4] "LMA_g_m2_Cal_Val_Scatterplots.png"             
-    ##  [5] "LMA_g_m2_Cal_Val_Spectra.png"                  
-    ##  [6] "LMA_g_m2_Coefficient_VIP_plot.png"             
-    ##  [7] "LMA_g_m2_Jackkife_PLSR_Coefficients.csv"       
-    ##  [8] "LMA_g_m2_Jackknife_Regression_Coefficients.png"
-    ##  [9] "LMA_g_m2_Observed_PLSR_CV_Pred_11comp.csv"     
-    ## [10] "LMA_g_m2_PLSR_Coefficients_11comp.csv"         
-    ## [11] "LMA_g_m2_PLSR_Validation_Scatterplot.png"      
-    ## [12] "LMA_g_m2_PLSR_VIPs_11comp.csv"                 
-    ## [13] "LMA_g_m2_Val_PLSR_Dataset.csv"                 
-    ## [14] "LMA_g_m2_Validation_PLSR_Pred_11comp.csv"      
-    ## [15] "LMA_g_m2_Validation_RMSEP_R2_by_Component.png"
+    ##  [1] "Narea_g_m2_Bootstrap_PLSR_Coefficients.csv"      
+    ##  [2] "Narea_g_m2_Bootstrap_Regression_Coefficients.png"
+    ##  [3] "Narea_g_m2_Cal_PLSR_Dataset.csv"                 
+    ##  [4] "Narea_g_m2_Cal_Val_Histograms.png"               
+    ##  [5] "Narea_g_m2_Cal_Val_Scatterplots.png"             
+    ##  [6] "Narea_g_m2_Cal_Val_Spectra.png"                  
+    ##  [7] "Narea_g_m2_Coefficient_VIP_plot.png"             
+    ##  [8] "Narea_g_m2_Observed_PLSR_CV_Pred_10comp.csv"     
+    ##  [9] "Narea_g_m2_PLSR_Coefficients_10comp.csv"         
+    ## [10] "Narea_g_m2_PLSR_Component_Selection.png"         
+    ## [11] "Narea_g_m2_PLSR_Validation_Scatterplot.png"      
+    ## [12] "Narea_g_m2_PLSR_VIPs_10comp.csv"                 
+    ## [13] "Narea_g_m2_Val_PLSR_Dataset.csv"                 
+    ## [14] "Narea_g_m2_Validation_PLSR_Pred_10comp.csv"      
+    ## [15] "Narea_g_m2_Validation_RMSEP_R2_by_Component.png"

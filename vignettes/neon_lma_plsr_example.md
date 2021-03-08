@@ -12,10 +12,13 @@ leaf-mass area (LMA)
 
 ### Getting Started
 
-### Installation
+### Load libraries
 
-    ## Skipping install of 'spectratrait' from a github remote, the SHA1 (d00228f2) has not changed since last install.
-    ##   Use `force = TRUE` to force installation
+``` r
+list.of.packages <- c("pls","dplyr","reshape2","here","plotrix","ggplot2","gridExtra",
+                      "spectratrait")
+invisible(lapply(list.of.packages, library, character.only = TRUE))
+```
 
     ## 
     ## Attaching package: 'pls'
@@ -78,7 +81,7 @@ output_dir <- "tempdir"
 
 ### Set working directory (scratch space)
 
-    ## [1] "/private/var/folders/xp/h3k9vf3n2jx181ts786_yjrn9c2gjq/T/RtmpB2Xa3G"
+    ## [1] "/private/var/folders/xp/h3k9vf3n2jx181ts786_yjrn9c2gjq/T/RtmpfiN8Us"
 
 ### Grab data from EcoSIS
 
@@ -123,35 +126,32 @@ head(dat_raw)
 ```
 
     ## # A tibble: 6 x 2,162
-    ##   Affiliation `Common Name` Domain Functional_type   LMA `Latin Genus`
-    ##   <chr>       <chr>         <chr>  <chr>           <dbl> <chr>        
-    ## 1 University… black walnut  D02    broadleaf        72.9 Juglans      
-    ## 2 University… black walnut  D02    broadleaf        72.9 Juglans      
-    ## 3 University… black walnut  D02    broadleaf        60.8 Juglans      
-    ## 4 University… black walnut  D02    broadleaf        60.8 Juglans      
-    ## 5 University… black walnut  D02    broadleaf        85.9 Juglans      
-    ## 6 University… black walnut  D02    broadleaf        85.9 Juglans      
-    ## # … with 2,156 more variables: `Latin Species` <chr>, PI <chr>, Project <chr>,
-    ## #   Sample_ID <chr>, `USDA Symbol` <chr>, `350` <dbl>, `351` <dbl>,
-    ## #   `352` <dbl>, `353` <dbl>, `354` <dbl>, `355` <dbl>, `356` <dbl>,
-    ## #   `357` <dbl>, `358` <dbl>, `359` <dbl>, `360` <dbl>, `361` <dbl>,
-    ## #   `362` <dbl>, `363` <dbl>, `364` <dbl>, `365` <dbl>, `366` <dbl>,
-    ## #   `367` <dbl>, `368` <dbl>, `369` <dbl>, `370` <dbl>, `371` <dbl>,
-    ## #   `372` <dbl>, `373` <dbl>, `374` <dbl>, `375` <dbl>, `376` <dbl>,
-    ## #   `377` <dbl>, `378` <dbl>, `379` <dbl>, `380` <dbl>, `381` <dbl>,
-    ## #   `382` <dbl>, `383` <dbl>, `384` <dbl>, `385` <dbl>, `386` <dbl>,
-    ## #   `387` <dbl>, `388` <dbl>, `389` <dbl>, `390` <dbl>, `391` <dbl>,
-    ## #   `392` <dbl>, `393` <dbl>, `394` <dbl>, `395` <dbl>, `396` <dbl>,
-    ## #   `397` <dbl>, `398` <dbl>, `399` <dbl>, `400` <dbl>, `401` <dbl>,
-    ## #   `402` <dbl>, `403` <dbl>, `404` <dbl>, `405` <dbl>, `406` <dbl>,
-    ## #   `407` <dbl>, `408` <dbl>, `409` <dbl>, `410` <dbl>, `411` <dbl>,
-    ## #   `412` <dbl>, `413` <dbl>, `414` <dbl>, `415` <dbl>, `416` <dbl>,
-    ## #   `417` <dbl>, `418` <dbl>, `419` <dbl>, `420` <dbl>, `421` <dbl>,
-    ## #   `422` <dbl>, `423` <dbl>, `424` <dbl>, `425` <dbl>, `426` <dbl>,
-    ## #   `427` <dbl>, `428` <dbl>, `429` <dbl>, `430` <dbl>, `431` <dbl>,
-    ## #   `432` <dbl>, `433` <dbl>, `434` <dbl>, `435` <dbl>, `436` <dbl>,
-    ## #   `437` <dbl>, `438` <dbl>, `439` <dbl>, `440` <dbl>, `441` <dbl>,
-    ## #   `442` <dbl>, `443` <dbl>, `444` <dbl>, …
+    ##   Affiliation           `Common Name` Domain Functional_type   LMA `Latin Genus`
+    ##   <chr>                 <chr>         <chr>  <chr>           <dbl> <chr>        
+    ## 1 University of Wiscon… black walnut  D02    broadleaf        72.9 Juglans      
+    ## 2 University of Wiscon… black walnut  D02    broadleaf        72.9 Juglans      
+    ## 3 University of Wiscon… black walnut  D02    broadleaf        60.8 Juglans      
+    ## 4 University of Wiscon… black walnut  D02    broadleaf        60.8 Juglans      
+    ## 5 University of Wiscon… black walnut  D02    broadleaf        85.9 Juglans      
+    ## 6 University of Wiscon… black walnut  D02    broadleaf        85.9 Juglans      
+    ## # … with 2,156 more variables: Latin Species <chr>, PI <chr>, Project <chr>,
+    ## #   Sample_ID <chr>, USDA Symbol <chr>, 350 <dbl>, 351 <dbl>, 352 <dbl>,
+    ## #   353 <dbl>, 354 <dbl>, 355 <dbl>, 356 <dbl>, 357 <dbl>, 358 <dbl>,
+    ## #   359 <dbl>, 360 <dbl>, 361 <dbl>, 362 <dbl>, 363 <dbl>, 364 <dbl>,
+    ## #   365 <dbl>, 366 <dbl>, 367 <dbl>, 368 <dbl>, 369 <dbl>, 370 <dbl>,
+    ## #   371 <dbl>, 372 <dbl>, 373 <dbl>, 374 <dbl>, 375 <dbl>, 376 <dbl>,
+    ## #   377 <dbl>, 378 <dbl>, 379 <dbl>, 380 <dbl>, 381 <dbl>, 382 <dbl>,
+    ## #   383 <dbl>, 384 <dbl>, 385 <dbl>, 386 <dbl>, 387 <dbl>, 388 <dbl>,
+    ## #   389 <dbl>, 390 <dbl>, 391 <dbl>, 392 <dbl>, 393 <dbl>, 394 <dbl>,
+    ## #   395 <dbl>, 396 <dbl>, 397 <dbl>, 398 <dbl>, 399 <dbl>, 400 <dbl>,
+    ## #   401 <dbl>, 402 <dbl>, 403 <dbl>, 404 <dbl>, 405 <dbl>, 406 <dbl>,
+    ## #   407 <dbl>, 408 <dbl>, 409 <dbl>, 410 <dbl>, 411 <dbl>, 412 <dbl>,
+    ## #   413 <dbl>, 414 <dbl>, 415 <dbl>, 416 <dbl>, 417 <dbl>, 418 <dbl>,
+    ## #   419 <dbl>, 420 <dbl>, 421 <dbl>, 422 <dbl>, 423 <dbl>, 424 <dbl>,
+    ## #   425 <dbl>, 426 <dbl>, 427 <dbl>, 428 <dbl>, 429 <dbl>, 430 <dbl>,
+    ## #   431 <dbl>, 432 <dbl>, 433 <dbl>, 434 <dbl>, 435 <dbl>, 436 <dbl>,
+    ## #   437 <dbl>, 438 <dbl>, 439 <dbl>, 440 <dbl>, 441 <dbl>, 442 <dbl>,
+    ## #   443 <dbl>, 444 <dbl>, …
 
 ``` r
 names(dat_raw)[1:40]
@@ -182,16 +182,16 @@ head(sample_info)
 ```
 
     ## # A tibble: 6 x 11
-    ##   Affiliation `Common Name` Domain Functional_type   LMA `Latin Genus`
-    ##   <chr>       <chr>         <chr>  <chr>           <dbl> <chr>        
-    ## 1 University… black walnut  D02    broadleaf        72.9 Juglans      
-    ## 2 University… black walnut  D02    broadleaf        72.9 Juglans      
-    ## 3 University… black walnut  D02    broadleaf        60.8 Juglans      
-    ## 4 University… black walnut  D02    broadleaf        60.8 Juglans      
-    ## 5 University… black walnut  D02    broadleaf        85.9 Juglans      
-    ## 6 University… black walnut  D02    broadleaf        85.9 Juglans      
-    ## # … with 5 more variables: `Latin Species` <chr>, PI <chr>, Project <chr>,
-    ## #   Sample_ID <chr>, `USDA Symbol` <chr>
+    ##   Affiliation           `Common Name` Domain Functional_type   LMA `Latin Genus`
+    ##   <chr>                 <chr>         <chr>  <chr>           <dbl> <chr>        
+    ## 1 University of Wiscon… black walnut  D02    broadleaf        72.9 Juglans      
+    ## 2 University of Wiscon… black walnut  D02    broadleaf        72.9 Juglans      
+    ## 3 University of Wiscon… black walnut  D02    broadleaf        60.8 Juglans      
+    ## 4 University of Wiscon… black walnut  D02    broadleaf        60.8 Juglans      
+    ## 5 University of Wiscon… black walnut  D02    broadleaf        85.9 Juglans      
+    ## 6 University of Wiscon… black walnut  D02    broadleaf        85.9 Juglans      
+    ## # … with 5 more variables: Latin Species <chr>, PI <chr>, Project <chr>,
+    ## #   Sample_ID <chr>, USDA Symbol <chr>
 
 ``` r
 sample_info2 <- sample_info %>%
@@ -405,87 +405,9 @@ if (method=="pls") {
 ```
 
     ## [1] "*** Running permutation test.  Please hang tight, this can take awhile ***"
-    ## [1] "Options: 20 40 250 0.7"
-
-    ## Running interation 1
-
-    ## Running interation 2
-
-    ## Running interation 3
-
-    ## Running interation 4
-
-    ## Running interation 5
-
-    ## Running interation 6
-
-    ## Running interation 7
-
-    ## Running interation 8
-
-    ## Running interation 9
-
-    ## Running interation 10
-
-    ## Running interation 11
-
-    ## Running interation 12
-
-    ## Running interation 13
-
-    ## Running interation 14
-
-    ## Running interation 15
-
-    ## Running interation 16
-
-    ## Running interation 17
-
-    ## Running interation 18
-
-    ## Running interation 19
-
-    ## Running interation 20
-
-    ## Running interation 21
-
-    ## Running interation 22
-
-    ## Running interation 23
-
-    ## Running interation 24
-
-    ## Running interation 25
-
-    ## Running interation 26
-
-    ## Running interation 27
-
-    ## Running interation 28
-
-    ## Running interation 29
-
-    ## Running interation 30
-
-    ## Running interation 31
-
-    ## Running interation 32
-
-    ## Running interation 33
-
-    ## Running interation 34
-
-    ## Running interation 35
-
-    ## Running interation 36
-
-    ## Running interation 37
-
-    ## Running interation 38
-
-    ## Running interation 39
-
-    ## Running interation 40
+    ## [1] "Options:"
+    ## [1] "Max Components: 20 Iterations: 40 Data Proportion (percent): 70"
+    ## [1] "*** Providing PRESS and coefficient array output ***"
 
     ## No id variables; using all as measure variables
 
@@ -753,7 +675,7 @@ jk.plsr.out <- pls::plsr(as.formula(paste(inVar,"~","Spectra")), scale=FALSE,
                          center=TRUE, ncomp=nComps, 
                          validation="CV", segments = seg, 
                          segment.type="interleaved", trace=FALSE, 
-                      jackknife=TRUE, data=cal.plsr.data)
+                         jackknife=TRUE, data=cal.plsr.data)
 pls.options(parallel = NULL)
 
 Jackknife_coef <- spectratrait::f.coef.valid(plsr.out = jk.plsr.out, data_plsr = cal.plsr.data, 

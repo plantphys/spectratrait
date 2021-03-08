@@ -184,7 +184,6 @@ maxComps <- 18
 iterations <- 50
 prop <- 0.70
 if (method=="pls") {
-  # pls package approach - faster but estimates more components....
   nComps <- spectratrait::find_optimal_components(dataset=cal.plsr.data, method=method, 
                                                   maxComps=maxComps, seg=seg, 
                                                   random_seed=random_seed)
@@ -192,7 +191,8 @@ if (method=="pls") {
 } else {
   nComps <- spectratrait::find_optimal_components(dataset=cal.plsr.data, method=method, 
                                                   maxComps=maxComps, iterations=iterations, 
-                                                  seg=seg, prop=prop, random_seed=random_seed)
+                                                  seg=seg, prop=prop, 
+                                                  random_seed=random_seed)
 }
 dev.copy(png,file.path(outdir,paste0(paste0(inVar,"_PLSR_Component_Selection.png"))), 
          height=2800, width=3400,  res=340)
@@ -334,8 +334,9 @@ jk.plsr.out <- pls::plsr(as.formula(paste(inVar,"~","Spectra")), scale=FALSE,
                          jackknife=TRUE, data=cal.plsr.data)
 pls.options(parallel = NULL)
 
-Jackknife_coef <- spectratrait::f.coef.valid(plsr.out = jk.plsr.out, data_plsr = cal.plsr.data, 
-                               ncomp = nComps, inVar=inVar)
+Jackknife_coef <- spectratrait::f.coef.valid(plsr.out = jk.plsr.out, 
+                                             data_plsr = cal.plsr.data, 
+                                             ncomp = nComps, inVar=inVar)
 Jackknife_intercept <- Jackknife_coef[1,,,]
 Jackknife_coef <- Jackknife_coef[2:dim(Jackknife_coef)[1],,,]
 

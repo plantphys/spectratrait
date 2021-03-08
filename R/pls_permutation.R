@@ -7,24 +7,27 @@
 ##' @param maxComps maximum number of components to use for each PLSR fit
 ##' @param iterations how many different permutations to run
 ##' @param prop proportion of data to preserve for each permutation
-##' @param verbose Should the function report the current iteration number to the terminal 
-##' or run silently? TRUE/FALSE
+##' @param verbose Should the function report the current iteration status/progress to the terminal
+##' or run silently? TRUE/FALSE. Default FALSE
 ##' 
 ##' @author Julien Lamour, Shawn P. Serbin
 ##' @export
-pls_permutation <- function(dataset=NULL, maxComps=20, iterations=20, prop=0.70, 
+pls_permutation <- function(dataset=NULL, maxComps=20, iterations=20, prop=0.70,
                             verbose=FALSE) {
   coefs <- array(0,dim=c((ncol(dataset$Spectra)+1),iterations,maxComps))
   press.out <- array(data=NA, dim=c(iterations,maxComps))
   print("*** Running permutation test.  Please hang tight, this can take awhile ***")
   print("Options:")
   print(paste("Max Components:",maxComps, "Iterations:", iterations, 
-              "Data Proportion:", prop, sep=" "))
-  # TODO: ADD PROGRESS BAR HERE!!!
+              "Data Proportion (percent):", prop*100, sep=" "))
+  
+  if (verbose) {
+    j <- 1 # <--- Numeric counter for progress bar
+    pb <- utils::txtProgressBar(min = 0, max = iterations, 
+                                char="*",width=70,style = 3)
+  }
+  
   for (i in seq_along(1:iterations)) {
-    if (verbose) {
-      message(paste("Running interation", i))
-    }
     rows <- sample(1:nrow(dataset),floor(prop*nrow(dataset)))
     sub.data <- dataset[rows,]
     val.sub.data <- dataset[-rows,]
@@ -36,8 +39,20 @@ pls_permutation <- function(dataset=NULL, maxComps=20, iterations=20, prop=0.70,
     press.out[i,] <- press
     coefs[,i,] <- coef(plsr.out, intercept = TRUE, ncomp = 1:maxComps)
     rm(rows,sub.data,val.sub.data,plsr.out,pred_val,sq_resid,press)
+    
+    ### Display progress to console
+    if (verbose) {
+      setTxtProgressBar(pb, j)    # show progress bar
+      j <- j+1                    # <--- increase counter by 1
+      flush.console()             #<--- show output in real-time
+    }
   }
+  if (verbose) {
+    close(pb)
+  }
+  
   # create a new list with PRESS and permuted coefficients x wavelength x component number
+  print("*** Providing PRESS and coefficient array output ***")
   output <- list(PRESS=press.out, coef_array=coefs)
   return(output)
 }

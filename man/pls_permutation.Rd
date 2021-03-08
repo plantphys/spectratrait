@@ -22,7 +22,8 @@ pls_permutation(
 
 \item{prop}{proportion of data to preserve for each permutation}
 
-\item{verbose}{Report to terminal current iteration or run silently? TRUE/FALSE}
+\item{verbose}{Should the function report the current iteration status/progress to the terminal
+or run silently? TRUE/FALSE. Default FALSE}
 }
 \description{
 See Serbin et al. (2019). DOI: https://doi.org/10.1111/nph.16123

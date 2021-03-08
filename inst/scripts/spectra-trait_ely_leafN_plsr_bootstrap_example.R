@@ -160,12 +160,14 @@ iterations <- 80
 prop <- 0.70
 if (method=="pls") {
   # pls package approach - faster but estimates more components....
-  nComps <- spectratrait::find_optimal_components(dataset=cal.plsr.data, method=method, maxComps=maxComps, 
-                                                  seg=seg, random_seed=random_seed)
+  nComps <- spectratrait::find_optimal_components(dataset=cal.plsr.data, method=method, 
+                                                  maxComps=maxComps, seg=seg, 
+                                                  random_seed=random_seed)
   print(paste0("*** Optimal number of components: ", nComps))
 } else {
-  nComps <- spectratrait::find_optimal_components(dataset=cal.plsr.data, method=method, maxComps=maxComps, 
-                                                  iterations=iterations, seg=seg, prop=prop, 
+  nComps <- spectratrait::find_optimal_components(dataset=cal.plsr.data, method=method, 
+                                                  maxComps=maxComps, iterations=iterations, 
+                                                  seg=seg, prop=prop, 
                                                   random_seed=random_seed)
 }
 dev.copy(png,file.path(outdir,paste0(paste0(inVar,"_PLSR_Component_Selection.png"))), 
@@ -305,7 +307,7 @@ prop <- 0.70          # fraction of training data to keep for each iteration
 plsr_permutation <- spectratrait::pls_permutation(dataset=cal.plsr.data, 
                                                             maxComps=nComps, 
                                                             iterations=iterations, 
-                                                            prop=prop, verbose=FALSE)
+                                                            prop=prop, verbose=TRUE)
 bootstrap_intercept <- plsr_permutation$coef_array[1,,nComps]
 hist(bootstrap_intercept)
 bootstrap_coef <- plsr_permutation$coef_array[2:length(plsr_permutation$coef_array[,1,nComps]),

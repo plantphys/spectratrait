@@ -222,13 +222,14 @@ maxComps <- 16
 iterations <- 80
 prop <- 0.70
 if (method=="pls") {
-  # pls package approach - faster but estimates more components....
-  nComps <- spectratrait::find_optimal_components(dataset=cal.plsr.data, method=method, maxComps=maxComps, 
-                                                  seg=seg, random_seed=random_seed)
+  nComps <- spectratrait::find_optimal_components(dataset=cal.plsr.data, method=method, 
+                                                  maxComps=maxComps, seg=seg, 
+                                                  random_seed=random_seed)
   print(paste0("*** Optimal number of components: ", nComps))
 } else {
-  nComps <- spectratrait::find_optimal_components(dataset=cal.plsr.data, method=method, maxComps=maxComps, 
-                                                  iterations=iterations, seg=seg, prop=prop, 
+  nComps <- spectratrait::find_optimal_components(dataset=cal.plsr.data, method=method, 
+                                                  maxComps=maxComps, iterations=iterations, 
+                                                  seg=seg, prop=prop, 
                                                   random_seed=random_seed)
 }
 dev.copy(png,file.path(outdir,paste0(paste0(inVar,"_PLSR_Component_Selection.png"))), 
@@ -265,7 +266,8 @@ par(opar)
 #--------------------------------------------------------------------------------------------------#
 ### PLSR fit observed vs. predicted plot data
 #calibration
-cal.plsr.output <- data.frame(cal.plsr.data[, which(names(cal.plsr.data) %notin% "Spectra")], PLSR_Predicted=fit,
+cal.plsr.output <- data.frame(cal.plsr.data[, which(names(cal.plsr.data) %notin% "Spectra")], 
+                              PLSR_Predicted=fit,
                               PLSR_CV_Predicted=as.vector(plsr.out$validation$pred[,,nComps]))
 cal.plsr.output <- cal.plsr.output %>%
   mutate(PLSR_CV_Residuals = PLSR_CV_Predicted-get(inVar))
@@ -286,11 +288,13 @@ val.RMSEP <- round(sqrt(mean(val.plsr.output$PLSR_Residuals^2)),2)
 rng_quant <- quantile(cal.plsr.output[,inVar], probs = c(0.001, 0.999))
 cal_scatter_plot <- ggplot(cal.plsr.output, aes(x=PLSR_CV_Predicted, y=get(inVar))) + 
   theme_bw() + geom_point() + geom_abline(intercept = 0, slope = 1, color="dark grey", 
-                                          linetype="dashed", size=1.5) + xlim(rng_quant[1], rng_quant[2]) + 
+                                          linetype="dashed", size=1.5) + xlim(rng_quant[1], 
+                                                                              rng_quant[2]) + 
   ylim(rng_quant[1], rng_quant[2]) +
   labs(x=paste0("Predicted ", paste(inVar), " (units)"),
        y=paste0("Observed ", paste(inVar), " (units)"),
-       title=paste0("Calibration: ", paste0("Rsq = ", cal.R2), "; ", paste0("RMSEP = ", cal.RMSEP))) +
+       title=paste0("Calibration: ", paste0("Rsq = ", cal.R2), "; ", paste0("RMSEP = ", 
+                                                                            cal.RMSEP))) +
   theme(axis.text=element_text(size=18), legend.position="none",
         axis.title=element_text(size=20, face="bold"), 
         axis.text.x = element_text(angle = 0,vjust = 0.5),
@@ -308,11 +312,13 @@ cal_resid_histogram <- ggplot(cal.plsr.output, aes(x=PLSR_CV_Residuals)) +
 rng_quant <- quantile(val.plsr.output[,inVar], probs = c(0.001, 0.999))
 val_scatter_plot <- ggplot(val.plsr.output, aes(x=PLSR_Predicted, y=get(inVar))) + 
   theme_bw() + geom_point() + geom_abline(intercept = 0, slope = 1, color="dark grey", 
-                                          linetype="dashed", size=1.5) + xlim(rng_quant[1], rng_quant[2]) + 
+                                          linetype="dashed", size=1.5) + xlim(rng_quant[1], 
+                                                                              rng_quant[2]) + 
   ylim(rng_quant[1], rng_quant[2]) +
   labs(x=paste0("Predicted ", paste(inVar), " (units)"),
        y=paste0("Observed ", paste(inVar), " (units)"),
-       title=paste0("Validation: ", paste0("Rsq = ", val.R2), "; ", paste0("RMSEP = ", val.RMSEP))) +
+       title=paste0("Validation: ", paste0("Rsq = ", val.R2), "; ", paste0("RMSEP = ", 
+                                                                           val.RMSEP))) +
   theme(axis.text=element_text(size=18), legend.position="none",
         axis.title=element_text(size=20, face="bold"), 
         axis.text.x = element_text(angle = 0,vjust = 0.5),
@@ -367,9 +373,8 @@ iterations <- 500    # how many permutation iterations to run
 prop <- 0.70          # fraction of training data to keep for each iteration
 plsr_permutation <- spectratrait::pls_permutation(dataset=cal.plsr.data, maxComps=nComps, 
                                                   iterations=iterations, prop=prop, 
-                                                  verbose=FALSE)
+                                                  verbose=TRUE)
 bootstrap_intercept <- plsr_permutation$coef_array[1,,nComps]
-hist(bootstrap_intercept)
 bootstrap_coef <- plsr_permutation$coef_array[2:length(plsr_permutation$coef_array[,1,nComps]),
                                               ,nComps]
 rm(plsr_permutation)
