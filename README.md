@@ -30,16 +30,13 @@ install.packages("pls")
 install.packages("ggplot2")
 ...
 ```
-Or 2) you can install all the packages at once as a list, though you need to carefully pay attention to any R messages about needing to uppdate existing or install new R packages at the same time. This usually shows up as a message with one or more packages that R would like to update requiring you to respond before install can continue
 
-``` r
-install.packages(c("devtools","remotes","readr","RCurl","httr","pls","dplyr","reshape2",
-"here","plotrix","scales","ggplot2","gridExtra"))
-```
+and so forth untill all of the dependencies (listed above in the "Depends" section) are installed. **Note** - you should pay careful attention at this stage to any R messages in your terminal alerting you that you need to uppdate existing or install new R packages. These messages usually show up after you attempt to run install.packages() and require you 
+to respond in your terminal to a y/n or multiple choice question before the install can continue.
 
-You can copy and paste the above line directly into your R or RStudio terminal. Finally, you can also run or source the "install_dependencies.R" script located in inst/scripts which should also install the dependencies.  Note that again you will need to watch for any R prompts to update pacakges in order for install to proceed correctly.
+Or 2) you can also run or source the "install_dependencies.R" script located in inst/scripts which should also install all of the required dependencies.  **Note** - again you will need to watch for any R prompts to update pacakges in order for the install to proceed correctly.
 
-Finally, to complete install you will also need to install the spectratrait package itself.  You can do this by copying and pasting the command below into your R or RStudio (preferred) terminal.
+Finally, to complete the installation you will also need to install the spectratrait package itself.  You can do this by copying and pasting the command below into your R or RStudio (preferred) terminal.
 
 ``` r
 # to install the master branch version
