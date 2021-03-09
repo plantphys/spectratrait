@@ -13,8 +13,9 @@ https://ecosml.org/package/github/TESTgroup-BNL/PLSR_for_plant_trait_prediction
 ### Getting started, tips and tricks:
 * If you are new to R you should start by reading https://support.rstudio.com/hc/en-us/articles/201141096-Getting-Started-with-R && https://www.dataquest.io/blog/tutorial-getting-started-with-r-and-rstudio/
 * Software requirements: R software (version 4.0 or above) and preferred operating environment (e.g. RStudio). 
-* Load script into operating environment: Using the green "Code" button at the top of this page, Download ZIP. Extract the contents of the ZIP in your preferred location. Use R Studio to open your selected example script from the inst/scripts folder.   
 * Install package dependencies and the spectratrait pacakge: See the Depends and INSTALL sections below
+* To work with the repository locally, clone the repository to your local machine (https://docs.github.com/en/github/creating-cloning-and-archiving-repositories/cloning-a-repository). Once you have the repository on your local machine you can run the scripts in inst/scripts or vignettes folders. You can also start editing the code yourself or contributing to the development of the package through new pull requests (https://guides.github.com/activities/hello-world/)
+* Or if you dont want to obtain the code via cloning the repository, you can click the green "Code" button at the top of this page and select "Download ZIP". Extract the contents of the ZIP in your preferred location. Use RStudio to open your selected example script from the inst/scripts folder and the run or source the code.
 
 ### Depends: 
 ggplot2 (>= 3.3.2), remotes (>= 2.2.0), devtools (>= 2.3.1), readr (>= 1.3.1), RCurl (>= 1.98-1.2), httr (>= 1.4.2), pls (>= 2.7-2), 
