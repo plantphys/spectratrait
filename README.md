@@ -18,8 +18,9 @@ https://ecosml.org/package/github/TESTgroup-BNL/PLSR_for_plant_trait_prediction
 * Or if you dont want to obtain the code via cloning the repository, you can click the green "Code" button at the top of this page and select "Download ZIP". Extract the contents of the ZIP in your preferred location. Use RStudio to open your selected example script from the inst/scripts folder and the run or source the code.
 
 ### Depends: 
-ggplot2 (>= 3.3.2), remotes (>= 2.2.0), devtools (>= 2.3.1), readr (>= 1.3.1), RCurl (>= 1.98-1.2), httr (>= 1.4.2), pls (>= 2.7-2), 
-dplyr (>= 1.0.1), reshape2 (>= 1.4.4), here (>= 0.1), plotrix (>= 3.7-8), gridExtra (>= 2.3), scales (>= 1.1.1)
+ggplot2 (>= 3.3.2), remotes (>= 2.2.0), devtools (>= 2.3.1), readr (>= 1.3.1), RCurl (>= 1.98-1.2), 
+httr (>= 1.4.2), pls (>= 2.7-2), dplyr (>= 1.0.1), reshape2 (>= 1.4.4), here (>= 0.1), 
+plotrix (>= 3.7-8), gridExtra (>= 2.3), scales (>= 1.1.1)
 
 ### INSTALL
 spectratrait is not currently on CRAN, but you can install from GitHub using devtools().  First, lets make sure you have all of the package dependencies installed. You can do this either by 1) installing the packages individually using install.packages(), for example:
@@ -32,8 +33,8 @@ install.packages("ggplot2")
 Or 2) you can install all the packages at once as a list, though you need to carefully pay attention to any R messages about needing to uppdate existing or install new R packages at the same time. This usually shows up as a message with one or more packages that R would like to update requiring you to respond before install can continue
 
 ``` r
-install.packages(c("devtools","remotes","readr","RCurl","httr","pls","dplyr","reshape2","here","plotrix",
-"scales","ggplot2","gridExtra"))
+install.packages(c("devtools","remotes","readr","RCurl","httr","pls","dplyr","reshape2",
+"here","plotrix","scales","ggplot2","gridExtra"))
 ```
 
 You can copy and paste the above line directly into your R or RStudio terminal. Finally, you can also run or source the "install_dependencies.R" script located in inst/scripts which should also install the dependencies.  Note that again you will need to watch for any R prompts to update pacakges in order for install to proceed correctly.
@@ -42,14 +43,16 @@ Finally, to complete install you will also need to install the spectratrait pack
 
 ``` r
 # to install the master branch version
-devtools::install_github(repo = "TESTgroup-BNL/PLSR_for_plant_trait_prediction", dependencies=TRUE)
+devtools::install_github(repo = "TESTgroup-BNL/PLSR_for_plant_trait_prediction", 
+dependencies=TRUE)
 
 # to install a specific release, for example release 1.0.0
-devtools::install_github(repo = "TESTgroup-BNL/PLSR_for_plant_trait_prediction@v1.0.0", dependencies=TRUE)
+devtools::install_github(repo = "TESTgroup-BNL/PLSR_for_plant_trait_prediction@v1.0.0", 
+dependencies=TRUE)
 
 # or a specific branch, e.g. a branch named devbranch
-devtools::install_github(repo = "TESTgroup-BNL/PLSR_for_plant_trait_prediction", ref = "devbranch", 
-dependencies=TRUE)
+devtools::install_github(repo = "TESTgroup-BNL/PLSR_for_plant_trait_prediction", 
+ref = "devbranch", dependencies=TRUE)
 ```
 
 ## Contains:
