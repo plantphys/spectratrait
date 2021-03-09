@@ -13,10 +13,13 @@ leaf nitrogen content (Narea, g/m2)
 
 ### Getting Started
 
-### Installation
+### Load libraries
 
-    ## Skipping install of 'spectratrait' from a github remote, the SHA1 (8e168d5e) has not changed since last install.
-    ##   Use `force = TRUE` to force installation
+``` r
+list.of.packages <- c("pls","dplyr","reshape2","here","plotrix","ggplot2","gridExtra",
+                      "spectratrait")
+invisible(lapply(list.of.packages, library, character.only = TRUE))
+```
 
     ## 
     ## Attaching package: 'pls'
@@ -79,7 +82,7 @@ output_dir <- "tempdir"
 
 ### Set working directory (scratch space)
 
-    ## [1] "/private/var/folders/xp/h3k9vf3n2jx181ts786_yjrn9c2gjq/T/Rtmpn7Jk9v"
+    ## [1] "/private/var/folders/xp/h3k9vf3n2jx181ts786_yjrn9c2gjq/T/RtmpKq1naf"
 
 ### Grab data from EcoSIS
 
@@ -115,38 +118,37 @@ head(dat_raw)
 ```
 
     ## # A tibble: 6 x 2,164
-    ##   `Cw/EWT (cm3/cm… `Latin Species` `Leaf area (mm2… `Leaf calcium c…
-    ##              <dbl> <chr>                      <dbl>            <dbl>
-    ## 1          0.00887 Arrhenatherum …             696.           0.0291
-    ## 2          0.00824 Bromus sterilis             447.           0.0230
-    ## 3          0.0280  Jacobaea vulga…            2418.           0.0950
-    ## 4          0.0106  Rubus caesius              5719.           0.0700
-    ## 5          0.00851 Arrhenatherum …             671.           0.0286
-    ## 6          0.0153  Crepis capilla…            1401.           0.0470
-    ## # … with 2,160 more variables: `Leaf magnesium content per leaf area
-    ## #   (mg/mm2)` <dbl>, `Leaf mass per area (g/cm2)` <dbl>, `Leaf nitrogen content
-    ## #   per leaf area (mg/mm2)` <dbl>, `Leaf phosphorus content per leaf area
-    ## #   (mg/mm2)` <dbl>, `Leaf potassium content per leaf area (mg/mm2)` <dbl>,
-    ## #   `Plant height vegetative (cm)` <dbl>, ids <chr>, `plot code` <chr>,
-    ## #   `species code` <chr>, `350` <dbl>, `351` <dbl>, `352` <dbl>, `353` <dbl>,
-    ## #   `354` <dbl>, `355` <dbl>, `356` <dbl>, `357` <dbl>, `358` <dbl>,
-    ## #   `359` <dbl>, `360` <dbl>, `361` <dbl>, `362` <dbl>, `363` <dbl>,
-    ## #   `364` <dbl>, `365` <dbl>, `366` <dbl>, `367` <dbl>, `368` <dbl>,
-    ## #   `369` <dbl>, `370` <dbl>, `371` <dbl>, `372` <dbl>, `373` <dbl>,
-    ## #   `374` <dbl>, `375` <dbl>, `376` <dbl>, `377` <dbl>, `378` <dbl>,
-    ## #   `379` <dbl>, `380` <dbl>, `381` <dbl>, `382` <dbl>, `383` <dbl>,
-    ## #   `384` <dbl>, `385` <dbl>, `386` <dbl>, `387` <dbl>, `388` <dbl>,
-    ## #   `389` <dbl>, `390` <dbl>, `391` <dbl>, `392` <dbl>, `393` <dbl>,
-    ## #   `394` <dbl>, `395` <dbl>, `396` <dbl>, `397` <dbl>, `398` <dbl>,
-    ## #   `399` <dbl>, `400` <dbl>, `401` <dbl>, `402` <dbl>, `403` <dbl>,
-    ## #   `404` <dbl>, `405` <dbl>, `406` <dbl>, `407` <dbl>, `408` <dbl>,
-    ## #   `409` <dbl>, `410` <dbl>, `411` <dbl>, `412` <dbl>, `413` <dbl>,
-    ## #   `414` <dbl>, `415` <dbl>, `416` <dbl>, `417` <dbl>, `418` <dbl>,
-    ## #   `419` <dbl>, `420` <dbl>, `421` <dbl>, `422` <dbl>, `423` <dbl>,
-    ## #   `424` <dbl>, `425` <dbl>, `426` <dbl>, `427` <dbl>, `428` <dbl>,
-    ## #   `429` <dbl>, `430` <dbl>, `431` <dbl>, `432` <dbl>, `433` <dbl>,
-    ## #   `434` <dbl>, `435` <dbl>, `436` <dbl>, `437` <dbl>, `438` <dbl>,
-    ## #   `439` <dbl>, `440` <dbl>, …
+    ##   `Cw/EWT (cm3/cm2… `Latin Species`   `Leaf area (mm2… `Leaf calcium content pe…
+    ##               <dbl> <chr>                        <dbl>                     <dbl>
+    ## 1           0.00887 Arrhenatherum el…             696.                    0.0291
+    ## 2           0.00824 Bromus sterilis               447.                    0.0230
+    ## 3           0.0280  Jacobaea vulgaris            2418.                    0.0950
+    ## 4           0.0106  Rubus caesius                5719.                    0.0700
+    ## 5           0.00851 Arrhenatherum el…             671.                    0.0286
+    ## 6           0.0153  Crepis capillaris            1401.                    0.0470
+    ## # … with 2,160 more variables:
+    ## #   Leaf magnesium content per leaf area (mg/mm2) <dbl>,
+    ## #   Leaf mass per area (g/cm2) <dbl>,
+    ## #   Leaf nitrogen content per leaf area (mg/mm2) <dbl>,
+    ## #   Leaf phosphorus content per leaf area (mg/mm2) <dbl>,
+    ## #   Leaf potassium content per leaf area (mg/mm2) <dbl>,
+    ## #   Plant height vegetative (cm) <dbl>, ids <chr>, plot code <chr>,
+    ## #   species code <chr>, 350 <dbl>, 351 <dbl>, 352 <dbl>, 353 <dbl>, 354 <dbl>,
+    ## #   355 <dbl>, 356 <dbl>, 357 <dbl>, 358 <dbl>, 359 <dbl>, 360 <dbl>,
+    ## #   361 <dbl>, 362 <dbl>, 363 <dbl>, 364 <dbl>, 365 <dbl>, 366 <dbl>,
+    ## #   367 <dbl>, 368 <dbl>, 369 <dbl>, 370 <dbl>, 371 <dbl>, 372 <dbl>,
+    ## #   373 <dbl>, 374 <dbl>, 375 <dbl>, 376 <dbl>, 377 <dbl>, 378 <dbl>,
+    ## #   379 <dbl>, 380 <dbl>, 381 <dbl>, 382 <dbl>, 383 <dbl>, 384 <dbl>,
+    ## #   385 <dbl>, 386 <dbl>, 387 <dbl>, 388 <dbl>, 389 <dbl>, 390 <dbl>,
+    ## #   391 <dbl>, 392 <dbl>, 393 <dbl>, 394 <dbl>, 395 <dbl>, 396 <dbl>,
+    ## #   397 <dbl>, 398 <dbl>, 399 <dbl>, 400 <dbl>, 401 <dbl>, 402 <dbl>,
+    ## #   403 <dbl>, 404 <dbl>, 405 <dbl>, 406 <dbl>, 407 <dbl>, 408 <dbl>,
+    ## #   409 <dbl>, 410 <dbl>, 411 <dbl>, 412 <dbl>, 413 <dbl>, 414 <dbl>,
+    ## #   415 <dbl>, 416 <dbl>, 417 <dbl>, 418 <dbl>, 419 <dbl>, 420 <dbl>,
+    ## #   421 <dbl>, 422 <dbl>, 423 <dbl>, 424 <dbl>, 425 <dbl>, 426 <dbl>,
+    ## #   427 <dbl>, 428 <dbl>, 429 <dbl>, 430 <dbl>, 431 <dbl>, 432 <dbl>,
+    ## #   433 <dbl>, 434 <dbl>, 435 <dbl>, 436 <dbl>, 437 <dbl>, 438 <dbl>,
+    ## #   439 <dbl>, 440 <dbl>, …
 
 ``` r
 names(dat_raw)[1:40]
@@ -207,20 +209,21 @@ head(sample_info)
 ```
 
     ## # A tibble: 6 x 13
-    ##   `Cw/EWT (cm3/cm… `Latin Species` `Leaf area (mm2… `Leaf calcium c…
-    ##              <dbl> <chr>                      <dbl>            <dbl>
-    ## 1          0.00887 Arrhenatherum …             696.           0.0291
-    ## 2          0.00824 Bromus sterilis             447.           0.0230
-    ## 3          0.0280  Jacobaea vulga…            2418.           0.0950
-    ## 4          0.0106  Rubus caesius              5719.           0.0700
-    ## 5          0.00851 Arrhenatherum …             671.           0.0286
-    ## 6          0.0153  Crepis capilla…            1401.           0.0470
-    ## # … with 9 more variables: `Leaf magnesium content per leaf area
-    ## #   (mg/mm2)` <dbl>, `Leaf mass per area (g/cm2)` <dbl>, `Leaf nitrogen content
-    ## #   per leaf area (mg/mm2)` <dbl>, `Leaf phosphorus content per leaf area
-    ## #   (mg/mm2)` <dbl>, `Leaf potassium content per leaf area (mg/mm2)` <dbl>,
-    ## #   `Plant height vegetative (cm)` <dbl>, ids <chr>, `plot code` <chr>,
-    ## #   `species code` <chr>
+    ##   `Cw/EWT (cm3/cm2… `Latin Species`   `Leaf area (mm2… `Leaf calcium content pe…
+    ##               <dbl> <chr>                        <dbl>                     <dbl>
+    ## 1           0.00887 Arrhenatherum el…             696.                    0.0291
+    ## 2           0.00824 Bromus sterilis               447.                    0.0230
+    ## 3           0.0280  Jacobaea vulgaris            2418.                    0.0950
+    ## 4           0.0106  Rubus caesius                5719.                    0.0700
+    ## 5           0.00851 Arrhenatherum el…             671.                    0.0286
+    ## 6           0.0153  Crepis capillaris            1401.                    0.0470
+    ## # … with 9 more variables: Leaf magnesium content per leaf area (mg/mm2) <dbl>,
+    ## #   Leaf mass per area (g/cm2) <dbl>,
+    ## #   Leaf nitrogen content per leaf area (mg/mm2) <dbl>,
+    ## #   Leaf phosphorus content per leaf area (mg/mm2) <dbl>,
+    ## #   Leaf potassium content per leaf area (mg/mm2) <dbl>,
+    ## #   Plant height vegetative (cm) <dbl>, ids <chr>, plot code <chr>,
+    ## #   species code <chr>
 
 ``` r
 sample_info2 <- sample_info %>%
@@ -856,7 +859,7 @@ write.csv(out.jk.coefs,file=file.path(outdir,
 print(paste("Output directory: ", outdir))
 ```
 
-    ## [1] "Output directory:  /var/folders/xp/h3k9vf3n2jx181ts786_yjrn9c2gjq/T//Rtmpn7Jk9v"
+    ## [1] "Output directory:  /var/folders/xp/h3k9vf3n2jx181ts786_yjrn9c2gjq/T//RtmpKq1naf"
 
 ``` r
 # Observed versus predicted

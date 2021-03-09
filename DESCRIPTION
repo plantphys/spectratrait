@@ -1,6 +1,6 @@
 Package: spectratrait
 Title: A simple add-on package to aid in the fitting of leaf-level spectra-trait PLSR models
-Version: 0.9.9
+Version: 1.0.1
 Authors@R:
   c(person(given = "Julien",
            family = "Lamour",

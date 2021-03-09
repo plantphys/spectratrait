@@ -14,10 +14,13 @@ For more information refer to the dataset EcoSIS page:
 
 ### Getting Started
 
-### Installation
+### Load libraries
 
-    ## Skipping install of 'spectratrait' from a github remote, the SHA1 (902afb48) has not changed since last install.
-    ##   Use `force = TRUE` to force installation
+``` r
+list.of.packages <- c("pls","dplyr","reshape2","here","plotrix","ggplot2","gridExtra",
+                      "spectratrait")
+invisible(lapply(list.of.packages, library, character.only = TRUE))
+```
 
     ## 
     ## Attaching package: 'pls'
@@ -80,7 +83,7 @@ output_dir <- "tempdir"
 
 ### Set working directory (scratch space)
 
-    ## [1] "/private/var/folders/xp/h3k9vf3n2jx181ts786_yjrn9c2gjq/T/RtmpluGMWw"
+    ## [1] "/private/var/folders/xp/h3k9vf3n2jx181ts786_yjrn9c2gjq/T/RtmpiRlNpw"
 
 ### Grab data from EcoSIS
 
@@ -116,35 +119,33 @@ head(dat_raw)
 ```
 
     ## # A tibble: 6 x 459
-    ##   Affiliation  Boron Calcium Carbon Carotenoids_area Carotenoids_mass Cellulose
-    ##   <chr>        <dbl>   <dbl>  <dbl>            <dbl>            <dbl>     <dbl>
-    ## 1 University… 0.0420   24.2    463.             9.19             1.18      221.
-    ## 2 University… 0.0361    6.90   558.            10.8              1.17      183.
-    ## 3 University… 0.0407   16.7    532.            12.2              1.52      133.
-    ## 4 University… 0.0461   13.9    461.             9.16             1.50      220.
-    ## 5 University… 0.0401   13.7    510.            11.0              1.53      101.
-    ## 6 University… 0.0456   14.5    557.             8.90             1.24      214.
+    ##   Affiliation   Boron Calcium Carbon Carotenoids_area Carotenoids_mass Cellulose
+    ##   <chr>         <dbl>   <dbl>  <dbl>            <dbl>            <dbl>     <dbl>
+    ## 1 University … 0.0420   24.2    463.             9.19             1.18      221.
+    ## 2 University … 0.0361    6.90   558.            10.8              1.17      183.
+    ## 3 University … 0.0407   16.7    532.            12.2              1.52      133.
+    ## 4 University … 0.0461   13.9    461.             9.16             1.50      220.
+    ## 5 University … 0.0401   13.7    510.            11.0              1.53      101.
+    ## 6 University … 0.0456   14.5    557.             8.90             1.24      214.
     ## # … with 452 more variables: Chlorophylls_area <dbl>, Chlorophylls_mass <dbl>,
     ## #   Copper <dbl>, EWT <dbl>, Fiber <dbl>, Flavonoids <dbl>, LMA <dbl>,
     ## #   Lignin <dbl>, Magnesium <dbl>, Manganese <dbl>, NSC <dbl>, Nitrogen <dbl>,
     ## #   PI <chr>, Phenolics <dbl>, Phosphorus <dbl>, Plot_ID <chr>,
     ## #   Potassium <dbl>, Project <chr>, SLA <dbl>, Sample_Year <dbl>, Starch <dbl>,
-    ## #   Sugar <dbl>, Sulfur <dbl>, Water <dbl>, d13C <dbl>, d15N <dbl>,
-    ## #   `384` <dbl>, `389` <dbl>, `394` <dbl>, `399` <dbl>, `404` <dbl>,
-    ## #   `409` <dbl>, `414` <dbl>, `419` <dbl>, `424` <dbl>, `429` <dbl>,
-    ## #   `434` <dbl>, `439` <dbl>, `444` <dbl>, `449` <dbl>, `454` <dbl>,
-    ## #   `459` <dbl>, `464` <dbl>, `469` <dbl>, `474` <dbl>, `479` <dbl>,
-    ## #   `484` <dbl>, `489` <dbl>, `494` <dbl>, `499` <dbl>, `504` <dbl>,
-    ## #   `509` <dbl>, `514` <dbl>, `519` <dbl>, `524` <dbl>, `529` <dbl>,
-    ## #   `534` <dbl>, `539` <dbl>, `544` <dbl>, `549` <dbl>, `554` <dbl>,
-    ## #   `559` <dbl>, `564` <dbl>, `569` <dbl>, `574` <dbl>, `579` <dbl>,
-    ## #   `584` <dbl>, `589` <dbl>, `594` <dbl>, `599` <dbl>, `604` <dbl>,
-    ## #   `609` <dbl>, `614` <dbl>, `619` <dbl>, `624` <dbl>, `629` <dbl>,
-    ## #   `634` <dbl>, `639` <dbl>, `644` <dbl>, `649` <dbl>, `654` <dbl>,
-    ## #   `659` <dbl>, `664` <dbl>, `669` <dbl>, `674` <dbl>, `679` <dbl>,
-    ## #   `684` <dbl>, `689` <dbl>, `694` <dbl>, `699` <dbl>, `704` <dbl>,
-    ## #   `709` <dbl>, `714` <dbl>, `719` <dbl>, `724` <dbl>, `729` <dbl>,
-    ## #   `734` <dbl>, `739` <dbl>, `744` <dbl>, `749` <dbl>, …
+    ## #   Sugar <dbl>, Sulfur <dbl>, Water <dbl>, d13C <dbl>, d15N <dbl>, 384 <dbl>,
+    ## #   389 <dbl>, 394 <dbl>, 399 <dbl>, 404 <dbl>, 409 <dbl>, 414 <dbl>,
+    ## #   419 <dbl>, 424 <dbl>, 429 <dbl>, 434 <dbl>, 439 <dbl>, 444 <dbl>,
+    ## #   449 <dbl>, 454 <dbl>, 459 <dbl>, 464 <dbl>, 469 <dbl>, 474 <dbl>,
+    ## #   479 <dbl>, 484 <dbl>, 489 <dbl>, 494 <dbl>, 499 <dbl>, 504 <dbl>,
+    ## #   509 <dbl>, 514 <dbl>, 519 <dbl>, 524 <dbl>, 529 <dbl>, 534 <dbl>,
+    ## #   539 <dbl>, 544 <dbl>, 549 <dbl>, 554 <dbl>, 559 <dbl>, 564 <dbl>,
+    ## #   569 <dbl>, 574 <dbl>, 579 <dbl>, 584 <dbl>, 589 <dbl>, 594 <dbl>,
+    ## #   599 <dbl>, 604 <dbl>, 609 <dbl>, 614 <dbl>, 619 <dbl>, 624 <dbl>,
+    ## #   629 <dbl>, 634 <dbl>, 639 <dbl>, 644 <dbl>, 649 <dbl>, 654 <dbl>,
+    ## #   659 <dbl>, 664 <dbl>, 669 <dbl>, 674 <dbl>, 679 <dbl>, 684 <dbl>,
+    ## #   689 <dbl>, 694 <dbl>, 699 <dbl>, 704 <dbl>, 709 <dbl>, 714 <dbl>,
+    ## #   719 <dbl>, 724 <dbl>, 729 <dbl>, 734 <dbl>, 739 <dbl>, 744 <dbl>,
+    ## #   749 <dbl>, …
 
 ``` r
 names(dat_raw)[1:40]
@@ -174,14 +175,14 @@ head(sample_info)
 ```
 
     ## # A tibble: 6 x 33
-    ##   Affiliation  Boron Calcium Carbon Carotenoids_area Carotenoids_mass Cellulose
-    ##   <chr>        <dbl>   <dbl>  <dbl>            <dbl>            <dbl>     <dbl>
-    ## 1 University… 0.0420   24.2    463.             9.19             1.18      221.
-    ## 2 University… 0.0361    6.90   558.            10.8              1.17      183.
-    ## 3 University… 0.0407   16.7    532.            12.2              1.52      133.
-    ## 4 University… 0.0461   13.9    461.             9.16             1.50      220.
-    ## 5 University… 0.0401   13.7    510.            11.0              1.53      101.
-    ## 6 University… 0.0456   14.5    557.             8.90             1.24      214.
+    ##   Affiliation   Boron Calcium Carbon Carotenoids_area Carotenoids_mass Cellulose
+    ##   <chr>         <dbl>   <dbl>  <dbl>            <dbl>            <dbl>     <dbl>
+    ## 1 University … 0.0420   24.2    463.             9.19             1.18      221.
+    ## 2 University … 0.0361    6.90   558.            10.8              1.17      183.
+    ## 3 University … 0.0407   16.7    532.            12.2              1.52      133.
+    ## 4 University … 0.0461   13.9    461.             9.16             1.50      220.
+    ## 5 University … 0.0401   13.7    510.            11.0              1.53      101.
+    ## 6 University … 0.0456   14.5    557.             8.90             1.24      214.
     ## # … with 26 more variables: Chlorophylls_area <dbl>, Chlorophylls_mass <dbl>,
     ## #   Copper <dbl>, EWT <dbl>, Fiber <dbl>, Flavonoids <dbl>, LMA <dbl>,
     ## #   Lignin <dbl>, Magnesium <dbl>, Manganese <dbl>, NSC <dbl>, Nitrogen <dbl>,
@@ -426,12 +427,14 @@ iterations <- 80
 prop <- 0.70
 if (method=="pls") {
   # pls package approach - faster but estimates more components....
-  nComps <- spectratrait::find_optimal_components(dataset=cal.plsr.data, method=method, maxComps=maxComps, 
-                                                  seg=seg, random_seed=random_seed)
+  nComps <- spectratrait::find_optimal_components(dataset=cal.plsr.data, method=method, 
+                                                  maxComps=maxComps, seg=seg, 
+                                                  random_seed=random_seed)
   print(paste0("*** Optimal number of components: ", nComps))
 } else {
-  nComps <- spectratrait::find_optimal_components(dataset=cal.plsr.data, method=method, maxComps=maxComps, 
-                                                  iterations=iterations, seg=seg, prop=prop, 
+  nComps <- spectratrait::find_optimal_components(dataset=cal.plsr.data, method=method, 
+                                                  maxComps=maxComps, iterations=iterations, 
+                                                  seg=seg, prop=prop, 
                                                   random_seed=random_seed)
 }
 ```
@@ -523,7 +526,8 @@ par(opar)
 
 ``` r
 #calibration
-cal.plsr.output <- data.frame(cal.plsr.data[, which(names(cal.plsr.data) %notin% "Spectra")], PLSR_Predicted=fit,
+cal.plsr.output <- data.frame(cal.plsr.data[, which(names(cal.plsr.data) %notin% "Spectra")], 
+                              PLSR_Predicted=fit,
                               PLSR_CV_Predicted=as.vector(plsr.out$validation$pred[,,nComps]))
 cal.plsr.output <- cal.plsr.output %>%
   mutate(PLSR_CV_Residuals = PLSR_CV_Predicted-get(inVar))
@@ -580,11 +584,13 @@ val.RMSEP <- round(sqrt(mean(val.plsr.output$PLSR_Residuals^2)),2)
 rng_quant <- quantile(cal.plsr.output[,inVar], probs = c(0.001, 0.999))
 cal_scatter_plot <- ggplot(cal.plsr.output, aes(x=PLSR_CV_Predicted, y=get(inVar))) + 
   theme_bw() + geom_point() + geom_abline(intercept = 0, slope = 1, color="dark grey", 
-                                          linetype="dashed", size=1.5) + xlim(rng_quant[1], rng_quant[2]) + 
+                                          linetype="dashed", size=1.5) + xlim(rng_quant[1], 
+                                                                              rng_quant[2]) + 
   ylim(rng_quant[1], rng_quant[2]) +
   labs(x=paste0("Predicted ", paste(inVar), " (units)"),
        y=paste0("Observed ", paste(inVar), " (units)"),
-       title=paste0("Calibration: ", paste0("Rsq = ", cal.R2), "; ", paste0("RMSEP = ", cal.RMSEP))) +
+       title=paste0("Calibration: ", paste0("Rsq = ", cal.R2), "; ", paste0("RMSEP = ", 
+                                                                            cal.RMSEP))) +
   theme(axis.text=element_text(size=18), legend.position="none",
         axis.title=element_text(size=20, face="bold"), 
         axis.text.x = element_text(angle = 0,vjust = 0.5),
@@ -602,11 +608,13 @@ cal_resid_histogram <- ggplot(cal.plsr.output, aes(x=PLSR_CV_Residuals)) +
 rng_quant <- quantile(val.plsr.output[,inVar], probs = c(0.001, 0.999))
 val_scatter_plot <- ggplot(val.plsr.output, aes(x=PLSR_Predicted, y=get(inVar))) + 
   theme_bw() + geom_point() + geom_abline(intercept = 0, slope = 1, color="dark grey", 
-                                          linetype="dashed", size=1.5) + xlim(rng_quant[1], rng_quant[2]) + 
+                                          linetype="dashed", size=1.5) + xlim(rng_quant[1], 
+                                                                              rng_quant[2]) + 
   ylim(rng_quant[1], rng_quant[2]) +
   labs(x=paste0("Predicted ", paste(inVar), " (units)"),
        y=paste0("Observed ", paste(inVar), " (units)"),
-       title=paste0("Validation: ", paste0("Rsq = ", val.R2), "; ", paste0("RMSEP = ", val.RMSEP))) +
+       title=paste0("Validation: ", paste0("Rsq = ", val.R2), "; ", paste0("RMSEP = ", 
+                                                                           val.RMSEP))) +
   theme(axis.text=element_text(size=18), legend.position="none",
         axis.title=element_text(size=20, face="bold"), 
         axis.text.x = element_text(angle = 0,vjust = 0.5),
@@ -680,1007 +688,9 @@ par(opar)
 ### Bootstrap validation
 
     ## [1] "*** Running permutation test.  Please hang tight, this can take awhile ***"
-    ## [1] "Options: 12 500 100 0.7"
-
-    ## Running interation 1
-
-    ## Running interation 2
-
-    ## Running interation 3
-
-    ## Running interation 4
-
-    ## Running interation 5
-
-    ## Running interation 6
-
-    ## Running interation 7
-
-    ## Running interation 8
-
-    ## Running interation 9
-
-    ## Running interation 10
-
-    ## Running interation 11
-
-    ## Running interation 12
-
-    ## Running interation 13
-
-    ## Running interation 14
-
-    ## Running interation 15
-
-    ## Running interation 16
-
-    ## Running interation 17
-
-    ## Running interation 18
-
-    ## Running interation 19
-
-    ## Running interation 20
-
-    ## Running interation 21
-
-    ## Running interation 22
-
-    ## Running interation 23
-
-    ## Running interation 24
-
-    ## Running interation 25
-
-    ## Running interation 26
-
-    ## Running interation 27
-
-    ## Running interation 28
-
-    ## Running interation 29
-
-    ## Running interation 30
-
-    ## Running interation 31
-
-    ## Running interation 32
-
-    ## Running interation 33
-
-    ## Running interation 34
-
-    ## Running interation 35
-
-    ## Running interation 36
-
-    ## Running interation 37
-
-    ## Running interation 38
-
-    ## Running interation 39
-
-    ## Running interation 40
-
-    ## Running interation 41
-
-    ## Running interation 42
-
-    ## Running interation 43
-
-    ## Running interation 44
-
-    ## Running interation 45
-
-    ## Running interation 46
-
-    ## Running interation 47
-
-    ## Running interation 48
-
-    ## Running interation 49
-
-    ## Running interation 50
-
-    ## Running interation 51
-
-    ## Running interation 52
-
-    ## Running interation 53
-
-    ## Running interation 54
-
-    ## Running interation 55
-
-    ## Running interation 56
-
-    ## Running interation 57
-
-    ## Running interation 58
-
-    ## Running interation 59
-
-    ## Running interation 60
-
-    ## Running interation 61
-
-    ## Running interation 62
-
-    ## Running interation 63
-
-    ## Running interation 64
-
-    ## Running interation 65
-
-    ## Running interation 66
-
-    ## Running interation 67
-
-    ## Running interation 68
-
-    ## Running interation 69
-
-    ## Running interation 70
-
-    ## Running interation 71
-
-    ## Running interation 72
-
-    ## Running interation 73
-
-    ## Running interation 74
-
-    ## Running interation 75
-
-    ## Running interation 76
-
-    ## Running interation 77
-
-    ## Running interation 78
-
-    ## Running interation 79
-
-    ## Running interation 80
-
-    ## Running interation 81
-
-    ## Running interation 82
-
-    ## Running interation 83
-
-    ## Running interation 84
-
-    ## Running interation 85
-
-    ## Running interation 86
-
-    ## Running interation 87
-
-    ## Running interation 88
-
-    ## Running interation 89
-
-    ## Running interation 90
-
-    ## Running interation 91
-
-    ## Running interation 92
-
-    ## Running interation 93
-
-    ## Running interation 94
-
-    ## Running interation 95
-
-    ## Running interation 96
-
-    ## Running interation 97
-
-    ## Running interation 98
-
-    ## Running interation 99
-
-    ## Running interation 100
-
-    ## Running interation 101
-
-    ## Running interation 102
-
-    ## Running interation 103
-
-    ## Running interation 104
-
-    ## Running interation 105
-
-    ## Running interation 106
-
-    ## Running interation 107
-
-    ## Running interation 108
-
-    ## Running interation 109
-
-    ## Running interation 110
-
-    ## Running interation 111
-
-    ## Running interation 112
-
-    ## Running interation 113
-
-    ## Running interation 114
-
-    ## Running interation 115
-
-    ## Running interation 116
-
-    ## Running interation 117
-
-    ## Running interation 118
-
-    ## Running interation 119
-
-    ## Running interation 120
-
-    ## Running interation 121
-
-    ## Running interation 122
-
-    ## Running interation 123
-
-    ## Running interation 124
-
-    ## Running interation 125
-
-    ## Running interation 126
-
-    ## Running interation 127
-
-    ## Running interation 128
-
-    ## Running interation 129
-
-    ## Running interation 130
-
-    ## Running interation 131
-
-    ## Running interation 132
-
-    ## Running interation 133
-
-    ## Running interation 134
-
-    ## Running interation 135
-
-    ## Running interation 136
-
-    ## Running interation 137
-
-    ## Running interation 138
-
-    ## Running interation 139
-
-    ## Running interation 140
-
-    ## Running interation 141
-
-    ## Running interation 142
-
-    ## Running interation 143
-
-    ## Running interation 144
-
-    ## Running interation 145
-
-    ## Running interation 146
-
-    ## Running interation 147
-
-    ## Running interation 148
-
-    ## Running interation 149
-
-    ## Running interation 150
-
-    ## Running interation 151
-
-    ## Running interation 152
-
-    ## Running interation 153
-
-    ## Running interation 154
-
-    ## Running interation 155
-
-    ## Running interation 156
-
-    ## Running interation 157
-
-    ## Running interation 158
-
-    ## Running interation 159
-
-    ## Running interation 160
-
-    ## Running interation 161
-
-    ## Running interation 162
-
-    ## Running interation 163
-
-    ## Running interation 164
-
-    ## Running interation 165
-
-    ## Running interation 166
-
-    ## Running interation 167
-
-    ## Running interation 168
-
-    ## Running interation 169
-
-    ## Running interation 170
-
-    ## Running interation 171
-
-    ## Running interation 172
-
-    ## Running interation 173
-
-    ## Running interation 174
-
-    ## Running interation 175
-
-    ## Running interation 176
-
-    ## Running interation 177
-
-    ## Running interation 178
-
-    ## Running interation 179
-
-    ## Running interation 180
-
-    ## Running interation 181
-
-    ## Running interation 182
-
-    ## Running interation 183
-
-    ## Running interation 184
-
-    ## Running interation 185
-
-    ## Running interation 186
-
-    ## Running interation 187
-
-    ## Running interation 188
-
-    ## Running interation 189
-
-    ## Running interation 190
-
-    ## Running interation 191
-
-    ## Running interation 192
-
-    ## Running interation 193
-
-    ## Running interation 194
-
-    ## Running interation 195
-
-    ## Running interation 196
-
-    ## Running interation 197
-
-    ## Running interation 198
-
-    ## Running interation 199
-
-    ## Running interation 200
-
-    ## Running interation 201
-
-    ## Running interation 202
-
-    ## Running interation 203
-
-    ## Running interation 204
-
-    ## Running interation 205
-
-    ## Running interation 206
-
-    ## Running interation 207
-
-    ## Running interation 208
-
-    ## Running interation 209
-
-    ## Running interation 210
-
-    ## Running interation 211
-
-    ## Running interation 212
-
-    ## Running interation 213
-
-    ## Running interation 214
-
-    ## Running interation 215
-
-    ## Running interation 216
-
-    ## Running interation 217
-
-    ## Running interation 218
-
-    ## Running interation 219
-
-    ## Running interation 220
-
-    ## Running interation 221
-
-    ## Running interation 222
-
-    ## Running interation 223
-
-    ## Running interation 224
-
-    ## Running interation 225
-
-    ## Running interation 226
-
-    ## Running interation 227
-
-    ## Running interation 228
-
-    ## Running interation 229
-
-    ## Running interation 230
-
-    ## Running interation 231
-
-    ## Running interation 232
-
-    ## Running interation 233
-
-    ## Running interation 234
-
-    ## Running interation 235
-
-    ## Running interation 236
-
-    ## Running interation 237
-
-    ## Running interation 238
-
-    ## Running interation 239
-
-    ## Running interation 240
-
-    ## Running interation 241
-
-    ## Running interation 242
-
-    ## Running interation 243
-
-    ## Running interation 244
-
-    ## Running interation 245
-
-    ## Running interation 246
-
-    ## Running interation 247
-
-    ## Running interation 248
-
-    ## Running interation 249
-
-    ## Running interation 250
-
-    ## Running interation 251
-
-    ## Running interation 252
-
-    ## Running interation 253
-
-    ## Running interation 254
-
-    ## Running interation 255
-
-    ## Running interation 256
-
-    ## Running interation 257
-
-    ## Running interation 258
-
-    ## Running interation 259
-
-    ## Running interation 260
-
-    ## Running interation 261
-
-    ## Running interation 262
-
-    ## Running interation 263
-
-    ## Running interation 264
-
-    ## Running interation 265
-
-    ## Running interation 266
-
-    ## Running interation 267
-
-    ## Running interation 268
-
-    ## Running interation 269
-
-    ## Running interation 270
-
-    ## Running interation 271
-
-    ## Running interation 272
-
-    ## Running interation 273
-
-    ## Running interation 274
-
-    ## Running interation 275
-
-    ## Running interation 276
-
-    ## Running interation 277
-
-    ## Running interation 278
-
-    ## Running interation 279
-
-    ## Running interation 280
-
-    ## Running interation 281
-
-    ## Running interation 282
-
-    ## Running interation 283
-
-    ## Running interation 284
-
-    ## Running interation 285
-
-    ## Running interation 286
-
-    ## Running interation 287
-
-    ## Running interation 288
-
-    ## Running interation 289
-
-    ## Running interation 290
-
-    ## Running interation 291
-
-    ## Running interation 292
-
-    ## Running interation 293
-
-    ## Running interation 294
-
-    ## Running interation 295
-
-    ## Running interation 296
-
-    ## Running interation 297
-
-    ## Running interation 298
-
-    ## Running interation 299
-
-    ## Running interation 300
-
-    ## Running interation 301
-
-    ## Running interation 302
-
-    ## Running interation 303
-
-    ## Running interation 304
-
-    ## Running interation 305
-
-    ## Running interation 306
-
-    ## Running interation 307
-
-    ## Running interation 308
-
-    ## Running interation 309
-
-    ## Running interation 310
-
-    ## Running interation 311
-
-    ## Running interation 312
-
-    ## Running interation 313
-
-    ## Running interation 314
-
-    ## Running interation 315
-
-    ## Running interation 316
-
-    ## Running interation 317
-
-    ## Running interation 318
-
-    ## Running interation 319
-
-    ## Running interation 320
-
-    ## Running interation 321
-
-    ## Running interation 322
-
-    ## Running interation 323
-
-    ## Running interation 324
-
-    ## Running interation 325
-
-    ## Running interation 326
-
-    ## Running interation 327
-
-    ## Running interation 328
-
-    ## Running interation 329
-
-    ## Running interation 330
-
-    ## Running interation 331
-
-    ## Running interation 332
-
-    ## Running interation 333
-
-    ## Running interation 334
-
-    ## Running interation 335
-
-    ## Running interation 336
-
-    ## Running interation 337
-
-    ## Running interation 338
-
-    ## Running interation 339
-
-    ## Running interation 340
-
-    ## Running interation 341
-
-    ## Running interation 342
-
-    ## Running interation 343
-
-    ## Running interation 344
-
-    ## Running interation 345
-
-    ## Running interation 346
-
-    ## Running interation 347
-
-    ## Running interation 348
-
-    ## Running interation 349
-
-    ## Running interation 350
-
-    ## Running interation 351
-
-    ## Running interation 352
-
-    ## Running interation 353
-
-    ## Running interation 354
-
-    ## Running interation 355
-
-    ## Running interation 356
-
-    ## Running interation 357
-
-    ## Running interation 358
-
-    ## Running interation 359
-
-    ## Running interation 360
-
-    ## Running interation 361
-
-    ## Running interation 362
-
-    ## Running interation 363
-
-    ## Running interation 364
-
-    ## Running interation 365
-
-    ## Running interation 366
-
-    ## Running interation 367
-
-    ## Running interation 368
-
-    ## Running interation 369
-
-    ## Running interation 370
-
-    ## Running interation 371
-
-    ## Running interation 372
-
-    ## Running interation 373
-
-    ## Running interation 374
-
-    ## Running interation 375
-
-    ## Running interation 376
-
-    ## Running interation 377
-
-    ## Running interation 378
-
-    ## Running interation 379
-
-    ## Running interation 380
-
-    ## Running interation 381
-
-    ## Running interation 382
-
-    ## Running interation 383
-
-    ## Running interation 384
-
-    ## Running interation 385
-
-    ## Running interation 386
-
-    ## Running interation 387
-
-    ## Running interation 388
-
-    ## Running interation 389
-
-    ## Running interation 390
-
-    ## Running interation 391
-
-    ## Running interation 392
-
-    ## Running interation 393
-
-    ## Running interation 394
-
-    ## Running interation 395
-
-    ## Running interation 396
-
-    ## Running interation 397
-
-    ## Running interation 398
-
-    ## Running interation 399
-
-    ## Running interation 400
-
-    ## Running interation 401
-
-    ## Running interation 402
-
-    ## Running interation 403
-
-    ## Running interation 404
-
-    ## Running interation 405
-
-    ## Running interation 406
-
-    ## Running interation 407
-
-    ## Running interation 408
-
-    ## Running interation 409
-
-    ## Running interation 410
-
-    ## Running interation 411
-
-    ## Running interation 412
-
-    ## Running interation 413
-
-    ## Running interation 414
-
-    ## Running interation 415
-
-    ## Running interation 416
-
-    ## Running interation 417
-
-    ## Running interation 418
-
-    ## Running interation 419
-
-    ## Running interation 420
-
-    ## Running interation 421
-
-    ## Running interation 422
-
-    ## Running interation 423
-
-    ## Running interation 424
-
-    ## Running interation 425
-
-    ## Running interation 426
-
-    ## Running interation 427
-
-    ## Running interation 428
-
-    ## Running interation 429
-
-    ## Running interation 430
-
-    ## Running interation 431
-
-    ## Running interation 432
-
-    ## Running interation 433
-
-    ## Running interation 434
-
-    ## Running interation 435
-
-    ## Running interation 436
-
-    ## Running interation 437
-
-    ## Running interation 438
-
-    ## Running interation 439
-
-    ## Running interation 440
-
-    ## Running interation 441
-
-    ## Running interation 442
-
-    ## Running interation 443
-
-    ## Running interation 444
-
-    ## Running interation 445
-
-    ## Running interation 446
-
-    ## Running interation 447
-
-    ## Running interation 448
-
-    ## Running interation 449
-
-    ## Running interation 450
-
-    ## Running interation 451
-
-    ## Running interation 452
-
-    ## Running interation 453
-
-    ## Running interation 454
-
-    ## Running interation 455
-
-    ## Running interation 456
-
-    ## Running interation 457
-
-    ## Running interation 458
-
-    ## Running interation 459
-
-    ## Running interation 460
-
-    ## Running interation 461
-
-    ## Running interation 462
-
-    ## Running interation 463
-
-    ## Running interation 464
-
-    ## Running interation 465
-
-    ## Running interation 466
-
-    ## Running interation 467
-
-    ## Running interation 468
-
-    ## Running interation 469
-
-    ## Running interation 470
-
-    ## Running interation 471
-
-    ## Running interation 472
-
-    ## Running interation 473
-
-    ## Running interation 474
-
-    ## Running interation 475
-
-    ## Running interation 476
-
-    ## Running interation 477
-
-    ## Running interation 478
-
-    ## Running interation 479
-
-    ## Running interation 480
-
-    ## Running interation 481
-
-    ## Running interation 482
-
-    ## Running interation 483
-
-    ## Running interation 484
-
-    ## Running interation 485
-
-    ## Running interation 486
-
-    ## Running interation 487
-
-    ## Running interation 488
-
-    ## Running interation 489
-
-    ## Running interation 490
-
-    ## Running interation 491
-
-    ## Running interation 492
-
-    ## Running interation 493
-
-    ## Running interation 494
-
-    ## Running interation 495
-
-    ## Running interation 496
-
-    ## Running interation 497
-
-    ## Running interation 498
-
-    ## Running interation 499
-
-    ## Running interation 500
+    ## [1] "Options:"
+    ## [1] "Max Components: 12 Iterations: 500 Data Proportion (percent): 70"
+    ## [1] "*** Providing PRESS and coefficient array output ***"
 
     ##    Plot_Num SampleID  Plot_ID Sample_Year      SLA Nitrogen CalVal
     ## 1       D02     0001 D02_0001        2017 13.66366 31.18030    Val

@@ -24,8 +24,8 @@ find_optimal_components <- function(dataset=NULL, method="pls", maxComps=20, ite
     nComps <- selectNcomp(plsr.out, method = "onesigma", plot = TRUE)
   }
   if(method=="firstPlateau") {
-    press.out <- pls_permutation(dataset=dataset, maxComps=maxComps, iterations=iterations, 
-                                 seg=seg, prop=prop)
+    press.out <- spectratrait::pls_permutation(dataset=dataset, maxComps=maxComps, 
+                                               iterations=iterations, prop=prop)
     # PRESS plot
     pressDF <- as.data.frame(press.out$PRESS)
     names(pressDF) <- as.character(seq(maxComps))
@@ -50,8 +50,8 @@ find_optimal_components <- function(dataset=NULL, method="pls", maxComps=20, ite
     print(bp)
   }
   if(method=="firstMin") {
-    press.out <- pls_permutation(dataset=dataset, maxComps=maxComps, iterations=iterations, 
-                                 seg=seg, prop=prop)
+    press.out <- spectratrait::pls_permutation(dataset=dataset, maxComps=maxComps, 
+                                               iterations=iterations, prop=prop)
     # PRESS plot
     pressDF <- as.data.frame(press.out$PRESS)
     names(pressDF) <- as.character(seq(maxComps))
