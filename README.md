@@ -1,5 +1,5 @@
 # PLSR modeling for the estimation of plant functional traits
-This repository contains example scripts illustrating best-practices for fitting, evaluating, and reporting leaf-level spectra-trait PLSR models. These scripts encompass several possibilities that you may encounter doing PLSR. Start by reading *Burnett et al. in review*, then work through the scripts or vignettes.
+This repository contains example scripts illustrating best-practices for fitting, evaluating, and reporting leaf level spectra-trait PLSR models. These scripts encompass several possibilities that you may encounter doing PLSR. Start by reading *Burnett et al. in review*, then work through the scripts or vignettes.
 
 ### Article citation:
 Burnett AC, Anderson J, Davidson KD, Ely KS, Lamour J, Li Q, Morrison BD, Yang D, Rogers A, Serbin SP (in review) A best-practice guide to predicting plant traits from leaf-level hyperspectral data using partial least squares regression. Journal of Experimental Botany. In Review.
@@ -71,7 +71,7 @@ EcoSIS URL: https://ecosis.org/package/leaf-reflectance-plant-functional-gradien
 EcoSIS ID: 3cf6b27e-d80e-4bc7-b214-c95506e46daa <br>
 Rpubs example output: https://rpubs.com/sserbin/722040
 
-2) Fresh Leaf Spectra to Estimate LMA over NEON domains in eastern United States <br>
+2) Fresh leaf spectra to estimate LMA over NEON domains in eastern United States <br>
 Target variable: LMA <br>
 EcoSIS URL: https://ecosis.org/package/fresh-leaf-spectra-to-estimate-lma-over-neon-domains-in-eastern-united-states <br>
 EcoSIS ID: 5617da17-c925-49fb-b395-45a51291bd2d <br>
@@ -92,7 +92,7 @@ EcoSIS URL: https://ecosis.org/package/leaf-spectra--structural-and-biochemical-
 EcoSIS ID: 25770ad9-d47c-428b-bf99-d1543a4b0ec9 <br>
 DOI: https://doi.org/doi:10.21232/C2GM2Z <br>
 
-5) Canopy Spectra to Map Foliar Functional Traits over NEON domains in eastern United States <br>
+5) Canopy spectra to map foliar functional traits over NEON domains in eastern United States <br>
 Target variable: leaf nitrogen <br>
 EcoSIS URL: https://ecosis.org/package/canopy-spectra-to-map-foliar-functional-traits-over-neon-domains-in-eastern-united-states <br>
 EcoSIS ID: b9dbf3db-5b9c-4ab2-88c2-26c8b39d0903 <br>
