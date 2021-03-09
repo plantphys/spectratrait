@@ -121,8 +121,9 @@ plsr_data <- plsr_data[complete.cases(plsr_data[,names(plsr_data) %in%
 method <- "dplyr" #base/dplyr
 # base R - a bit slow
 # dplyr - much faster
-split_data <- spectratrait::create_data_split(dataset=plsr_data, approach=method, split_seed=7529075,
-                                              prop=0.8, group_variables="Species_Code")
+split_data <- spectratrait::create_data_split(dataset=plsr_data, approach=method, 
+                                              split_seed=7529075,prop=0.8, 
+                                              group_variables="Species_Code")
 names(split_data)
 cal.plsr.data <- split_data$cal_data
 head(cal.plsr.data)[1:8]
@@ -138,17 +139,27 @@ text_loc <- c(max(hist(cal.plsr.data[,paste0(inVar)])$counts),
               max(hist(cal.plsr.data[,paste0(inVar)])$mids))
 cal_hist_plot <- qplot(cal.plsr.data[,paste0(inVar)],geom="histogram",
                        main = paste0("Calibration Histogram for ",inVar),
-                       xlab = paste0(inVar),ylab = "Count",fill=I("grey50"),col=I("black"),alpha=I(.7)) +
+                       xlab = paste0(inVar),ylab = "Count",fill=I("grey50"),col=I("black"),
+                       alpha=I(.7)) +
   annotate("text", x=text_loc[2], y=text_loc[1], label= "1.",size=10)
 val_hist_plot <- qplot(val.plsr.data[,paste0(inVar)],geom="histogram",
                        main = paste0("Validation Histogram for ",inVar),
-                       xlab = paste0(inVar),ylab = "Count",fill=I("grey50"),col=I("black"),alpha=I(.7))
+                       xlab = paste0(inVar),ylab = "Count",fill=I("grey50"),col=I("black"),
+                       alpha=I(.7))
 histograms <- grid.arrange(cal_hist_plot, val_hist_plot, ncol=2)
 ggsave(filename = file.path(outdir,paste0(inVar,"_Cal_Val_Histograms.png")), plot = histograms, 
        device="png", width = 30, height = 12, units = "cm", dpi = 300)
 # output cal/val data
 write.csv(cal.plsr.data,file=file.path(outdir,paste0(inVar,'_Cal_PLSR_Dataset.csv')),row.names=FALSE)
 write.csv(val.plsr.data,file=file.path(outdir,paste0(inVar,'_Val_PLSR_Dataset.csv')),row.names=FALSE)
+#--------------------------------------------------------------------------------------------------#
+
+
+#--------------------------------------------------------------------------------------------------#
+# Figure S1. The resulting leaf mass area (LMA, g/m2) distribution (histogram) for the 
+# calibration (i.e. model training) and validation datasets. The data was split using the 
+# spectratrait::create_data_split() function using "Species_Code" as the group_variable and
+# using a data split proportion per group of 80% to calibration and 20% to validation
 #--------------------------------------------------------------------------------------------------#
 
 
@@ -182,6 +193,13 @@ par(mfrow=c(1,1))
 
 
 #--------------------------------------------------------------------------------------------------#
+# Figure S2. The resulting calibration and validation spectral reflectance distribution by
+# wavelength.  The spectra split was achieved at the same time as LMA, as described in
+# Supplemental Figure S1. 
+#--------------------------------------------------------------------------------------------------#
+
+
+#--------------------------------------------------------------------------------------------------#
 ### Step 10.
 ### Use permutation to determine the optimal number of components
 if(grepl("Windows", sessionInfo()$running)){
@@ -206,10 +224,23 @@ if (method=="pls") {
                                                   maxComps=maxComps, iterations=iterations, 
                                                   seg=seg, prop=prop, random_seed=random_seed)
 }
-print("*** Figure 3. Optimal PLSR component selection ***")
+print("*** Figure S3. Optimal PLSR component selection ***")
 dev.copy(png,file.path(outdir,paste0(paste0("Figure_3_",inVar,"_PLSR_Component_Selection.png"))), 
          height=2800, width=3400,  res=340)
 dev.off();
+#--------------------------------------------------------------------------------------------------#
+
+
+#--------------------------------------------------------------------------------------------------#
+# Figure S3. A key challenge in building robust and parsimonious PLSR models is determining the
+# optimal number of PLSR components. A good definition is the minimum number of components that 
+# minimizes the PRESS statistic and where the next higher component doesn't produce a meaningful
+# increase in model performance (i.e. lower PRESS). We provide three methods in the
+# find_optimal_components() function to determine the optimal number of components statistically 
+# using the internal pls package jackknife method or our custom methods that are better in some 
+# conditions, including for large datasets. In this example we show "firstMin" option that 
+# selects the number of components corresponding to the first statistical minimum PRESS value
+# (vertical broken blue line).
 #--------------------------------------------------------------------------------------------------#
 
 
@@ -239,6 +270,12 @@ dev.copy(png,file.path(outdir,paste0(paste0(inVar,"_Validation_RMSEP_R2_by_Compo
          height=2800, width=4900,  res=340)
 dev.off();
 par(opar)
+#--------------------------------------------------------------------------------------------------#
+
+
+#--------------------------------------------------------------------------------------------------#
+# Figure S4. A plot of the validation root mean square error of prediction (RMSEP, left) and 
+# coefficient of determination (right) for the 0 to optimal number of components
 #--------------------------------------------------------------------------------------------------#
 
 
@@ -320,6 +357,14 @@ ggsave(filename = file.path(outdir,paste0(inVar,"_Cal_Val_Scatterplots.png")),
 
 
 #--------------------------------------------------------------------------------------------------#
+# Figure S5. The calibration model and independent validation scatter plot results for the example
+# LMA PLSR model (top row). Also shown are the calibration model and validation PLSR
+# residuals, where the calibration results are based on the internal model cross-validation
+# and the validation residuals are the predicted minus observed values of LMA.
+#--------------------------------------------------------------------------------------------------#
+
+
+#--------------------------------------------------------------------------------------------------#
 ### Step 13.
 ### Generate Coefficient and VIP plots
 vips <- spectratrait::VIP(plsr.out)[nComps,]
@@ -338,6 +383,12 @@ dev.copy(png,file.path(outdir,paste0(inVar,'_Coefficient_VIP_plot.png')),
          height=3100, width=4100, res=340)
 dev.off();
 par(opar)
+#--------------------------------------------------------------------------------------------------#
+
+
+#--------------------------------------------------------------------------------------------------#
+# Figure S6. The calibration model PLSR regression coefficient (top) and variable importance of 
+# projection (bottom) plots
 #--------------------------------------------------------------------------------------------------#
 
 
@@ -386,6 +437,10 @@ dev.copy(png,file.path(outdir,paste0(inVar,'_Jackknife_Regression_Coefficients.p
          height=2100, width=3800, res=340)
 dev.off();
 
+#--------------------------------------------------------------------------------------------------#
+# Figure S7. The calibration model jackknife PLSR regression coefficients 
+#--------------------------------------------------------------------------------------------------#
+
 # JK validation plot
 RMSEP <- sqrt(mean(val.plsr.output$PLSR_Residuals^2))
 pecr_RMSEP <- RMSEP/mean(val.plsr.output[,inVar])*100
@@ -413,9 +468,17 @@ dev.off();
 #--------------------------------------------------------------------------------------------------#
 
 
+#--------------------------------------------------------------------------------------------------#
+# Figure S8. Independent validation results for the LMA PLSR model with associated jackknife
+# uncertainty estimate 95% prediction intervals for each estimate LMA value. The %RMSEP is the 
+# model prediction performance standardized to the percentage of the response range, in this case
+# the range of LMA values
+#--------------------------------------------------------------------------------------------------#
+
+
 #---------------- Output jackknife results --------------------------------------------------------#
-### Step 15.
-# JK Coefficents
+### Step 15. Outputs the final PLSR model jackknife coefficients
+# JK Coefficients
 out.jk.coefs <- data.frame(Iteration=seq(1,length(Jackknife_intercept),1),
                            Intercept=Jackknife_intercept,t(Jackknife_coef))
 head(out.jk.coefs)[1:6]
@@ -425,7 +488,7 @@ write.csv(out.jk.coefs,file=file.path(outdir,paste0(inVar,'_Jackkife_PLSR_Coeffi
 
 
 #---------------- Export Model Output -------------------------------------------------------------#
-### Step 16.
+### Step 16. Create and write all relevant PLSR model output to disk in .csv format
 print(paste("Output directory: ", getwd()))
 
 # Observed versus predicted
