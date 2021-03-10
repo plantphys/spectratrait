@@ -309,7 +309,6 @@ plsr_permutation <- spectratrait::pls_permutation(dataset=cal.plsr.data,
                                                             iterations=iterations, 
                                                             prop=prop, verbose=TRUE)
 bootstrap_intercept <- plsr_permutation$coef_array[1,,nComps]
-hist(bootstrap_intercept)
 bootstrap_coef <- plsr_permutation$coef_array[2:length(plsr_permutation$coef_array[,1,nComps]),
                                               ,nComps]
 rm(plsr_permutation)
@@ -340,13 +339,17 @@ dev.copy(png,file.path(outdir,paste0(inVar,'_Bootstrap_Regression_Coefficients.p
 dev.off();
 
 # validation plot
-RMSEP <- sqrt(mean(val.plsr.output$PLSR_Residuals^2))
-pecr_RMSEP <- RMSEP/mean(val.plsr.output[,inVar])*100
+rmsep_percrmsep <- spectratrait::percent_rmse(plsr_dataset = val.plsr.output, 
+                                              inVar = inVar, 
+                                              residuals = val.plsr.output$PLSR_Residuals, 
+                                              range="full")
+RMSEP <- rmsep_percrmsep$rmse
+perc_RMSEP <- rmsep_percrmsep$perc_rmse
 r2 <- round(pls::R2(plsr.out, newdata = val.plsr.data)$val[nComps+1],2)
 expr <- vector("expression", 3)
 expr[[1]] <- bquote(R^2==.(r2))
 expr[[2]] <- bquote(RMSEP==.(round(RMSEP,2)))
-expr[[3]] <- bquote("%RMSEP"==.(round(pecr_RMSEP,2)))
+expr[[3]] <- bquote("%RMSEP"==.(round(perc_RMSEP,2)))
 rng_vals <- c(min(val.plsr.output$LPI), max(val.plsr.output$UPI))
 par(mfrow=c(1,1), mar=c(4.2,5.3,1,0.4), oma=c(0, 0.1, 0, 0.2))
 plotrix::plotCI(val.plsr.output$PLSR_Predicted,val.plsr.output[,inVar], 
@@ -365,6 +368,8 @@ plotrix::plotCI(val.plsr.output$PLSR_Predicted,val.plsr.output[,inVar],
                 ylab=paste0("Observed ", paste(inVar), " (units)"),
                 cex.axis=1.5,cex.lab=1.8, add=T)
 legend("topleft", legend=expr, bty="n", cex=1.5)
+legend("bottomright", legend=c("Prediction Interval","Confidence Interval"), 
+       lty=c(1,1), col = c("grey80","black"), lwd=3, bty="n", cex=1.5)
 box(lwd=2.2)
 dev.copy(png,file.path(outdir,paste0(inVar,"_PLSR_Validation_Scatterplot.png")), 
          height=2800, width=3200,  res=340)

@@ -138,24 +138,38 @@ head(LeafLMA.PLSR.dataset)
 
 
 #--------------------------------------------------------------------------------------------------#
-RMSEP <- sqrt(mean(LeafLMA.PLSR.dataset$PLSR_Residuals^2))
-pecr_RMSEP <- RMSEP/mean(LeafLMA.PLSR.dataset[,inVar])*100
-r2 <- round(summary(lm(LeafLMA.PLSR.dataset$PLSR_LMA_gDW_m2~LeafLMA.PLSR.dataset[,inVar]))$adj.r.squared,2)
+rmsep_percrmsep <- spectratrait::percent_rmse(plsr_dataset = LeafLMA.PLSR.dataset, 
+                                              inVar = inVar, 
+                                              residuals = LeafLMA.PLSR.dataset$PLSR_Residuals, 
+                                              range="full")
+RMSEP <- rmsep_percrmsep$rmse
+perc_RMSEP <- rmsep_percrmsep$perc_rmse
+r2 <- round(summary(lm(LeafLMA.PLSR.dataset$PLSR_LMA_gDW_m2~
+                         LeafLMA.PLSR.dataset[,inVar]))$adj.r.squared,2)
 expr <- vector("expression", 3)
 expr[[1]] <- bquote(R^2==.(r2))
 expr[[2]] <- bquote(RMSEP==.(round(RMSEP,2)))
-expr[[3]] <- bquote("%RMSEP"==.(round(pecr_RMSEP,2)))
+expr[[3]] <- bquote("%RMSEP"==.(round(perc_RMSEP,2)))
 rng_vals <- c(min(LeafLMA.PLSR.dataset$LPI), max(LeafLMA.PLSR.dataset$UPI))
 par(mfrow=c(1,1), mar=c(4.2,5.3,1,0.4), oma=c(0, 0.1, 0, 0.2))
 plotrix::plotCI(LeafLMA.PLSR.dataset$PLSR_LMA_gDW_m2,LeafLMA.PLSR.dataset[,inVar], 
-       li=LeafLMA.PLSR.dataset$LCI, ui=LeafLMA.PLSR.dataset$UCI, gap=0.009,sfrac=0.004, 
-       lwd=1.6, xlim=c(rng_vals[1], rng_vals[2]), ylim=c(rng_vals[1], rng_vals[2]), 
-       err="x", pch=21, col="black", pt.bg=scales::alpha("grey70",0.7), scol="grey40",
-       cex=2, xlab=paste0("Predicted ", paste(inVar), " (units)"),
-       ylab=paste0("Observed ", paste(inVar), " (units)"),
-       cex.axis=1.5,cex.lab=1.8)
+                li=LeafLMA.PLSR.dataset$LPI, ui=LeafLMA.PLSR.dataset$UPI, gap=0.009,sfrac=0.000, 
+                lwd=1.6, xlim=c(rng_vals[1], rng_vals[2]), ylim=c(rng_vals[1], rng_vals[2]), 
+                err="x", pch=21, col="black", pt.bg=scales::alpha("grey70",0.7), scol="grey80",
+                cex=2, xlab=paste0("Predicted ", paste(inVar), " (units)"),
+                ylab=paste0("Observed ", paste(inVar), " (units)"),
+                cex.axis=1.5,cex.lab=1.8)
 abline(0,1,lty=2,lw=2)
+plotrix::plotCI(LeafLMA.PLSR.dataset$PLSR_LMA_gDW_m2,LeafLMA.PLSR.dataset[,inVar], 
+                li=LeafLMA.PLSR.dataset$LCI, ui=LeafLMA.PLSR.dataset$UCI, gap=0.009,sfrac=0.004, 
+                lwd=1.6, xlim=c(rng_vals[1], rng_vals[2]), ylim=c(rng_vals[1], rng_vals[2]), 
+                err="x", pch=21, col="black", pt.bg=scales::alpha("grey70",0.7), scol="black",
+                cex=2, xlab=paste0("Predicted ", paste(inVar), " (units)"),
+                ylab=paste0("Observed ", paste(inVar), " (units)"),
+                cex.axis=1.5,cex.lab=1.8, add=T)
 legend("topleft", legend=expr, bty="n", cex=1.5)
+legend("bottomright", legend=c("Prediction Interval","Confidence Interval"), 
+       lty=c(1,1), col = c("grey80","black"), lwd=3, bty="n", cex=1.5)
 box(lwd=2.2)
 dev.copy(png,file.path(outdir,paste0(inVar,"_PLSR_Validation_Scatterplot.png")), 
          height=2800, width=3200,  res=340)
