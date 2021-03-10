@@ -88,6 +88,7 @@ Rpubs LeafN bootstrap example output: https://rpubs.com/sserbin/721908
 EcoSIS URL: https://ecosis.org/package/leaf-spectra--structural-and-biochemical-leaf-traits-of-eight-crop-species <br>
 EcoSIS ID: 25770ad9-d47c-428b-bf99-d1543a4b0ec9 <br>
 DOI: https://doi.org/doi:10.21232/C2GM2Z <br>
+Rpubs LeafN bootstrap example output: https://rpubs.com/sserbin/736689 <br>
 
 5) Canopy spectra to map foliar functional traits over NEON domains in eastern United States <br>
 Target variable: leaf nitrogen <br>

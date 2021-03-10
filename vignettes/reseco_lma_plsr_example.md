@@ -13,7 +13,7 @@ leaf-mass area (LMA)
 
 ### Getting Started
 
-### Step 1. Load libraries to run example script
+### Step 1. Load libraries needed to run example script
 
 ``` r
 list.of.packages <- c("pls","dplyr","reshape2","here","plotrix","ggplot2","gridExtra",
@@ -82,7 +82,7 @@ output_dir <- "tempdir"
 
 ### Step 3. Set working directory (scratch space)
 
-    ## [1] "/private/var/folders/xp/h3k9vf3n2jx181ts786_yjrn9c2gjq/T/Rtmp1Hsn79"
+    ## [1] "/private/var/folders/xp/h3k9vf3n2jx181ts786_yjrn9c2gjq/T/RtmpiBKiLO"
 
 ### Step 4. Pull example dataset from EcoSIS (ecosis.org)
 
@@ -266,8 +266,9 @@ plsr_data <- plsr_data[complete.cases(plsr_data[,names(plsr_data) %in%
 method <- "dplyr" #base/dplyr
 # base R - a bit slow
 # dplyr - much faster
-split_data <- spectratrait::create_data_split(dataset=plsr_data, approach=method, split_seed=7529075, 
-                                prop=0.8, group_variables="Species_Code")
+split_data <- spectratrait::create_data_split(dataset=plsr_data, approach=method, 
+                                              split_seed=7529075, prop=0.8, 
+                                              group_variables="Species_Code")
 names(split_data)
 ```
 
@@ -349,8 +350,17 @@ histograms <- grid.arrange(cal_hist_plot, val_hist_plot, ncol=2)
 ![](reseco_lma_plsr_example_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
 
 ``` r
-ggsave(filename = file.path(outdir,paste0(inVar,"_Cal_Val_Histograms.png")), plot = histograms, 
-       device="png", width = 30, height = 12, units = "cm", dpi = 300)
+# Figure S1. The resulting leaf mass area (LMA, g/m2) distribution (histogram) for the 
+# calibration (i.e. model training) and validation datasets. The data was split using 
+# the spectratrait::create_data_split() function using "Species_Code" as the 
+# group_variable and using a data split proportion per group of 80% to calibration 
+# and 20% to validation
+```
+
+``` r
+ggsave(filename = file.path(outdir,paste0(inVar,"_Cal_Val_Histograms.png")), 
+       plot = histograms, device="png", width = 30, height = 12, units = "cm", 
+       dpi = 300)
 # output cal/val data
 write.csv(cal.plsr.data,file=file.path(outdir,paste0(inVar,'_Cal_PLSR_Dataset.csv')),
           row.names=FALSE)
@@ -362,8 +372,10 @@ write.csv(val.plsr.data,file=file.path(outdir,paste0(inVar,'_Val_PLSR_Dataset.cs
 
 ``` r
 ### Format PLSR data for model fitting 
-cal_spec <- as.matrix(cal.plsr.data[, which(names(cal.plsr.data) %in% paste0("Wave_",wv))])
-cal.plsr.data <- data.frame(cal.plsr.data[, which(names(cal.plsr.data) %notin% paste0("Wave_",wv))],
+cal_spec <- as.matrix(cal.plsr.data[, which(names(cal.plsr.data) %in% 
+                                              paste0("Wave_",wv))])
+cal.plsr.data <- data.frame(cal.plsr.data[, which(names(cal.plsr.data) %notin% 
+                                                    paste0("Wave_",wv))], 
                             Spectra=I(cal_spec))
 head(cal.plsr.data)[1:5]
 ```
@@ -377,8 +389,10 @@ head(cal.plsr.data)[1:5]
     ## 6 Ammophila arenaria       Ammare  ZC3 0.01802409 180.2409
 
 ``` r
-val_spec <- as.matrix(val.plsr.data[, which(names(val.plsr.data) %in% paste0("Wave_",wv))])
-val.plsr.data <- data.frame(val.plsr.data[, which(names(val.plsr.data) %notin% paste0("Wave_",wv))],
+val_spec <- as.matrix(val.plsr.data[, which(names(val.plsr.data) %in% 
+                                              paste0("Wave_",wv))])
+val.plsr.data <- data.frame(val.plsr.data[, which(names(val.plsr.data) %notin% 
+                                                    paste0("Wave_",wv))],
                             Spectra=I(val_spec))
 head(val.plsr.data)[1:5]
 ```
@@ -402,9 +416,13 @@ spectratrait::f.plot.spec(Z=val.plsr.data$Spectra,wv=wv,
             plot_label="Validation")
 ```
 
-![](reseco_lma_plsr_example_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
+![](reseco_lma_plsr_example_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
 
 ``` r
+# Figure S2. The resulting calibration and validation spectral reflectance distribution by
+# wavelength. The spectra split was done at the same time as LMA, as described in
+# Supplemental Figure S1.
+
 dev.copy(png,file.path(outdir,paste0(inVar,'_Cal_Val_Spectra.png')), 
          height=2500,width=4900, res=340)
 ```
@@ -461,15 +479,14 @@ if (method=="pls") {
 
     ## [1] "*** Optimal number of components based on t.test: 11"
 
-![](reseco_lma_plsr_example_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
+![](reseco_lma_plsr_example_files/figure-gfm/unnamed-chunk-11-1.png)<!-- -->
 
 ``` r
-print("*** Figure 3. Optimal PLSR component selection ***")
-```
+# Figure S3. Selection of the optimal number of components based on the 
+# minimization of the PRESS statistic.  In this example we show "firstMin" 
+# option that selects the number of components corresponding to the first 
+# statistical minimum PRESS value (vertical broken blue line).
 
-    ## [1] "*** Figure 3. Optimal PLSR component selection ***"
-
-``` r
 dev.copy(png,file.path(outdir,paste0(paste0("Figure_3_",inVar,
                                             "_PLSR_Component_Selection.png"))), 
          height=2800, width=3400,  res=340)
@@ -489,8 +506,8 @@ dev.off();
 
 ``` r
 ### Fit final model - using leave-one-out cross validation
-plsr.out <- plsr(as.formula(paste(inVar,"~","Spectra")),scale=FALSE,ncomp=nComps,validation="LOO",
-                 trace=FALSE,data=cal.plsr.data)
+plsr.out <- plsr(as.formula(paste(inVar,"~","Spectra")),scale=FALSE,ncomp=nComps,
+                 validation="LOO",trace=FALSE,data=cal.plsr.data)
 fit <- plsr.out$fitted.values[,1,nComps]
 pls.options(parallel = NULL)
 
@@ -526,9 +543,12 @@ plot(pls::R2(plsr.out,estimate=c("test"),newdata = val.plsr.data), main="MODEL R
 box(lwd=2.2)
 ```
 
-![](reseco_lma_plsr_example_files/figure-gfm/unnamed-chunk-11-1.png)<!-- -->
+![](reseco_lma_plsr_example_files/figure-gfm/unnamed-chunk-12-1.png)<!-- -->
 
 ``` r
+# Figure S4. A plot of the validation root mean square error of prediction (RMSEP, left) 
+# and coefficient of determination (right) for the 0 to optimal number of components
+
 dev.copy(png,file.path(outdir,paste0(paste0(inVar,"_Validation_RMSEP_R2_by_Component.png"))), 
          height=2800, width=4800,  res=340)
 ```
@@ -551,9 +571,11 @@ par(opar)
 
 ``` r
 #calibration
-cal.plsr.output <- data.frame(cal.plsr.data[, which(names(cal.plsr.data) %notin% "Spectra")],
+cal.plsr.output <- data.frame(cal.plsr.data[, which(names(cal.plsr.data) %notin% 
+                                                      "Spectra")],
                               PLSR_Predicted=fit,
-                              PLSR_CV_Predicted=as.vector(plsr.out$validation$pred[,,nComps]))
+                              PLSR_CV_Predicted=as.vector(plsr.out$validation$pred[,,
+                                                                                   nComps]))
 cal.plsr.output <- cal.plsr.output %>%
   mutate(PLSR_CV_Residuals = PLSR_CV_Predicted-get(inVar))
 head(cal.plsr.output)
@@ -578,10 +600,12 @@ head(cal.plsr.output)
 cal.R2 <- round(pls::R2(plsr.out)[[1]][nComps],2)
 cal.RMSEP <- round(sqrt(mean(cal.plsr.output$PLSR_CV_Residuals^2)),2)
 
-val.plsr.output <- data.frame(val.plsr.data[, which(names(val.plsr.data) %notin% "Spectra")],
+val.plsr.output <- data.frame(val.plsr.data[, which(names(val.plsr.data) %notin% 
+                                                      "Spectra")],
                               PLSR_Predicted=as.vector(predict(plsr.out, 
                                                                newdata = val.plsr.data, 
-                                                               ncomp=nComps, type="response")[,,1]))
+                                                               ncomp=nComps, 
+                                                               type="response")[,,1]))
 val.plsr.output <- val.plsr.output %>%
   mutate(PLSR_Residuals = PLSR_Predicted-get(inVar))
 head(val.plsr.output)
@@ -609,13 +633,13 @@ val.RMSEP <- round(sqrt(mean(val.plsr.output$PLSR_Residuals^2)),2)
 rng_quant <- quantile(cal.plsr.output[,inVar], probs = c(0.001, 0.999))
 cal_scatter_plot <- ggplot(cal.plsr.output, aes(x=PLSR_CV_Predicted, y=get(inVar))) + 
   theme_bw() + geom_point() + geom_abline(intercept = 0, slope = 1, color="dark grey", 
-                                          linetype="dashed", size=1.5) + xlim(rng_quant[1], 
-                                                                              rng_quant[2]) + 
+                                          linetype="dashed", size=1.5) + 
+  xlim(rng_quant[1], rng_quant[2]) + 
   ylim(rng_quant[1], rng_quant[2]) +
   labs(x=paste0("Predicted ", paste(inVar), " (units)"),
        y=paste0("Observed ", paste(inVar), " (units)"),
-       title=paste0("Calibration: ", paste0("Rsq = ", cal.R2), "; ", paste0("RMSEP = ", 
-                                                                            cal.RMSEP))) +
+       title=paste0("Calibration: ", paste0("Rsq = ", cal.R2), "; ", 
+                    paste0("RMSEP = ", cal.RMSEP))) +
   theme(axis.text=element_text(size=18), legend.position="none",
         axis.title=element_text(size=20, face="bold"), 
         axis.text.x = element_text(angle = 0,vjust = 0.5),
@@ -634,13 +658,13 @@ cal_resid_histogram <- ggplot(cal.plsr.output, aes(x=PLSR_CV_Residuals)) +
 rng_quant <- quantile(val.plsr.output[,inVar], probs = c(0.001, 0.999))
 val_scatter_plot <- ggplot(val.plsr.output, aes(x=PLSR_Predicted, y=get(inVar))) + 
   theme_bw() + geom_point() + geom_abline(intercept = 0, slope = 1, color="dark grey", 
-                                          linetype="dashed", size=1.5) + xlim(rng_quant[1], 
-                                                                              rng_quant[2]) + 
+                                          linetype="dashed", size=1.5) + 
+  xlim(rng_quant[1], rng_quant[2]) + 
   ylim(rng_quant[1], rng_quant[2]) +
   labs(x=paste0("Predicted ", paste(inVar), " (units)"),
        y=paste0("Observed ", paste(inVar), " (units)"),
-       title=paste0("Validation: ", paste0("Rsq = ", val.R2), "; ", paste0("RMSEP = ", 
-                                                                           val.RMSEP))) +
+       title=paste0("Validation: ", paste0("Rsq = ", val.R2), "; ", 
+                    paste0("RMSEP = ", val.RMSEP))) +
   theme(axis.text=element_text(size=18), legend.position="none",
         axis.title=element_text(size=20, face="bold"), 
         axis.text.x = element_text(angle = 0,vjust = 0.5),
@@ -667,12 +691,14 @@ scatterplots <- grid.arrange(cal_scatter_plot, val_scatter_plot, cal_resid_histo
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-![](reseco_lma_plsr_example_files/figure-gfm/unnamed-chunk-12-1.png)<!-- -->
+![](reseco_lma_plsr_example_files/figure-gfm/unnamed-chunk-13-1.png)<!-- -->
 
 ``` r
-ggsave(filename = file.path(outdir,paste0(inVar,"_Cal_Val_Scatterplots.png")), 
-       plot = scatterplots, device="png", width = 32, height = 30, units = "cm",
-       dpi = 300)
+# Figure S5. The calibration model and independent validation scatter plot results for 
+# the example LMA PLSR model (top row). Also shown are the calibration model and 
+# validation PLSR residuals, where the calibration results are based on the internal 
+# model cross-validation and the validation residuals are the predicted minus observed 
+# values of LMA.
 ```
 
 ### Step 13. Generate Coefficient and VIP plots
@@ -692,9 +718,12 @@ abline(h=0.8,lty=2,col="dark grey")
 box(lwd=2.2)
 ```
 
-![](reseco_lma_plsr_example_files/figure-gfm/unnamed-chunk-13-1.png)<!-- -->
+![](reseco_lma_plsr_example_files/figure-gfm/unnamed-chunk-15-1.png)<!-- -->
 
 ``` r
+# Figure S6. The calibration model PLSR regression coefficient (top) and variable 
+# importance of projection (bottom) plots
+
 dev.copy(png,file.path(outdir,paste0(inVar,'_Coefficient_VIP_plot.png')), 
          height=3100, width=4100, res=340)
 ```
@@ -724,8 +753,9 @@ jk.plsr.out <- pls::plsr(as.formula(paste(inVar,"~","Spectra")), scale=FALSE,
                          data=cal.plsr.data)
 pls.options(parallel = NULL)
 
-Jackknife_coef <- spectratrait::f.coef.valid(plsr.out = jk.plsr.out, data_plsr = cal.plsr.data, 
-                               ncomp = nComps, inVar=inVar)
+Jackknife_coef <- spectratrait::f.coef.valid(plsr.out = jk.plsr.out, 
+                                             data_plsr = cal.plsr.data, 
+                                             ncomp = nComps, inVar=inVar)
 Jackknife_intercept <- Jackknife_coef[1,,,]
 Jackknife_coef <- Jackknife_coef[2:dim(Jackknife_coef)[1],,,]
 
@@ -769,9 +799,11 @@ legend("topleft",legend = "7.", cex=2, bty="n")
 box(lwd=2.2)
 ```
 
-![](reseco_lma_plsr_example_files/figure-gfm/unnamed-chunk-15-1.png)<!-- -->
+![](reseco_lma_plsr_example_files/figure-gfm/unnamed-chunk-17-1.png)<!-- -->
 
 ``` r
+# Figure S7. The calibration model jackknife PLSR regression coefficients 
+
 dev.copy(png,file.path(outdir,paste0(inVar,'_Jackknife_Regression_Coefficients.png')), 
          height=2100, width=3800, res=340)
 ```
@@ -810,9 +842,14 @@ legend("bottomright", legend="8.", bty="n", cex=2.2)
 box(lwd=2.2)
 ```
 
-![](reseco_lma_plsr_example_files/figure-gfm/unnamed-chunk-16-1.png)<!-- -->
+![](reseco_lma_plsr_example_files/figure-gfm/unnamed-chunk-18-1.png)<!-- -->
 
 ``` r
+# Figure S8. Independent validation results for the LMA PLSR model with associated 
+# jackknife uncertainty estimate 95% prediction intervals for each estimate LMA 
+# value. The %RMSEP is the model prediction performance standardized to the 
+# percentage of the response range, in this case the range of LMA values
+
 dev.copy(png,file.path(outdir,paste0(inVar,"_PLSR_Validation_Scatterplot.png")), 
          height=2800, width=3200,  res=340)
 ```
@@ -845,7 +882,8 @@ head(out.jk.coefs)[1:6]
 
 ``` r
 write.csv(out.jk.coefs,file=file.path(outdir,
-                                      paste0(inVar,'_Jackkife_PLSR_Coefficients.csv')),
+                                      paste0(inVar,
+                                             '_Jackkife_PLSR_Coefficients.csv')),
           row.names=FALSE)
 ```
 
@@ -855,7 +893,7 @@ write.csv(out.jk.coefs,file=file.path(outdir,
 print(paste("Output directory: ", outdir))
 ```
 
-    ## [1] "Output directory:  /var/folders/xp/h3k9vf3n2jx181ts786_yjrn9c2gjq/T//Rtmp1Hsn79"
+    ## [1] "Output directory:  /var/folders/xp/h3k9vf3n2jx181ts786_yjrn9c2gjq/T//RtmpiBKiLO"
 
 ``` r
 # Observed versus predicted
