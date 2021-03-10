@@ -26,6 +26,8 @@ source_GitHubData <- function(url, sep = ",", header = TRUE) {
 ##' a cross-validation CV or independent validation
 ##' @param range calculate over the full data range or the 95% of data range. 
 ##' options full or 95perc
+##' @return output a list containing the rmse and perc_rmse. 
+##' output <- list(rmse = rmse, perc_rmse = perc_rmse)
 ##' 
 ##' @author Shawn P. Serbin
 ##' 

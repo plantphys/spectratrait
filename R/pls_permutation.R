@@ -9,6 +9,8 @@
 ##' @param prop proportion of data to preserve for each permutation
 ##' @param verbose Should the function report the current iteration status/progress to the terminal
 ##' or run silently? TRUE/FALSE. Default FALSE
+##' @return output a list containing the PRESS and coef_array.
+##' output <- list(PRESS=press.out, coef_array=coefs)
 ##' 
 ##' @author Julien Lamour, Shawn P. Serbin
 ##' @export

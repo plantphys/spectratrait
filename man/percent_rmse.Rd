@@ -22,6 +22,10 @@ a cross-validation CV or independent validation}
 \item{range}{calculate over the full data range or the 95\% of data range.
 options full or 95perc}
 }
+\value{
+output a list containing the rmse and perc_rmse.
+output <- list(rmse = rmse, perc_rmse = perc_rmse)
+}
 \description{
 Calculate RMSE and percent RMSE with PLSR model results
 }

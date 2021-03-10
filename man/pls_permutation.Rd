@@ -25,6 +25,10 @@ pls_permutation(
 \item{verbose}{Should the function report the current iteration status/progress to the terminal
 or run silently? TRUE/FALSE. Default FALSE}
 }
+\value{
+output a list containing the PRESS and coef_array.
+output <- list(PRESS=press.out, coef_array=coefs)
+}
 \description{
 See Serbin et al. (2019). DOI: https://doi.org/10.1111/nph.16123
 }
