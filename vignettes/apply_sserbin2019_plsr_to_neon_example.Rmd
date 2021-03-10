@@ -2,11 +2,11 @@
 title: An example showing how to apply an existing PLSR model to new data. In this case applying the LMA model from Serbin et al., (2019; DOI - 10.1111/nph.16123) to a dataset collected at CONUS NEON field sites. 
 author: "Shawn P. Serbin, Julien Lamour, & Jeremiah Anderson"
 output:
+  github_document: default
+  html_notebook: default
+  pdf_document: default
   html_document:
     df_print: paged
-  html_notebook: default
-  github_document: default
-  pdf_document: default
 params:
   date: !r Sys.Date()
 ---
@@ -143,7 +143,7 @@ jk_int <- t(LeafLMA.plsr.jk.coeffs[,2])
 head(jk_int)[,1:6]
 
 jk_pred <- as.matrix(sub_spec) %*% jk_coef + matrix(rep(jk_int, length(plsr_data[,inVar])), 
-                                         byrow=TRUE, ncol=length(jk_int))
+                                                    byrow=TRUE, ncol=length(jk_int))
 jk_pred <- jk_pred^2
 head(jk_pred)[,1:6]
 dim(jk_pred)
@@ -178,19 +178,19 @@ rng_vals <- c(min(LeafLMA.PLSR.dataset$LPI), max(LeafLMA.PLSR.dataset$UPI))
 par(mfrow=c(1,1), mar=c(4.2,5.3,1,0.4), oma=c(0, 0.1, 0, 0.2))
 plotrix::plotCI(LeafLMA.PLSR.dataset$PLSR_LMA_gDW_m2,LeafLMA.PLSR.dataset[,inVar], 
                 li=LeafLMA.PLSR.dataset$LPI, ui=LeafLMA.PLSR.dataset$UPI, gap=0.009,sfrac=0.000, 
-                lwd=1.6, xlim=c(rng_vals[1]-8, rng_vals[2]+20), ylim=c(rng_vals[1]-8, rng_vals[2]+20), 
+                lwd=1.6, xlim=c(rng_vals[1], rng_vals[2]), ylim=c(rng_vals[1], rng_vals[2]), 
                 err="x", pch=21, col="black", pt.bg=scales::alpha("grey70",0.7), scol="grey80",
                 cex=2, xlab=paste0("Predicted ", paste(inVar), " (units)"),
                 ylab=paste0("Observed ", paste(inVar), " (units)"),
                 cex.axis=1.5,cex.lab=1.8)
 abline(0,1,lty=2,lw=2)
 plotrix::plotCI(LeafLMA.PLSR.dataset$PLSR_LMA_gDW_m2,LeafLMA.PLSR.dataset[,inVar], 
-       li=LeafLMA.PLSR.dataset$LCI, ui=LeafLMA.PLSR.dataset$UCI, gap=0.009,sfrac=0.004, 
-       lwd=1.6, xlim=c(rng_vals[1], rng_vals[2]), ylim=c(rng_vals[1], rng_vals[2]), 
-       err="x", pch=21, col="black", pt.bg=scales::alpha("grey70",0.7), scol="black",
-       cex=2, xlab=paste0("Predicted ", paste(inVar), " (units)"),
-       ylab=paste0("Observed ", paste(inVar), " (units)"),
-       cex.axis=1.5,cex.lab=1.8, add=T)
+                li=LeafLMA.PLSR.dataset$LCI, ui=LeafLMA.PLSR.dataset$UCI, gap=0.009,sfrac=0.004, 
+                lwd=1.6, xlim=c(rng_vals[1], rng_vals[2]), ylim=c(rng_vals[1], rng_vals[2]), 
+                err="x", pch=21, col="black", pt.bg=scales::alpha("grey70",0.7), scol="black",
+                cex=2, xlab=paste0("Predicted ", paste(inVar), " (units)"),
+                ylab=paste0("Observed ", paste(inVar), " (units)"),
+                cex.axis=1.5,cex.lab=1.8, add=T)
 legend("topleft", legend=expr, bty="n", cex=1.5)
 legend("bottomright", legend=c("Prediction Interval","Confidence Interval"), 
        lty=c(1,1), col = c("grey80","black"), lwd=3, bty="n", cex=1.5)
@@ -199,8 +199,6 @@ dev.copy(png,file.path(outdir,paste0(inVar,"_PLSR_Validation_Scatterplot.png")),
          height=2800, width=3200,  res=340)
 dev.off();
 ```
-
-### Create main output
 ```{r, echo=TRUE}
 print(paste("Output directory: ", outdir))
 
