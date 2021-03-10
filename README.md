@@ -66,23 +66,24 @@ ref = "devbranch", dependencies=TRUE)
 Target variable: SLA <br>
 EcoSIS URL: https://ecosis.org/package/leaf-reflectance-plant-functional-gradient-ifgg-kit <br>
 EcoSIS ID: 3cf6b27e-d80e-4bc7-b214-c95506e46daa <br>
-Rpubs example output: https://rpubs.com/sserbin/722040
+Rpubs example output: https://rpubs.com/sserbin/736799
 
 2) Fresh leaf spectra to estimate LMA over NEON domains in eastern United States <br>
 Target variable: LMA <br>
 EcoSIS URL: https://ecosis.org/package/fresh-leaf-spectra-to-estimate-lma-over-neon-domains-in-eastern-united-states <br>
 EcoSIS ID: 5617da17-c925-49fb-b395-45a51291bd2d <br>
 DOI: https://doi.org/doi:10.21232/9831-rq60 <br>
-Rpubs example output: https://rpubs.com/sserbin/722017
+Rpubs example output: https://rpubs.com/sserbin/736820 <br>
+Rpubs example showing Serbin et al. (2019) applied to NEON data: https://rpubs.com/sserbin/736893 <br>
 
 3) Leaf spectra of 36 species growing in Rosa rugosa invaded coastal grassland communities in Belgium <br>
 Target variable: LMA, leaf nitrogen <br>
 EcoSIS URL: https://ecosis.org/package/leaf-spectra-of-36-species-growing-in-rosa-rugosa-invaded-coastal-grassland-communities-in-belgium <br>
 EcoSIS ID: 9db4c5a2-7eac-4e1e-8859-009233648e89 <br>
 DOI: https://doi.org/doi:10.21232/9nr6-sq54 <br>
-Rpubs LMA example output: https://rpubs.com/sserbin/721898 <br>
-Rpubs LeafN example output: https://rpubs.com/sserbin/721878 <br>
-Rpubs LeafN bootstrap example output: https://rpubs.com/sserbin/721908
+Rpubs LMA example output: https://rpubs.com/sserbin/736861 <br>
+Rpubs LeafN example output: https://rpubs.com/sserbin/736852 <br>
+Rpubs LeafN bootstrap example output: https://rpubs.com/sserbin/736843 <br>
 
 4) Leaf spectra, structural and biochemical leaf traits of eight crop species <br>
 EcoSIS URL: https://ecosis.org/package/leaf-spectra--structural-and-biochemical-leaf-traits-of-eight-crop-species <br>
@@ -95,4 +96,4 @@ Target variable: leaf nitrogen <br>
 EcoSIS URL: https://ecosis.org/package/canopy-spectra-to-map-foliar-functional-traits-over-neon-domains-in-eastern-united-states <br>
 EcoSIS ID: b9dbf3db-5b9c-4ab2-88c2-26c8b39d0903 <br>
 DOI: https://doi.org/doi:10.21232/e2jt-5209 <br>
-Rpubs leaf nitrogen example output: https://rpubs.com/sserbin/728124
+Rpubs leaf nitrogen example output: https://rpubs.com/sserbin/736801
