@@ -194,7 +194,7 @@ par(mfrow=c(1,1))
 
 #--------------------------------------------------------------------------------------------------#
 # Figure S2. The resulting calibration and validation spectral reflectance distribution by
-# wavelength.  The spectra split was achieved at the same time as LMA, as described in
+# wavelength. The spectra split was done at the same time as LMA, as described in
 # Supplemental Figure S1. 
 #--------------------------------------------------------------------------------------------------#
 
