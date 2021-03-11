@@ -8,7 +8,7 @@ Burnett AC, Anderson J, Davidson KD, Ely KS, Lamour J, Li Q, Morrison BD, Yang D
 [![DOI](https://zenodo.org/badge/222699149.svg)](https://zenodo.org/badge/latestdoi/222699149)
 
 ### EcoSML
-https://ecosml.org/package/github/TESTgroup-BNL/PLSR_for_plant_trait_prediction
+https://ecosml.org/package/github/TESTgroup-BNL/spectratrait
 
 ### Getting started, tips and tricks:
 * If you are new to R you should start by reading https://support.rstudio.com/hc/en-us/articles/201141096-Getting-Started-with-R & https://www.dataquest.io/blog/tutorial-getting-started-with-r-and-rstudio/
