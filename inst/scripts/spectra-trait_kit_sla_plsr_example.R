@@ -365,13 +365,17 @@ dev.copy(png,file.path(outdir,paste0(inVar,'_Jackknife_Regression_Coefficients.p
 dev.off();
 
 # JK validation plot
-RMSEP <- sqrt(mean(val.plsr.output$PLSR_Residuals^2))
-pecr_RMSEP <- RMSEP/mean(val.plsr.output[,inVar])*100
+rmsep_percrmsep <- spectratrait::percent_rmse(plsr_dataset = val.plsr.output, 
+                                              inVar = inVar, 
+                                              residuals = val.plsr.output$PLSR_Residuals, 
+                                              range="full")
+RMSEP <- rmsep_percrmsep$rmse
+perc_RMSEP <- rmsep_percrmsep$perc_rmse
 r2 <- round(pls::R2(plsr.out, newdata = val.plsr.data)$val[nComps+1],2)
 expr <- vector("expression", 3)
 expr[[1]] <- bquote(R^2==.(r2))
 expr[[2]] <- bquote(RMSEP==.(round(RMSEP,2)))
-expr[[3]] <- bquote("%RMSEP"==.(round(pecr_RMSEP,2)))
+expr[[3]] <- bquote("%RMSEP"==.(round(perc_RMSEP,2)))
 rng_vals <- c(min(val.plsr.output$LPI), max(val.plsr.output$UPI))
 par(mfrow=c(1,1), mar=c(4.2,5.3,1,0.4), oma=c(0, 0.1, 0, 0.2))
 plotrix::plotCI(val.plsr.output$PLSR_Predicted,val.plsr.output[,inVar], 
