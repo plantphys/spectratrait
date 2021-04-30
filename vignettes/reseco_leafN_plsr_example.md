@@ -82,7 +82,7 @@ output_dir <- "tempdir"
 
 ### Set working directory (scratch space)
 
-    ## [1] "/private/var/folders/xp/h3k9vf3n2jx181ts786_yjrn9c2gjq/T/RtmpdoDuGk"
+    ## [1] "/private/var/folders/xp/h3k9vf3n2jx181ts786_yjrn9c2gjq/T/RtmpJ6W1sB"
 
 ### Grab data from EcoSIS
 
@@ -558,7 +558,7 @@ head(cal.plsr.output)
     ## 6          2.943186       0.656508493
 
 ``` r
-cal.R2 <- round(pls::R2(plsr.out)[[1]][nComps],2)
+cal.R2 <- round(pls::R2(plsr.out,intercept=F)[[1]][nComps],2)
 cal.RMSEP <- round(sqrt(mean(cal.plsr.output$PLSR_CV_Residuals^2)),2)
 
 val.plsr.output <- data.frame(val.plsr.data[, which(names(val.plsr.data) %notin% "Spectra")],
@@ -586,7 +586,7 @@ head(val.plsr.output)
     ## 189     0.13020008
 
 ``` r
-val.R2 <- round(pls::R2(plsr.out,newdata=val.plsr.data)[[1]][nComps],2)
+val.R2 <- round(pls::R2(plsr.out,newdata=val.plsr.data,intercept=F)[[1]][nComps],2)
 val.RMSEP <- round(sqrt(mean(val.plsr.output$PLSR_Residuals^2)),2)
 
 rng_quant <- quantile(cal.plsr.output[,inVar], probs = c(0.001, 0.999))
@@ -798,7 +798,7 @@ rmsep_percrmsep <- spectratrait::percent_rmse(plsr_dataset = val.plsr.output,
                                               range="full")
 RMSEP <- rmsep_percrmsep$rmse
 perc_RMSEP <- rmsep_percrmsep$perc_rmse
-r2 <- round(pls::R2(plsr.out, newdata = val.plsr.data)$val[nComps+1],2)
+r2 <- round(pls::R2(plsr.out, newdata = val.plsr.data,intercept=F)$val[nComps],2)
 expr <- vector("expression", 3)
 expr[[1]] <- bquote(R^2==.(r2))
 expr[[2]] <- bquote(RMSEP==.(round(RMSEP,2)))
@@ -863,7 +863,7 @@ write.csv(out.jk.coefs,file=file.path(outdir,
 print(paste("Output directory: ", outdir))
 ```
 
-    ## [1] "Output directory:  /var/folders/xp/h3k9vf3n2jx181ts786_yjrn9c2gjq/T//RtmpdoDuGk"
+    ## [1] "Output directory:  /var/folders/xp/h3k9vf3n2jx181ts786_yjrn9c2gjq/T//RtmpJ6W1sB"
 
 ``` r
 # Observed versus predicted

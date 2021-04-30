@@ -187,7 +187,7 @@ plsr_data.output <- data.frame(plsr_data[, which(names(plsr_data) %notin% "Spect
 plsr_data.output <- plsr_data.output %>%
   mutate(PLSR_CV_Residuals = PLSR_CV_Predicted-get(inVar))
 head(plsr_data.output)
-cal.R2 <- round(pls::R2(plsr.out)[[1]][nComps],2)
+cal.R2 <- round(pls::R2(plsr.out,intercept=F)[[1]][nComps],2)
 cal.RMSEP <- round(sqrt(mean(plsr_data.output$PLSR_CV_Residuals^2)),2)
 
 rng_quant <- quantile(plsr_data.output[,inVar], probs = c(0.001, 0.999))
