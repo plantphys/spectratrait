@@ -2,7 +2,7 @@
 This repository contains example scripts illustrating best-practices for fitting, evaluating, and reporting leaf level spectra-trait PLSR models. These scripts encompass several possibilities that you may encounter doing PLSR. Start by reading *Burnett et al. in review*, then work through the scripts or vignettes.
 
 ### Article citation:
-Burnett AC, Anderson J, Davidson KD, Ely KS, Lamour J, Li Q, Morrison BD, Yang D, Rogers A, Serbin SP (in review) A best-practice guide to predicting plant traits from leaf-level hyperspectral data using partial least squares regression. Journal of Experimental Botany. In Review.
+Burnett AC, Anderson J, Davidson KD, Ely KS, Lamour J, Li Q, Morrison BD, Yang D, Rogers A, Serbin SP (2021) A best-practice guide to predicting plant traits from leaf-level hyperspectral data using partial least squares regression. Journal of Experimental Botany. https://doi.org/10.1093/jxb/erab295
 
 ### Source code citation:
 [![DOI](https://zenodo.org/badge/222699149.svg)](https://zenodo.org/badge/latestdoi/222699149)
