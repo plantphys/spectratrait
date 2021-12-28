@@ -85,7 +85,9 @@ sample_info <- dat_raw[,names(dat_raw) %notin% seq(350,2500,1)]
 head(sample_info)
 
 sample_info2 <- sample_info %>%
-  select(Plant_Species=species,Growth_Form=`growth form`,timestamp,SLA_g_cm=`SLA (g/cm )`)
+  select(Plant_Species=species,Growth_Form=`growth form`,timestamp,
+         SLA_g_cm=`SLA (g/cm )`) %>%
+  mutate(SLA_g_cm=as.numeric(SLA_g_cm)) # ensure SLA is numeric
 head(sample_info2)
 
 plsr_data <- data.frame(sample_info2,Spectra)
