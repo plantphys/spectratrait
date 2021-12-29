@@ -12,6 +12,9 @@
 ##' @return output a list containing the PRESS and coef_array.
 ##' output <- list(PRESS=press.out, coef_array=coefs)
 ##' 
+##' @importFrom pls plsr 
+##' @importFrom utils flush.console read.table setTxtProgressBar txtProgressBar
+##' 
 ##' @author Julien Lamour, Shawn P. Serbin
 ##' @export
 pls_permutation <- function(dataset=NULL, maxComps=20, iterations=20, prop=0.70,
@@ -25,8 +28,8 @@ pls_permutation <- function(dataset=NULL, maxComps=20, iterations=20, prop=0.70,
   
   if (verbose) {
     j <- 1 # <--- Numeric counter for progress bar
-    pb <- utils::txtProgressBar(min = 0, max = iterations, 
-                                char="*",width=70,style = 3)
+    pb <- txtProgressBar(min = 0, max = iterations, 
+                         char="*",width=70,style = 3)
   }
   
   for (i in seq_along(1:iterations)) {

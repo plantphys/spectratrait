@@ -3,10 +3,10 @@ title: Spectra-trait PLSR example using leaf-level spectra and specific leaf are
 author: "Shawn P. Serbin, Julien Lamour, & Jeremiah Anderson"
 output:
   github_document: default
-  html_document:
-    df_print: paged
   html_notebook: default
   pdf_document: default
+  html_document:
+    df_print: paged
 params:
   date: !r Sys.Date()
 ---
@@ -80,7 +80,9 @@ sample_info <- dat_raw[,names(dat_raw) %notin% seq(350,2500,1)]
 head(sample_info)
 
 sample_info2 <- sample_info %>%
-  select(Plant_Species=species,Growth_Form=`growth form`,timestamp,SLA_g_cm=`SLA (g/cm )`)
+  select(Plant_Species=species,Growth_Form=`growth form`,timestamp,
+         SLA_g_cm=`SLA (g/cm )`) %>%
+  mutate(SLA_g_cm=as.numeric(SLA_g_cm)) # ensure SLA is numeric
 head(sample_info2)
 
 plsr_data <- data.frame(sample_info2,Spectra)
