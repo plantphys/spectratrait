@@ -40,16 +40,13 @@ Finally, to complete the installation you will also need to install the spectrat
 
 ``` r
 # to install the master branch version
-devtools::install_github(repo = "TESTgroup-BNL/PLSR_for_plant_trait_prediction", 
-dependencies=TRUE)
+devtools::install_github(repo = "TESTgroup-BNL/spectratrait", dependencies=TRUE)
 
-# to install a specific release, for example release 1.0.0
-devtools::install_github(repo = "TESTgroup-BNL/PLSR_for_plant_trait_prediction@v1.0.0", 
-dependencies=TRUE)
+# to install a specific release, for example release 1.0.5
+devtools::install_github(repo = "TESTgroup-BNL/spectratrait@v1.0.5", dependencies=TRUE)
 
 # or a specific branch, e.g. a branch named devbranch
-devtools::install_github(repo = "TESTgroup-BNL/PLSR_for_plant_trait_prediction", 
-ref = "devbranch", dependencies=TRUE)
+devtools::install_github(repo = "TESTgroup-BNL/spectratrait", ref = "devbranch", dependencies=TRUE)
 ```
 
 ## Contains:
