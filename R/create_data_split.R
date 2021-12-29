@@ -38,7 +38,8 @@ create_data_split <- function(dataset=NULL, approach=NULL, split_seed=123456789,
           dataset$CalVal[ row.names(dataset) %in% Cal ] <- "Cal"
           dataset$CalVal[ row.names(dataset) %in% Val ] <- "Val"
           p_cal <- length(Cal)/length(temp) * 100
-          message(paste0(split_var_list[i], "   ", "Cal", ": ", round(p_cal,3), "%"))
+          message(paste0(split_var_list[i], "   ", "Cal", ": ", 
+                         round(p_cal,3), "%"))
         } else {
           message(paste(split_var_list[i], "Not enough observations"))
         }
@@ -55,10 +56,10 @@ create_data_split <- function(dataset=NULL, approach=NULL, split_seed=123456789,
       
       # dplyr based data split function
     } else if (approach=="dplyr") {
-      dataset <- dataset %>% mutate(ids=row_number())
+      dataset <- dataset %>% dplyr::mutate(ids=dplyr::row_number())
       cal.plsr.data <- dataset %>%
-        group_by_at(vars(all_of(group_variables))) %>% 
-        slice(sample(1:n(), prop*n())) %>% 
+        dplyr::group_by_at(dplyr::vars(dplyr::all_of(group_variables))) %>% 
+        dplyr::slice(sample(1:dplyr::n(), prop*dplyr::n())) %>% 
         data.frame()
       val.plsr.data <- dataset[dataset$ids %notin% cal.plsr.data$ids,]
       cal.plsr.data <- cal.plsr.data[,-which(colnames(cal.plsr.data)=="ids")]
