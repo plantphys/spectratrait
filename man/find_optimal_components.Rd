@@ -2,7 +2,7 @@
 % Please edit documentation in R/find_optimal_components.R
 \name{find_optimal_components}
 \alias{find_optimal_components}
-\title{Apply different methods to determing the optimal number of PLSR model components}
+\title{Applies different methods for the determination of the optimal number of PLSR model components}
 \usage{
 find_optimal_components(
   dataset = NULL,
@@ -33,7 +33,7 @@ find_optimal_components(
 nComps the optimal number of PLSR components
 }
 \description{
-Apply different methods to determing the optimal number of PLSR model components
+Applies different methods for the determination of the optimal number of PLSR model components
 }
 \author{
 Julien Lamour, Jeremiah Anderson, Shawn P. Serbin

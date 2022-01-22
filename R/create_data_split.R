@@ -5,7 +5,7 @@
 ##' @param split_seed random seed to use for splitting data
 ##' @param prop the proportion of data to preserve for calibration (e.g. 0.8) and validation (0.2). 
 ##' This sets the calibration proportion
-##' @param group_variables Use factor variables to conduct a stratfied sampling for cal/val
+##' @param group_variables Use factor variables to conduct a stratified sampling for cal/val
 ##' 
 ##' @return output_list A list containing the calibration dataset (cal_data)
 ##' and validation dataset (val_data)
