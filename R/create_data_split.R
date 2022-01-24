@@ -10,10 +10,14 @@
 ##' @return output_list A list containing the calibration dataset (cal_data)
 ##' and validation dataset (val_data)
 ##' 
+##' @importFrom magrittr %>%
+##' @importFrom dplyr mutate group_by_at slice n vars all_of 
+##' 
 ##' @author Julien Lamour, Jeremiah Anderson, Shawn P. Serbin
 ##' @export
 create_data_split <- function(dataset=NULL, approach=NULL, split_seed=123456789, prop=0.8,
                               group_variables=NULL) {
+  # TODO: import only required functions from dplyr
   set.seed(split_seed)
   
   # outer if/else to stop if approach set to NULL

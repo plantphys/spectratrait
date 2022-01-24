@@ -28,7 +28,8 @@ find_optimal_comp_by_groups(
 
 \item{random_seed}{random seed to use for splitting data}
 
-\item{group_variables}{group_variables should be an vector of characters of the form c("var1", "var2"..."varn")}
+\item{group_variables}{group_variables character vector of the form c("var1", "var2"..."varn")
+providing the factors used for stratified sampling.}
 }
 \value{
 nComps the optimal number of PLSR components

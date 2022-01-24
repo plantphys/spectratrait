@@ -26,8 +26,8 @@ pls_permutation_by_groups(
 \item{verbose}{Should the function report the current iteration status/progress to the terminal
 or run silently? TRUE/FALSE. Default FALSE}
 
-\item{group_variables}{Use factor variables to conduct a stratified sampling for the
-PLSR permutation analysis. group_variables should be of the form c("var1", "var2"..."varn")}
+\item{group_variables}{Character vector of the form c("var1", "var2"..."varn")
+providing the factors used for stratified sampling in the PLSR permutation analysis}
 }
 \value{
 output a list containing the PRESS and coef_array.

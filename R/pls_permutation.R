@@ -47,9 +47,9 @@ pls_permutation <- function(dataset=NULL, maxComps=20, iterations=20, prop=0.70,
     
     ### Display progress to console
     if (verbose) {
-      setTxtProgressBar(pb, j)    # show progress bar
-      j <- j+1                    # <--- increase counter by 1
-      flush.console()             #<--- show output in real-time
+      setTxtProgressBar(pb, j)
+      j <- j+1
+      flush.console()
     }
   }
   if (verbose) {
@@ -63,19 +63,6 @@ pls_permutation <- function(dataset=NULL, maxComps=20, iterations=20, prop=0.70,
 }
 
 
-
-##Same function as pls_permutation but just with an additional argument (groups),
-## and a new sampling approach which takes into account the input groups
-
-##Stratifying is only included if groups is not null
-##A dplyr approach is used to do the by-group sampling
-
-
-## groups should be an vector of caracters of the form c("var1", "var2"..."varn")
-##I have not included any control for this condition, though
-
-##Changed commands marked 
-
 ##' Run a PLSR model permutation analysis stratified by selected "groups". Can be used to 
 ##' determine the optimal number of components or conduct a boostrap uncertainty analysis
 ##' 
@@ -85,13 +72,14 @@ pls_permutation <- function(dataset=NULL, maxComps=20, iterations=20, prop=0.70,
 ##' @param prop proportion of data to preserve for each permutation
 ##' @param verbose Should the function report the current iteration status/progress to the terminal
 ##' or run silently? TRUE/FALSE. Default FALSE
-##' @param group_variables Use factor variables to conduct a stratified sampling for the
-##' PLSR permutation analysis. group_variables should be of the form c("var1", "var2"..."varn")
+##' @param group_variables Character vector of the form c("var1", "var2"..."varn") 
+##' providing the factors used for stratified sampling in the PLSR permutation analysis
 ##' 
 ##' @return output a list containing the PRESS and coef_array.
 ##' output <- list(PRESS=press.out, coef_array=coefs)
 ##' 
-##' @import dplyr
+##' @importFrom magrittr %>%
+##' @importFrom dplyr mutate group_by_at slice n row_number
 ##' @importFrom pls plsr 
 ##' @importFrom utils flush.console read.table setTxtProgressBar txtProgressBar
 ##' 
@@ -99,8 +87,7 @@ pls_permutation <- function(dataset=NULL, maxComps=20, iterations=20, prop=0.70,
 ##' @export
 ##' 
 pls_permutation_by_groups <- function (dataset = NULL, maxComps = 20, iterations = 20, prop = 0.7, 
-                                  verbose = FALSE, group_variables=NULL) 
-{
+                                  verbose = FALSE, group_variables=NULL) {
   coefs <- array(0, dim = c((ncol(dataset$Spectra) + 1), iterations, 
                             maxComps))
   press.out <- array(data = NA, dim = c(iterations, maxComps))
@@ -117,13 +104,13 @@ pls_permutation_by_groups <- function (dataset = NULL, maxComps = 20, iterations
   for (i in seq_along(1:iterations)) {
     if (!is.null(group_variables)) {
       trainset <- dataset %>%
-        mutate(int_id = row_number()) %>%
+        mutate(int_id=row_number()) %>%
         group_by_at(group_variables) %>%
         slice(sample(1:n(), prop * n()))
       rows <- trainset$int_id
       } else {
        rows <- sample(1:nrow(dataset), floor(prop * nrow(dataset)))
-    }
+      }
     sub.data <- dataset[rows, ]
     val.sub.data <- dataset[-rows, ]
     plsr.out <- plsr(as.formula(paste(inVar, "~", "Spectra")), 
@@ -135,8 +122,7 @@ pls_permutation_by_groups <- function (dataset = NULL, maxComps = 20, iterations
     press <- apply(X = sq_resid, MARGIN = 2, FUN = sum)
     press.out[i, ] <- press
     coefs[, i, ] <- coef(plsr.out, intercept = TRUE, ncomp = 1:maxComps)
-    rm(rows, sub.data, val.sub.data, plsr.out, pred_val, 
-       sq_resid, press)
+    rm(rows, sub.data, val.sub.data, plsr.out, pred_val, sq_resid, press)
     if (verbose) {
       setTxtProgressBar(pb, j)
       j <- j + 1
@@ -146,6 +132,7 @@ pls_permutation_by_groups <- function (dataset = NULL, maxComps = 20, iterations
   if (verbose) {
     close(pb)
   }
+  # create a new list with PRESS and permuted coefficients x wavelength x component number
   print("*** Providing PRESS and coefficient array output ***")
   output <- list(PRESS = press.out, coef_array = coefs)
   return(output)

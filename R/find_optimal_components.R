@@ -97,7 +97,9 @@ find_optimal_components <- function(dataset=NULL, method="pls", maxComps=20, ite
 ##' @param prop proportion of data to preserve for each permutation
 ##' @param random_seed random seed to use for splitting data
 ##' 
-##' @param group_variables group_variables should be an vector of characters of the form c("var1", "var2"..."varn")
+##' @param group_variables group_variables character vector of the form c("var1", "var2"..."varn") 
+##' providing the factors used for stratified sampling. 
+##' 
 ##' 
 ##' @return nComps the optimal number of PLSR components
 ##' 
@@ -110,16 +112,15 @@ find_optimal_comp_by_groups <- function (dataset = NULL, method = "firstPlateau"
   set.seed(random_seed)
   
   # TODO - really should merge this with the original and have an if/else if not NULL and select either
-  # pls_permutation OR pls_permutation_by_groups. BUT would need to add a check if pls method is 
-  # selected but groups are provided.  incompatible 
+  # pls_permutation OR pls_permutation_by_groups.
   print("*** Identifying optimal number of PLSR components using stratified resampling by group_variables ***")
   if (method == "pls") {
     stop("*** Please select either the firstMin and firstPlateau. The pls package approach is not compatible ***")
   }
   if (method == "firstPlateau") {
-    press.out <- spectratrait::pls_permutation_by_groups(dataset = dataset, 
-                                                    maxComps = maxComps, iterations = iterations, 
-                                                    prop = prop, group_variables=group_variables)
+    press.out <- spectratrait::pls_permutation_by_groups(dataset=dataset, 
+                                                    maxComps=maxComps, iterations=iterations, 
+                                                    prop=prop, group_variables=group_variables)
     pressDF <- as.data.frame(press.out$PRESS)
     names(pressDF) <- as.character(seq(maxComps))
     pressDFres <- reshape2::melt(pressDF)
@@ -136,8 +137,8 @@ find_optimal_comp_by_groups <- function (dataset = NULL, method = "firstPlateau"
                  nComps))
     bp <- ggplot(pressDFres, aes(x = variable, y = value)) + 
       theme_bw() + geom_boxplot(notch = FALSE) + labs(x = "Number of Components", 
-                                                      y = "PRESS") + stat_boxplot(geom = "errorbar", 
-                                                                                  width = 0.2) + 
+                                                      y = "PRESS") + 
+      stat_boxplot(geom = "errorbar", width = 0.2) + 
       geom_vline(xintercept = nComps, linetype = "dashed", 
                  color = "blue", size = 1)
     theme(axis.text = element_text(size = 18), legend.position = "none", 
@@ -149,8 +150,8 @@ find_optimal_comp_by_groups <- function (dataset = NULL, method = "firstPlateau"
   }
   if (method == "firstMin") {
     press.out <- spectratrait::pls_permutation_by_groups(dataset = dataset, 
-                                                   maxComps = maxComps, iterations = iterations, 
-                                                   prop = prop, group_variables=group_variables)
+                                                   maxComps=maxComps, iterations=iterations, 
+                                                   prop=prop, group_variables=group_variables)
     pressDF <- as.data.frame(press.out$PRESS)
     names(pressDF) <- as.character(seq(maxComps))
     pressDFres <- reshape2::melt(pressDF)
@@ -161,9 +162,8 @@ find_optimal_comp_by_groups <- function (dataset = NULL, method = "firstPlateau"
     for (i in seq_along(1:(lowest_PRESS - 1))) {
       comp1 <- i
       comp2 <- lowest_PRESS
-      ttest <- t.test(pressDFres$value[which(pressDFres$variable == 
-                                               comp1)], pressDFres$value[which(pressDFres$variable == 
-                                                                                 comp2)])
+      ttest <- t.test(pressDFres$value[which(pressDFres$variable == comp1)], 
+                      pressDFres$value[which(pressDFres$variable == comp2)])
       results[i] <- round(unlist(ttest$p.value), 8)
     }
     results <- data.frame(seq(1, lowest_PRESS - 1, 1), results)
@@ -175,8 +175,8 @@ find_optimal_comp_by_groups <- function (dataset = NULL, method = "firstPlateau"
                  nComps))
     bp <- ggplot(pressDFres, aes(x = variable, y = value)) + 
       theme_bw() + geom_boxplot(notch = FALSE) + labs(x = "Number of Components", 
-                                                      y = "PRESS") + stat_boxplot(geom = "errorbar", 
-                                                                                  width = 0.2) + 
+                                                      y = "PRESS") + 
+      stat_boxplot(geom = "errorbar", width = 0.2) + 
       geom_vline(xintercept = nComps, linetype = "dashed", 
                  color = "blue", size = 1)
     theme(axis.text = element_text(size = 18), legend.position = "none", 
