@@ -11,8 +11,8 @@ pls_permutation_by_groups(
   maxComps = 20,
   iterations = 20,
   prop = 0.7,
-  verbose = FALSE,
-  group_variables = NULL
+  group_variables = NULL,
+  verbose = FALSE
 )
 }
 \arguments{
@@ -27,11 +27,11 @@ Usually the "inVar" variable set at the beginning of a PLS script}
 
 \item{prop}{proportion of data to preserve for each permutation}
 
-\item{verbose}{Should the function report the current iteration status/progress to the terminal
-or run silently? TRUE/FALSE. Default FALSE}
-
 \item{group_variables}{Character vector of the form c("var1", "var2"..."varn")
 providing the factors used for stratified sampling in the PLSR permutation analysis}
+
+\item{verbose}{Should the function report the current iteration status/progress to the terminal
+or run silently? TRUE/FALSE. Default FALSE}
 }
 \value{
 output a list containing the PRESS and coef_array.
