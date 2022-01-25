@@ -20,7 +20,7 @@
 
 #--------------------------------------------------------------------------------------------------#
 ### Load libraries
-list.of.packages <- c("here","dplyr","plotrix","ggplot2","gridExtra","spectratrait")
+list.of.packages <- c("pls","here","dplyr","plotrix","ggplot2","gridExtra","spectratrait")
 invisible(lapply(list.of.packages, library, character.only = TRUE))
 #--------------------------------------------------------------------------------------------------#
 
@@ -138,13 +138,14 @@ maxComps <- 20
 iterations <- 40
 prop <- 0.70
 if (method=="pls") {
-  nComps <- spectratrait::find_optimal_components(dataset=plsr_data, method=method, maxComps=maxComps, 
-                                    seg=seg, random_seed=random_seed)
+  nComps <- spectratrait::find_optimal_components(dataset=plsr_data, targetVariable=inVar, 
+                                                  method=method, maxComps=maxComps, seg=seg, 
+                                                  random_seed=random_seed)
   print(paste0("*** Optimal number of components: ", nComps))
 } else {
-  nComps <- spectratrait::find_optimal_components(dataset=plsr_data, method=method, maxComps=maxComps, 
-                                    iterations=iterations, seg=seg, prop=prop, 
-                                    random_seed=random_seed)
+  nComps <- spectratrait::find_optimal_components(dataset=plsr_data, targetVariable=inVar, 
+                                                  method=method, maxComps=maxComps, iterations=iterations, 
+                                                  seg=seg, prop=prop, random_seed=random_seed)
 }
 dev.copy(png,file.path(outdir,paste0(paste0(inVar,"_PLSR_Component_Selection.png"))), 
          height=2800, width=3400,  res=340)

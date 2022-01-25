@@ -92,8 +92,8 @@ pls_permutation <- function(dataset=NULL, targetVariable=NULL, maxComps=20, iter
 ##' @export
 ##' 
 pls_permutation_by_groups <- function (dataset = NULL, targetVariable=NULL, maxComps = 20, 
-                                       iterations = 20, prop = 0.7, verbose = FALSE, 
-                                       group_variables=NULL) {
+                                       iterations = 20, prop = 0.7, group_variables=NULL,
+                                       verbose = FALSE) {
   inVar <- targetVariable
   coefs <- array(0, dim = c((ncol(dataset$Spectra) + 1), iterations, maxComps))
   press.out <- array(data = NA, dim = c(iterations, maxComps))

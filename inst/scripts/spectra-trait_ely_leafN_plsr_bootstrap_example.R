@@ -15,8 +15,7 @@
 
 #--------------------------------------------------------------------------------------------------#
 ### Load libraries
-list.of.packages <- c("pls","dplyr","reshape2","here","plotrix","ggplot2","gridExtra",
-                      "spectratrait")
+list.of.packages <- c("pls","dplyr","here","plotrix","ggplot2","gridExtra","spectratrait")
 invisible(lapply(list.of.packages, library, character.only = TRUE))
 #--------------------------------------------------------------------------------------------------#
 
@@ -159,16 +158,15 @@ maxComps <- 16
 iterations <- 80
 prop <- 0.70
 if (method=="pls") {
-  # pls package approach - faster but estimates more components....
-  nComps <- spectratrait::find_optimal_components(dataset=cal.plsr.data, method=method, 
-                                                  maxComps=maxComps, seg=seg, 
+  nComps <- spectratrait::find_optimal_components(dataset=cal.plsr.data, targetVariable=inVar, 
+                                                  method=method, maxComps=maxComps, seg=seg, 
                                                   random_seed=random_seed)
   print(paste0("*** Optimal number of components: ", nComps))
 } else {
-  nComps <- spectratrait::find_optimal_components(dataset=cal.plsr.data, method=method, 
-                                                  maxComps=maxComps, iterations=iterations, 
-                                                  seg=seg, prop=prop, 
-                                                  random_seed=random_seed)
+  nComps <- spectratrait::find_optimal_components(dataset=cal.plsr.data, targetVariable=inVar, 
+                                                  method=method, maxComps=maxComps, 
+                                                  iterations=iterations, 
+                                                  seg=seg, prop=prop, random_seed=random_seed)
 }
 dev.copy(png,file.path(outdir,paste0(paste0(inVar,"_PLSR_Component_Selection.png"))), 
          height=2800, width=3400, res=340)
@@ -304,7 +302,7 @@ if(grepl("Windows", sessionInfo()$running)){
 ### PLSR bootstrap permutation uncertainty analysis
 iterations <- 500    # how many permutation iterations to run
 prop <- 0.70          # fraction of training data to keep for each iteration
-plsr_permutation <- spectratrait::pls_permutation(dataset=cal.plsr.data, 
+plsr_permutation <- spectratrait::pls_permutation(dataset=cal.plsr.data, targetVariable=inVar,
                                                             maxComps=nComps, 
                                                             iterations=iterations, 
                                                             prop=prop, verbose=TRUE)

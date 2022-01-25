@@ -222,12 +222,14 @@ maxComps <- 16
 iterations <- 80
 prop <- 0.70
 if (method=="pls") {
-  nComps <- spectratrait::find_optimal_components(dataset=cal.plsr.data, method=method, 
+  nComps <- spectratrait::find_optimal_components(dataset=cal.plsr.data, targetVariable=inVar, 
+                                                  method=method, 
                                                   maxComps=maxComps, seg=seg, 
                                                   random_seed=random_seed)
   print(paste0("*** Optimal number of components: ", nComps))
 } else {
-  nComps <- spectratrait::find_optimal_components(dataset=cal.plsr.data, method=method, 
+  nComps <- spectratrait::find_optimal_components(dataset=cal.plsr.data, targetVariable=inVar, 
+                                                  method=method, 
                                                   maxComps=maxComps, iterations=iterations, 
                                                   seg=seg, prop=prop, 
                                                   random_seed=random_seed)
@@ -371,7 +373,8 @@ if(grepl("Windows", sessionInfo()$running)){
 ### PLSR bootstrap permutation uncertainty analysis
 iterations <- 500    # how many permutation iterations to run
 prop <- 0.70          # fraction of training data to keep for each iteration
-plsr_permutation <- spectratrait::pls_permutation(dataset=cal.plsr.data, maxComps=nComps, 
+plsr_permutation <- spectratrait::pls_permutation(dataset=cal.plsr.data, targetVariable=inVar, 
+                                                  maxComps=nComps, 
                                                   iterations=iterations, prop=prop, 
                                                   verbose=TRUE)
 bootstrap_intercept <- plsr_permutation$coef_array[1,,nComps]

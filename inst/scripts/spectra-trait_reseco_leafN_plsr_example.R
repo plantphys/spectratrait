@@ -19,8 +19,7 @@
 
 #--------------------------------------------------------------------------------------------------#
 ### Load libraries
-list.of.packages <- c("pls","dplyr","reshape2","here","plotrix","ggplot2","gridExtra",
-                      "spectratrait")
+list.of.packages <- c("pls","dplyr","here","plotrix","ggplot2","gridExtra","spectratrait")
 invisible(lapply(list.of.packages, library, character.only = TRUE))
 #--------------------------------------------------------------------------------------------------#
 
@@ -188,13 +187,14 @@ maxComps <- 16
 iterations <- 80
 prop <- 0.70
 if (method=="pls") {
-  # pls package approach - faster but estimates more components....
-  nComps <- spectratrait::find_optimal_components(dataset=cal.plsr.data, method=method, 
+  nComps <- spectratrait::find_optimal_components(dataset=cal.plsr.data, targetVariable=inVar, 
+                                                  method=method, 
                                                   maxComps=maxComps, seg=seg, 
                                                   random_seed=random_seed)
   print(paste0("*** Optimal number of components: ", nComps))
 } else {
-  nComps <- spectratrait::find_optimal_components(dataset=cal.plsr.data, method=method, 
+  nComps <- spectratrait::find_optimal_components(dataset=cal.plsr.data, targetVariable=inVar,
+                                                  method=method, 
                                                   maxComps=maxComps, iterations=iterations, 
                                                   seg=seg, prop=prop, 
                                                   random_seed=random_seed)
