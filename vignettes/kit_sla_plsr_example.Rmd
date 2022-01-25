@@ -2,9 +2,9 @@
 title: Spectra-trait PLSR example using leaf-level spectra and specific leaf area (SLA) data from more than 40 species grassland species comprising both herbs and graminoids. 
 author: "Shawn P. Serbin, Julien Lamour, & Jeremiah Anderson"
 output:
-  github_document: default
-  html_notebook: default
   pdf_document: default
+  html_notebook: default
+  github_document: default
   html_document:
     df_print: paged
 params:
@@ -110,9 +110,7 @@ split_data <- spectratrait::create_data_split(dataset=plsr_data, approach=method
                                               prop=0.8, group_variables="Plant_Species")
 names(split_data)
 cal.plsr.data <- split_data$cal_data
-head(cal.plsr.data)[1:8]
 val.plsr.data <- split_data$val_data
-head(val.plsr.data)[1:8]
 rm(split_data)
 
 # Datasets:
@@ -181,12 +179,14 @@ iterations <- 50
 prop <- 0.70
 if (method=="pls") {
   # pls package approach - faster but estimates more components....
-  nComps <- spectratrait::find_optimal_components(dataset=cal.plsr.data,method=method, 
+  nComps <- spectratrait::find_optimal_components(dataset=cal.plsr.data, targetVariable=inVar, 
+                                                  method=method, 
                                                   maxComps=maxComps, seg=seg, 
                                                   random_seed=random_seed)
   print(paste0("*** Optimal number of components: ", nComps))
 } else {
-  nComps <- spectratrait::find_optimal_components(dataset=cal.plsr.data, method=method, 
+  nComps <- spectratrait::find_optimal_components(dataset=cal.plsr.data, targetVariable=inVar, 
+                                                  method=method, 
                                                   maxComps=maxComps, 
                                                   iterations=iterations, 
                                                   seg=seg, prop=prop, 

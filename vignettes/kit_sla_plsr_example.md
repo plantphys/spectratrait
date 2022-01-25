@@ -85,7 +85,7 @@ output_dir <- "tempdir"
 
 ### Set working directory (scratch space)
 
-    ## [1] "Output directory: /private/var/folders/6h/r2g9xpxj2xq5xt1dn3cn5g800000gn/T/Rtmp0jgwQR"
+    ## [1] "Output directory: /private/var/folders/xp/h3k9vf3n2jx181ts786_yjrn9c2gjq/T/Rtmp952NtZ"
 
 ### Grab data from EcoSIS
 
@@ -104,16 +104,15 @@ dat_raw <- spectratrait::get_ecosis_data(ecosis_id = ecosis_id)
 
     ## Downloading data...
 
-    ## Rows: 739 Columns: 2114
-
-    ## ── Column specification ────────────────────────────────────────────────────────
-    ## Delimiter: ","
-    ## chr   (13): Anthocyanin concentration (mg/g), Anthocyanin content ( g/cm ), ...
-    ## dbl (2101): 400, 401, 402, 403, 404, 405, 406, 407, 408, 409, 410, 411, 412,...
-
     ## 
-    ## ℹ Use `spec()` to retrieve the full column specification for this data.
-    ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
+    ## ── Column specification ────────────────────────────────────────────────────────
+    ## cols(
+    ##   .default = col_double(),
+    ##   `growth form` = col_character(),
+    ##   species = col_character(),
+    ##   timestamp = col_character()
+    ## )
+    ## ℹ Use `spec()` for the full column specifications.
 
     ## Download complete!
 
@@ -123,32 +122,20 @@ head(dat_raw)
 
     ## # A tibble: 6 × 2,114
     ##   `Anthocyanin concen… `Anthocyanin cont… `Carotenoid concen… `Carotenoid conte…
-    ##   <chr>                <chr>              <chr>               <chr>             
-    ## 1 0.00106305           0.996765974        0.00799017          7.491957938       
-    ## 2 0.003571021          1.217297195        0.022081567         7.527211759       
-    ## 3 0.002517379          1.142859188        0.018826449         8.546976036       
-    ## 4 0.003102353          2.262477235        0.015835418         11.54841829       
-    ## 5 0.004116414          1.733783943        0.021558342         9.080114754       
-    ## 6 0.003965355          1.021371167        0.033632402         8.662821832       
-    ## # … with 2,110 more variables: Chlorophyll concentration (mg/g) <chr>,
-    ## #   Chlorophyll content ( g/cm ) <chr>, LDMC (g/g) <chr>, LFA (mg/cm ) <chr>,
-    ## #   LWC (mg/cm ) <chr>, SLA (g/cm ) <chr>, growth form <chr>, species <chr>,
+    ##                  <dbl>              <dbl>               <dbl>              <dbl>
+    ## 1              0.00106              0.997             0.00799               7.49
+    ## 2              0.00357              1.22              0.0221                7.53
+    ## 3              0.00252              1.14              0.0188                8.55
+    ## 4              0.00310              2.26              0.0158               11.5 
+    ## 5              0.00412              1.73              0.0216                9.08
+    ## 6              0.00397              1.02              0.0336                8.66
+    ## # … with 2,110 more variables: Chlorophyll concentration (mg/g) <dbl>,
+    ## #   Chlorophyll content ( g/cm ) <dbl>, LDMC (g/g) <dbl>, LFA (mg/cm ) <dbl>,
+    ## #   LWC (mg/cm ) <dbl>, SLA (g/cm ) <dbl>, growth form <chr>, species <chr>,
     ## #   timestamp <chr>, 400 <dbl>, 401 <dbl>, 402 <dbl>, 403 <dbl>, 404 <dbl>,
     ## #   405 <dbl>, 406 <dbl>, 407 <dbl>, 408 <dbl>, 409 <dbl>, 410 <dbl>,
     ## #   411 <dbl>, 412 <dbl>, 413 <dbl>, 414 <dbl>, 415 <dbl>, 416 <dbl>,
-    ## #   417 <dbl>, 418 <dbl>, 419 <dbl>, 420 <dbl>, 421 <dbl>, 422 <dbl>,
-    ## #   423 <dbl>, 424 <dbl>, 425 <dbl>, 426 <dbl>, 427 <dbl>, 428 <dbl>,
-    ## #   429 <dbl>, 430 <dbl>, 431 <dbl>, 432 <dbl>, 433 <dbl>, 434 <dbl>,
-    ## #   435 <dbl>, 436 <dbl>, 437 <dbl>, 438 <dbl>, 439 <dbl>, 440 <dbl>,
-    ## #   441 <dbl>, 442 <dbl>, 443 <dbl>, 444 <dbl>, 445 <dbl>, 446 <dbl>,
-    ## #   447 <dbl>, 448 <dbl>, 449 <dbl>, 450 <dbl>, 451 <dbl>, 452 <dbl>,
-    ## #   453 <dbl>, 454 <dbl>, 455 <dbl>, 456 <dbl>, 457 <dbl>, 458 <dbl>,
-    ## #   459 <dbl>, 460 <dbl>, 461 <dbl>, 462 <dbl>, 463 <dbl>, 464 <dbl>,
-    ## #   465 <dbl>, 466 <dbl>, 467 <dbl>, 468 <dbl>, 469 <dbl>, 470 <dbl>,
-    ## #   471 <dbl>, 472 <dbl>, 473 <dbl>, 474 <dbl>, 475 <dbl>, 476 <dbl>,
-    ## #   477 <dbl>, 478 <dbl>, 479 <dbl>, 480 <dbl>, 481 <dbl>, 482 <dbl>,
-    ## #   483 <dbl>, 484 <dbl>, 485 <dbl>, 486 <dbl>, 487 <dbl>, 488 <dbl>,
-    ## #   489 <dbl>, 490 <dbl>, …
+    ## #   417 <dbl>, 418 <dbl>, 419 <dbl>, 420 <dbl>, 421 <dbl>, 422 <dbl>, …
 
 ``` r
 names(dat_raw)[1:40]
@@ -190,16 +177,16 @@ head(sample_info)
 
     ## # A tibble: 6 × 13
     ##   `Anthocyanin concen… `Anthocyanin cont… `Carotenoid concen… `Carotenoid conte…
-    ##   <chr>                <chr>              <chr>               <chr>             
-    ## 1 0.00106305           0.996765974        0.00799017          7.491957938       
-    ## 2 0.003571021          1.217297195        0.022081567         7.527211759       
-    ## 3 0.002517379          1.142859188        0.018826449         8.546976036       
-    ## 4 0.003102353          2.262477235        0.015835418         11.54841829       
-    ## 5 0.004116414          1.733783943        0.021558342         9.080114754       
-    ## 6 0.003965355          1.021371167        0.033632402         8.662821832       
-    ## # … with 9 more variables: Chlorophyll concentration (mg/g) <chr>,
-    ## #   Chlorophyll content ( g/cm ) <chr>, LDMC (g/g) <chr>, LFA (mg/cm ) <chr>,
-    ## #   LWC (mg/cm ) <chr>, SLA (g/cm ) <chr>, growth form <chr>, species <chr>,
+    ##                  <dbl>              <dbl>               <dbl>              <dbl>
+    ## 1              0.00106              0.997             0.00799               7.49
+    ## 2              0.00357              1.22              0.0221                7.53
+    ## 3              0.00252              1.14              0.0188                8.55
+    ## 4              0.00310              2.26              0.0158               11.5 
+    ## 5              0.00412              1.73              0.0216                9.08
+    ## 6              0.00397              1.02              0.0336                8.66
+    ## # … with 9 more variables: Chlorophyll concentration (mg/g) <dbl>,
+    ## #   Chlorophyll content ( g/cm ) <dbl>, LDMC (g/g) <dbl>, LFA (mg/cm ) <dbl>,
+    ## #   LWC (mg/cm ) <dbl>, SLA (g/cm ) <dbl>, growth form <chr>, species <chr>,
     ## #   timestamp <chr>
 
 ``` r
@@ -346,45 +333,7 @@ names(split_data)
 
 ``` r
 cal.plsr.data <- split_data$cal_data
-head(cal.plsr.data)[1:8]
-```
-
-    ##            Plant_Species Growth_Form       timestamp SLA_g_cm   Wave_500
-    ## 1 Calamagrostis epigejos   graminoid 5/25/2016 12:20 106.6500 0.09180559
-    ## 2  Anthoxanthum odoratum   graminoid  5/27/2016 8:40 293.3565 0.09022668
-    ## 3   Alopecurus pratensis   graminoid  5/27/2016 9:23 220.2703 0.07998340
-    ## 4          Festuca ovina   graminoid  5/27/2016 9:23 137.1220 0.05205080
-    ## 5    Agrostis capillaris   graminoid  5/27/2016 9:42 237.4237 0.06695127
-    ## 6  Aegopodium podagraria        forb 5/25/2016 12:20 388.2384 0.04091566
-    ##     Wave_501   Wave_502   Wave_503
-    ## 1 0.09293251 0.09417092 0.09552863
-    ## 2 0.09125158 0.09237300 0.09359694
-    ## 3 0.08109460 0.08231389 0.08365015
-    ## 4 0.05256869 0.05314560 0.05378355
-    ## 5 0.06766205 0.06845248 0.06932220
-    ## 6 0.04169865 0.04257613 0.04355737
-
-``` r
 val.plsr.data <- split_data$val_data
-head(val.plsr.data)[1:8]
-```
-
-    ##            Plant_Species Growth_Form       timestamp SLA_g_cm   Wave_500
-    ## 9          Urtica dioica        forb 5/25/2016 12:37 284.6788 0.04716736
-    ## 15       Stellaria media        forb 5/25/2016 13:21 418.4284 0.05694278
-    ## 23  Alopecurus pratensis   graminoid  6/1/2016 11:32 218.2117 0.08135086
-    ## 44  Alopecurus pratensis   graminoid   6/8/2016 8:37 216.7568 0.10062342
-    ## 46   Agrostis capillaris   graminoid   6/8/2016 9:05 231.5292 0.08099724
-    ## 47 Aegopodium podagraria        forb   6/7/2016 9:05 311.4018 0.03778815
-    ##      Wave_501   Wave_502   Wave_503
-    ## 9  0.04781633 0.04854276 0.04935320
-    ## 15 0.05811729 0.05940497 0.06080936
-    ## 23 0.08249180 0.08373915 0.08509719
-    ## 44 0.10190706 0.10330054 0.10480538
-    ## 46 0.08178586 0.08265099 0.08360108
-    ## 47 0.03845043 0.03919155 0.04001581
-
-``` r
 rm(split_data)
 
 # Datasets:
@@ -6493,7 +6442,7 @@ head(val.plsr.data)[1:5]
     ## 23        0.13114422        0.13173930        0.13233132        0.13292035
     ## 44        0.14035330        0.14102638        0.14169735        0.14236617
     ## 46        0.13576063        0.13641384        0.13706527        0.13771485
-    ## 47        0.08674581        0.08727845        0.08781028        0.08834134
+    ## 47        0.08674581        0.08727845        0.08781028        0.08834133
     ##    Spectra.Wave_2049 Spectra.Wave_2050 Spectra.Wave_2051 Spectra.Wave_2052
     ## 9         0.11252288        0.11318057        0.11383750        0.11449413
     ## 15        0.05869478        0.05920211        0.05971230        0.06022535
@@ -6743,7 +6692,7 @@ head(val.plsr.data)[1:5]
     ## 9         0.17459234        0.17471639        0.17483767        0.17495602
     ## 15        0.11900502        0.11910486        0.11920045        0.11929147
     ## 23        0.18956770        0.18964676        0.18972298        0.18979607
-    ## 44        0.20551218        0.20558308        0.20565096        0.20571562
+    ## 44        0.20551219        0.20558308        0.20565096        0.20571562
     ## 46        0.19599448        0.19604878        0.19610115        0.19615136
     ## 47        0.14005093        0.14013975        0.14022655        0.14031084
     ##    Spectra.Wave_2193 Spectra.Wave_2194 Spectra.Wave_2195 Spectra.Wave_2196
@@ -7158,12 +7107,14 @@ iterations <- 50
 prop <- 0.70
 if (method=="pls") {
   # pls package approach - faster but estimates more components....
-  nComps <- spectratrait::find_optimal_components(dataset=cal.plsr.data,method=method, 
+  nComps <- spectratrait::find_optimal_components(dataset=cal.plsr.data, targetVariable=inVar, 
+                                                  method=method, 
                                                   maxComps=maxComps, seg=seg, 
                                                   random_seed=random_seed)
   print(paste0("*** Optimal number of components: ", nComps))
 } else {
-  nComps <- spectratrait::find_optimal_components(dataset=cal.plsr.data, method=method, 
+  nComps <- spectratrait::find_optimal_components(dataset=cal.plsr.data, targetVariable=inVar, 
+                                                  method=method, 
                                                   maxComps=maxComps, 
                                                   iterations=iterations, 
                                                   seg=seg, prop=prop, 
@@ -7171,6 +7122,7 @@ if (method=="pls") {
 }
 ```
 
+    ## [1] "*** Identifying optimal number of PLSR components ***"
     ## [1] "*** Running PLS permutation test ***"
 
 ![](kit_sla_plsr_example_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->

@@ -16,8 +16,7 @@ nitrogen content (Narea, g/m2)
 ### Load libraries
 
 ``` r
-list.of.packages <- c("pls","dplyr","reshape2","here","plotrix","ggplot2","gridExtra",
-                      "spectratrait")
+list.of.packages <- c("pls","dplyr","here","plotrix","ggplot2","gridExtra","spectratrait")
 invisible(lapply(list.of.packages, library, character.only = TRUE))
 ```
 
@@ -103,7 +102,7 @@ inVar <- "N_g_m2"
 
 ### Set working directory (scratch space)
 
-    ## [1] "/private/var/folders/xp/h3k9vf3n2jx181ts786_yjrn9c2gjq/T/RtmpTADBVi"
+    ## [1] "/private/var/folders/xp/h3k9vf3n2jx181ts786_yjrn9c2gjq/T/RtmpDzC9vA"
 
 ### Full PLSR dataset
 
@@ -139,19 +138,19 @@ split_data <- spectratrait::create_data_split(dataset=plsr_data, approach=method
 
     ## HEAN3   Cal: 70%
 
-    ## CUSA4   Cal: 68.1818181818182%
+    ## CUSA4   Cal: 68.182%
 
-    ## CUPE   Cal: 70.5882352941177%
+    ## CUPE   Cal: 70.588%
 
     ## SOLYL   Cal: 70%
 
-    ## OCBA   Cal: 68.4210526315789%
+    ## OCBA   Cal: 68.421%
 
-    ## POPUL   Cal: 71.4285714285714%
+    ## POPUL   Cal: 71.429%
 
-    ## GLMA4   Cal: 70.5882352941177%
+    ## GLMA4   Cal: 70.588%
 
-    ## PHVU   Cal: 66.6666666666667%
+    ## PHVU   Cal: 66.667%
 
 ``` r
 names(split_data)
@@ -324,19 +323,21 @@ maxComps <- 16
 iterations <- 80
 prop <- 0.70
 if (method=="pls") {
-  # pls package approach - faster but estimates more components....
-  nComps <- spectratrait::find_optimal_components(dataset=cal.plsr.data, method=method, 
+  nComps <- spectratrait::find_optimal_components(dataset=cal.plsr.data, targetVariable=inVar,
+                                                  method=method, 
                                                   maxComps=maxComps, seg=seg, 
                                                   random_seed=random_seed)
   print(paste0("*** Optimal number of components: ", nComps))
 } else {
-  nComps <- spectratrait::find_optimal_components(dataset=cal.plsr.data, method=method,
+  nComps <- spectratrait::find_optimal_components(dataset=cal.plsr.data, targetVariable=inVar,
+                                                  method=method,
                                                   maxComps=maxComps, iterations=iterations, 
                                                   seg=seg, prop=prop, 
                                                   random_seed=random_seed)
 }
 ```
 
+    ## [1] "*** Identifying optimal number of PLSR components ***"
     ## [1] "*** Running PLS permutation test ***"
 
 ![](ely_leafN_bootstrap_plsr_example_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
@@ -439,13 +440,13 @@ head(cal.plsr.output)
     ## 6         CUSA4  garden cucumber     7.43  8.06035   114.36    18.40 1.117704
     ## 7          CUPE    field pumpkin     7.20 11.43007   128.42    25.83 1.215333
     ## 10        SOLYL    garden tomato     7.89 11.61918   142.23    27.40 1.304110
-    ##    CalVal PLSR_Predicted PLSR_CV_Predicted PLSR_CV_Residuals
-    ## 1     Cal       1.820666          1.702501       -0.40119317
-    ## 2     Cal       1.609632          1.711772        0.48005882
-    ## 4     Cal       1.364985          1.275526       -0.01243687
-    ## 6     Cal       1.126062          1.060119       -0.05758587
-    ## 7     Cal       1.227538          1.226708        0.01137583
-    ## 10    Cal       1.358638          1.365181        0.06107105
+    ##    PLSR_Predicted PLSR_CV_Predicted PLSR_CV_Residuals
+    ## 1        1.820666          1.702501       -0.40119317
+    ## 2        1.609632          1.711772        0.48005882
+    ## 4        1.364985          1.275526       -0.01243687
+    ## 6        1.126062          1.060119       -0.05758587
+    ## 7        1.227538          1.226708        0.01137583
+    ## 10       1.358638          1.365181        0.06107105
 
 ``` r
 cal.R2 <- round(pls::R2(plsr.out,intercept=F)[[1]][nComps],2)
@@ -467,13 +468,13 @@ head(val.plsr.output)
     ## 9          CUPE    field pumpkin     7.64 17.100448   142.85    43.39 1.1390174
     ## 13        SOLYL    garden tomato     7.73  7.938866   129.95    17.96 0.9483533
     ## 15         OCBA      sweet basil     8.13 16.975969   173.30    38.65 1.1246459
-    ##    CalVal PLSR_Predicted PLSR_Residuals
-    ## 3     Val      1.7125176   -0.052233917
-    ## 5     Val      1.4618447    0.050483171
-    ## 8     Val      1.0951891   -0.051652168
-    ## 9     Val      1.2152379    0.076220509
-    ## 13    Val      0.7992342   -0.149119020
-    ## 15    Val      1.1267054    0.002059572
+    ##    PLSR_Predicted PLSR_Residuals
+    ## 3       1.7125176   -0.052233917
+    ## 5       1.4618447    0.050483171
+    ## 8       1.0951891   -0.051652168
+    ## 9       1.2152379    0.076220509
+    ## 13      0.7992342   -0.149119020
+    ## 15      1.1267054    0.002059572
 
 ``` r
 val.R2 <- round(pls::R2(plsr.out,newdata=val.plsr.data,intercept=F)[[1]][nComps],2)
@@ -593,7 +594,8 @@ if(grepl("Windows", sessionInfo()$running)){
 ### PLSR bootstrap permutation uncertainty analysis
 iterations <- 500    # how many permutation iterations to run
 prop <- 0.70          # fraction of training data to keep for each iteration
-plsr_permutation <- spectratrait::pls_permutation(dataset=cal.plsr.data, maxComps=nComps, 
+plsr_permutation <- spectratrait::pls_permutation(dataset=cal.plsr.data, targetVariable=inVar,
+                                                  maxComps=nComps, 
                                                   iterations=iterations, prop=prop,
                                                   verbose = FALSE)
 ```
@@ -633,13 +635,13 @@ head(val.plsr.output)
     ## 9          CUPE    field pumpkin     7.64 17.100448   142.85    43.39 1.1390174
     ## 13        SOLYL    garden tomato     7.73  7.938866   129.95    17.96 0.9483533
     ## 15         OCBA      sweet basil     8.13 16.975969   173.30    38.65 1.1246459
-    ##    CalVal PLSR_Predicted PLSR_Residuals       LCI       UCI       LPI      UPI
-    ## 3     Val      1.7125176   -0.052233917 1.5070086 1.8760564 1.2810247 2.144011
-    ## 5     Val      1.4618447    0.050483171 1.2909822 1.5475356 1.0541359 1.869553
-    ## 8     Val      1.0951891   -0.051652168 0.9595488 1.2335912 0.6846083 1.505770
-    ## 9     Val      1.2152379    0.076220509 1.0746965 1.3367675 0.8068229 1.623653
-    ## 13    Val      0.7992342   -0.149119020 0.6820207 0.9451323 0.3899050 1.208563
-    ## 15    Val      1.1267054    0.002059572 1.0316572 1.2737521 0.7209233 1.532488
+    ##    PLSR_Predicted PLSR_Residuals       LCI       UCI       LPI      UPI
+    ## 3       1.7125176   -0.052233917 1.5070086 1.8760564 1.2810247 2.144011
+    ## 5       1.4618447    0.050483171 1.2909822 1.5475356 1.0541359 1.869553
+    ## 8       1.0951891   -0.051652168 0.9595488 1.2335912 0.6846083 1.505770
+    ## 9       1.2152379    0.076220509 1.0746965 1.3367675 0.8068229 1.623653
+    ## 13      0.7992342   -0.149119020 0.6820207 0.9451323 0.3899050 1.208563
+    ## 15      1.1267054    0.002059572 1.0316572 1.2737521 0.7209233 1.532488
 
 ### Jackknife coefficient plot
 
@@ -752,7 +754,7 @@ write.csv(out.jk.coefs,file=file.path(outdir,paste0(inVar,
 print(paste("Output directory: ", outdir))
 ```
 
-    ## [1] "Output directory:  /var/folders/xp/h3k9vf3n2jx181ts786_yjrn9c2gjq/T//RtmpTADBVi"
+    ## [1] "Output directory:  /var/folders/xp/h3k9vf3n2jx181ts786_yjrn9c2gjq/T//RtmpDzC9vA"
 
 ``` r
 # Observed versus predicted
