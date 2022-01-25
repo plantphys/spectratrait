@@ -10,6 +10,8 @@
 ##' names(dat_raw)[1:40]
 ##' }
 ##' 
+##' @importFrom readr read_csv
+##' 
 ##' @return EcoSIS spectral dataset object
 ##' 
 ##' @author Shawn P. Serbin, Alexey Shiklomanov

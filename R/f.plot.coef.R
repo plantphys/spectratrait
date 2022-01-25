@@ -7,6 +7,9 @@
 ##' @param type Name of the y axis and of the legend
 ##' @param plot_label optional plot label to include with the figure
 ##' 
+##' @importFrom stats quantile
+##' @importFrom graphics polygon lines legend box
+##' 
 ##' @author Julien Lamour
 ##' @export
 f.plot.coef <- function(

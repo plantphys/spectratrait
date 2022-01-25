@@ -4,6 +4,8 @@
 ##' See Serbin et al. (2019). DOI: https://doi.org/10.1111/nph.16123
 ##'
 ##' @param dataset input full PLSR dataset. Usually just the calibration dataset
+##' @param targetVariable What object or variable to use as the Y (predictand) in the PLSR model? 
+##' Usually the "inVar" variable set at the beginning of a PLS script
 ##' @param maxComps maximum number of components to use for each PLSR fit
 ##' @param iterations how many different permutations to run
 ##' @param prop proportion of data to preserve for each permutation
@@ -17,8 +19,9 @@
 ##' 
 ##' @author Julien Lamour, Shawn P. Serbin
 ##' @export
-pls_permutation <- function(dataset=NULL, maxComps=20, iterations=20, prop=0.70,
-                            verbose=FALSE) {
+pls_permutation <- function(dataset=NULL, targetVariable=NULL, maxComps=20, iterations=20, 
+                            prop=0.70, verbose=FALSE) {
+  inVar <- targetVariable
   coefs <- array(0,dim=c((ncol(dataset$Spectra)+1),iterations,maxComps))
   press.out <- array(data=NA, dim=c(iterations,maxComps))
   print("*** Running permutation test.  Please hang tight, this can take awhile ***")
@@ -27,7 +30,7 @@ pls_permutation <- function(dataset=NULL, maxComps=20, iterations=20, prop=0.70,
               "Data Proportion (percent):", prop*100, sep=" "))
   
   if (verbose) {
-    j <- 1 # <--- Numeric counter for progress bar
+    j <- 1
     pb <- txtProgressBar(min = 0, max = iterations, 
                          char="*",width=70,style = 3)
   }
@@ -67,6 +70,8 @@ pls_permutation <- function(dataset=NULL, maxComps=20, iterations=20, prop=0.70,
 ##' determine the optimal number of components or conduct a boostrap uncertainty analysis
 ##' 
 ##' @param dataset input full PLSR dataset. Usually just the calibration dataset
+##' @param targetVariable What object or variable to use as the Y (predictand) in the PLSR model? 
+##' Usually the "inVar" variable set at the beginning of a PLS script
 ##' @param maxComps maximum number of components to use for each PLSR fit
 ##' @param iterations how many different permutations to run
 ##' @param prop proportion of data to preserve for each permutation
@@ -86,16 +91,16 @@ pls_permutation <- function(dataset=NULL, maxComps=20, iterations=20, prop=0.70,
 ##' @author asierrl, Shawn P. Serbin, Julien Lamour
 ##' @export
 ##' 
-pls_permutation_by_groups <- function (dataset = NULL, maxComps = 20, iterations = 20, prop = 0.7, 
-                                  verbose = FALSE, group_variables=NULL) {
-  coefs <- array(0, dim = c((ncol(dataset$Spectra) + 1), iterations, 
-                            maxComps))
+pls_permutation_by_groups <- function (dataset = NULL, targetVariable=NULL, maxComps = 20, 
+                                       iterations = 20, prop = 0.7, verbose = FALSE, 
+                                       group_variables=NULL) {
+  inVar <- targetVariable
+  coefs <- array(0, dim = c((ncol(dataset$Spectra) + 1), iterations, maxComps))
   press.out <- array(data = NA, dim = c(iterations, maxComps))
   print("*** Running permutation test.  Please hang tight, this can take awhile ***")
   print("Options:")
-  print(paste("Max Components:", maxComps, "Iterations:", 
-              iterations, "Data Proportion (percent):", prop * 
-                100, sep = " "))
+  print(paste("Max Components:", maxComps, "Iterations:", iterations, 
+              "Data Proportion (percent):", prop * 100, sep = " "))
   if (verbose) {
     j <- 1
     pb <- utils::txtProgressBar(min = 0, max = iterations, 

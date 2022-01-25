@@ -1,5 +1,4 @@
 library(testthat)
-library(dplyr)
 library(spectratrait)
 
-test_check("spectratrait")
+testthat::test_check("spectratrait")

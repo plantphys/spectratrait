@@ -7,6 +7,7 @@ determine the optimal number of components or conduct a boostrap uncertainty ana
 \usage{
 pls_permutation_by_groups(
   dataset = NULL,
+  targetVariable = NULL,
   maxComps = 20,
   iterations = 20,
   prop = 0.7,
@@ -16,6 +17,9 @@ pls_permutation_by_groups(
 }
 \arguments{
 \item{dataset}{input full PLSR dataset. Usually just the calibration dataset}
+
+\item{targetVariable}{What object or variable to use as the Y (predictand) in the PLSR model?
+Usually the "inVar" variable set at the beginning of a PLS script}
 
 \item{maxComps}{maximum number of components to use for each PLSR fit}
 

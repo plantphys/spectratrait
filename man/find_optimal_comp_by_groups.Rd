@@ -7,6 +7,7 @@ by group (i.e. optimal selection by stratification)}
 \usage{
 find_optimal_comp_by_groups(
   dataset = NULL,
+  targetVariable = NULL,
   method = "firstPlateau",
   maxComps = 20,
   iterations = 20,
@@ -17,6 +18,9 @@ find_optimal_comp_by_groups(
 }
 \arguments{
 \item{dataset}{input full PLSR dataset. Usually just the calibration dataset}
+
+\item{targetVariable}{What object or variable to use as the Y (predictand) in the PLSR model?
+Usually the "inVar" variable set at the beginning of a PLS script}
 
 \item{method}{Which approach to use to find optimal components. Options: firstPlateau, firstMin}
 

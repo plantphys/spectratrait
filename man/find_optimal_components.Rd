@@ -6,6 +6,7 @@
 \usage{
 find_optimal_components(
   dataset = NULL,
+  targetVariable = NULL,
   method = "pls",
   maxComps = 20,
   iterations = 20,
@@ -16,6 +17,9 @@ find_optimal_components(
 }
 \arguments{
 \item{dataset}{input full PLSR dataset. Usually just the calibration dataset}
+
+\item{targetVariable}{What object or variable to use as the Y (predictand) in the PLSR model?
+Usually the "inVar" variable set at the beginning of a PLS script}
 
 \item{method}{Which approach to use to find optimal components. Options: pls, firstPlateau, firstMin}
 

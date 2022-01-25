@@ -20,8 +20,7 @@
 
 #--------------------------------------------------------------------------------------------------#
 ### Load libraries
-list.of.packages <- c("pls","dplyr","reshape2","here","plotrix","ggplot2","gridExtra",
-                      "spectratrait")
+list.of.packages <- c("here","dplyr","plotrix","ggplot2","gridExtra","spectratrait")
 invisible(lapply(list.of.packages, library, character.only = TRUE))
 #--------------------------------------------------------------------------------------------------#
 
