@@ -186,12 +186,14 @@ maxComps <- 20
 iterations <- 40
 prop <- 0.70
 if (method=="pls") {
-  nComps <- spectratrait::find_optimal_components(dataset=cal.plsr.data, method=method, 
+  nComps <- spectratrait::find_optimal_components(dataset=cal.plsr.data, targetVariable=inVar,
+                                                  method=method, 
                                                   maxComps=maxComps, seg=seg, 
                                                   random_seed=random_seed)
   print(paste0("*** Optimal number of components: ", nComps))
 } else {
-  nComps <- spectratrait::find_optimal_components(dataset=cal.plsr.data, method=method, 
+  nComps <- spectratrait::find_optimal_components(dataset=cal.plsr.data, targetVariable=inVar,
+                                                  method=method, 
                                                   maxComps=maxComps, iterations=iterations, 
                                                   seg=seg, prop=prop, random_seed=random_seed)
 }

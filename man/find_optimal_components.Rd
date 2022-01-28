@@ -2,10 +2,11 @@
 % Please edit documentation in R/find_optimal_components.R
 \name{find_optimal_components}
 \alias{find_optimal_components}
-\title{Apply different methods to determing the optimal number of PLSR model components}
+\title{Applies different methods for the determination of the optimal number of PLSR model components}
 \usage{
 find_optimal_components(
   dataset = NULL,
+  targetVariable = NULL,
   method = "pls",
   maxComps = 20,
   iterations = 20,
@@ -16,6 +17,9 @@ find_optimal_components(
 }
 \arguments{
 \item{dataset}{input full PLSR dataset. Usually just the calibration dataset}
+
+\item{targetVariable}{What object or variable to use as the Y (predictand) in the PLSR model?
+Usually the "inVar" variable set at the beginning of a PLS script}
 
 \item{method}{Which approach to use to find optimal components. Options: pls, firstPlateau, firstMin}
 
@@ -33,7 +37,7 @@ find_optimal_components(
 nComps the optimal number of PLSR components
 }
 \description{
-Apply different methods to determing the optimal number of PLSR model components
+Applies different methods for the determination of the optimal number of PLSR model components
 }
 \author{
 Julien Lamour, Jeremiah Anderson, Shawn P. Serbin

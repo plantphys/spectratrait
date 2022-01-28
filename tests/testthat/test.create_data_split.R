@@ -1,4 +1,4 @@
-context("Test that the create data split function has the expected behavior")
+context("*** Test that the create data split function has the expected behavior *** ")
 
 test_that("Generating a data split using the dplyr approach doesn't throw an error or generate duplicates between cal. and val. data", {
   plot<- rep(c("plot1", "plot2", "plot3"),each=42)

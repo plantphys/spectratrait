@@ -15,8 +15,7 @@ leaf-mass area (LMA)
 ### Load libraries
 
 ``` r
-list.of.packages <- c("pls","dplyr","reshape2","here","plotrix","ggplot2","gridExtra",
-                      "spectratrait")
+list.of.packages <- c("pls","dplyr","here","plotrix","ggplot2","gridExtra","spectratrait")
 invisible(lapply(list.of.packages, library, character.only = TRUE))
 ```
 
@@ -81,7 +80,7 @@ output_dir <- "tempdir"
 
 ### Set working directory (scratch space)
 
-    ## [1] "/private/var/folders/xp/h3k9vf3n2jx181ts786_yjrn9c2gjq/T/RtmpRBdgMm"
+    ## [1] "/private/var/folders/xp/h3k9vf3n2jx181ts786_yjrn9c2gjq/T/Rtmp1VUVAg"
 
 ### Grab data from EcoSIS
 
@@ -125,7 +124,7 @@ dat_raw <- spectratrait::get_ecosis_data(ecosis_id = ecosis_id)
 head(dat_raw)
 ```
 
-    ## # A tibble: 6 x 2,162
+    ## # A tibble: 6 × 2,162
     ##   Affiliation           `Common Name` Domain Functional_type   LMA `Latin Genus`
     ##   <chr>                 <chr>         <chr>  <chr>           <dbl> <chr>        
     ## 1 University of Wiscon… black walnut  D02    broadleaf        72.9 Juglans      
@@ -140,18 +139,7 @@ head(dat_raw)
     ## #   359 <dbl>, 360 <dbl>, 361 <dbl>, 362 <dbl>, 363 <dbl>, 364 <dbl>,
     ## #   365 <dbl>, 366 <dbl>, 367 <dbl>, 368 <dbl>, 369 <dbl>, 370 <dbl>,
     ## #   371 <dbl>, 372 <dbl>, 373 <dbl>, 374 <dbl>, 375 <dbl>, 376 <dbl>,
-    ## #   377 <dbl>, 378 <dbl>, 379 <dbl>, 380 <dbl>, 381 <dbl>, 382 <dbl>,
-    ## #   383 <dbl>, 384 <dbl>, 385 <dbl>, 386 <dbl>, 387 <dbl>, 388 <dbl>,
-    ## #   389 <dbl>, 390 <dbl>, 391 <dbl>, 392 <dbl>, 393 <dbl>, 394 <dbl>,
-    ## #   395 <dbl>, 396 <dbl>, 397 <dbl>, 398 <dbl>, 399 <dbl>, 400 <dbl>,
-    ## #   401 <dbl>, 402 <dbl>, 403 <dbl>, 404 <dbl>, 405 <dbl>, 406 <dbl>,
-    ## #   407 <dbl>, 408 <dbl>, 409 <dbl>, 410 <dbl>, 411 <dbl>, 412 <dbl>,
-    ## #   413 <dbl>, 414 <dbl>, 415 <dbl>, 416 <dbl>, 417 <dbl>, 418 <dbl>,
-    ## #   419 <dbl>, 420 <dbl>, 421 <dbl>, 422 <dbl>, 423 <dbl>, 424 <dbl>,
-    ## #   425 <dbl>, 426 <dbl>, 427 <dbl>, 428 <dbl>, 429 <dbl>, 430 <dbl>,
-    ## #   431 <dbl>, 432 <dbl>, 433 <dbl>, 434 <dbl>, 435 <dbl>, 436 <dbl>,
-    ## #   437 <dbl>, 438 <dbl>, 439 <dbl>, 440 <dbl>, 441 <dbl>, 442 <dbl>,
-    ## #   443 <dbl>, 444 <dbl>, …
+    ## #   377 <dbl>, 378 <dbl>, 379 <dbl>, 380 <dbl>, 381 <dbl>, 382 <dbl>, …
 
 ``` r
 names(dat_raw)[1:40]
@@ -181,7 +169,7 @@ sample_info <- dat_raw[,names(dat_raw) %notin% seq(350,2500,1)]
 head(sample_info)
 ```
 
-    ## # A tibble: 6 x 11
+    ## # A tibble: 6 × 11
     ##   Affiliation           `Common Name` Domain Functional_type   LMA `Latin Genus`
     ##   <chr>                 <chr>         <chr>  <chr>           <dbl> <chr>        
     ## 1 University of Wiscon… black walnut  D02    broadleaf        72.9 Juglans      
@@ -199,7 +187,7 @@ sample_info2 <- sample_info %>%
 head(sample_info2)
 ```
 
-    ## # A tibble: 6 x 5
+    ## # A tibble: 6 × 5
     ##   Domain Functional_type Sample_ID USDA_Species_Code LMA_gDW_m2
     ##   <chr>  <chr>           <chr>     <chr>                  <dbl>
     ## 1 D02    broadleaf       P0001     JUNI                    72.9
@@ -255,20 +243,20 @@ val.plsr.data <- split_data$val_data
 head(val.plsr.data)[1:8]
 ```
 
-    ##      Domain Functional_type Sample_ID USDA_Species_Code LMA_gDW_m2 Wave_500
-    ## 4923    D08       broadleaf     P2462              <NA>      21.10 0.044964
-    ## 4924    D08       broadleaf     L2462              SANI     100.72 0.068921
-    ## 4925    D08       broadleaf     P2463              <NA>      29.59 0.036254
-    ## 4926    D08       broadleaf     L2463              SANI      96.48 0.051810
-    ## 4927    D08       broadleaf     P2464              <NA>      31.08 0.056587
-    ## 4928    D08       broadleaf     L2464              SANI      61.40 0.037310
-    ##      Wave_501 Wave_502
-    ## 4923 0.045854 0.046911
-    ## 4924 0.069633 0.070254
-    ## 4925 0.036999 0.037671
-    ## 4926 0.052113 0.052896
-    ## 4927 0.057006 0.057734
-    ## 4928 0.037223 0.037671
+    ##    Domain Functional_type Sample_ID USDA_Species_Code LMA_gDW_m2 Wave_500
+    ## 3     D02       broadleaf     P0002              JUNI      60.77 0.043758
+    ## 12    D02       broadleaf     L0006              JUNI      42.54 0.044338
+    ## 13    D02       broadleaf     P0007              QUVE     106.57 0.015643
+    ## 19    D02       broadleaf     P0010              PRSE      78.82 0.033019
+    ## 21    D02       broadleaf     P0011              PRSE      86.09 0.024819
+    ## 28    D02       broadleaf     L0014              PRSE      67.11 0.040095
+    ##    Wave_501 Wave_502
+    ## 3  0.044171 0.044869
+    ## 12 0.044748 0.045294
+    ## 13 0.015579 0.015431
+    ## 19 0.033102 0.033245
+    ## 21 0.024826 0.025045
+    ## 28 0.040397 0.040864
 
 ``` r
 rm(split_data)
@@ -338,13 +326,13 @@ val.plsr.data <- data.frame(val.plsr.data[, which(names(val.plsr.data) %notin% p
 head(val.plsr.data)[1:5]
 ```
 
-    ##      Domain Functional_type Sample_ID USDA_Species_Code LMA_gDW_m2
-    ## 4923    D08       broadleaf     P2462              <NA>      21.10
-    ## 4924    D08       broadleaf     L2462              SANI     100.72
-    ## 4925    D08       broadleaf     P2463              <NA>      29.59
-    ## 4926    D08       broadleaf     L2463              SANI      96.48
-    ## 4927    D08       broadleaf     P2464              <NA>      31.08
-    ## 4928    D08       broadleaf     L2464              SANI      61.40
+    ##    Domain Functional_type Sample_ID USDA_Species_Code LMA_gDW_m2
+    ## 3     D02       broadleaf     P0002              JUNI      60.77
+    ## 12    D02       broadleaf     L0006              JUNI      42.54
+    ## 13    D02       broadleaf     P0007              QUVE     106.57
+    ## 19    D02       broadleaf     P0010              PRSE      78.82
+    ## 21    D02       broadleaf     P0011              PRSE      86.09
+    ## 28    D02       broadleaf     L0014              PRSE      67.11
 
 ### plot cal and val spectra
 
@@ -392,18 +380,21 @@ maxComps <- 20
 iterations <- 40
 prop <- 0.70
 if (method=="pls") {
-  nComps <- spectratrait::find_optimal_components(dataset=cal.plsr.data, method=method, 
+  nComps <- spectratrait::find_optimal_components(dataset=cal.plsr.data, targetVariable=inVar, 
+                                                  method=method, 
                                                   maxComps=maxComps, seg=seg, 
                                                   random_seed=random_seed)
   print(paste0("*** Optimal number of components: ", nComps))
 } else {
-  nComps <- spectratrait::find_optimal_components(dataset=cal.plsr.data, method=method, 
+  nComps <- spectratrait::find_optimal_components(dataset=cal.plsr.data, targetVariable=inVar, 
+                                                  method=method, 
                                                   maxComps=maxComps, iterations=iterations, 
                                                   seg=seg, prop=prop, 
                                                   random_seed=random_seed)
 }
 ```
 
+    ## [1] "*** Identifying optimal number of PLSR components ***"
     ## [1] "*** Running permutation test.  Please hang tight, this can take awhile ***"
     ## [1] "Options:"
     ## [1] "Max Components: 20 Iterations: 40 Data Proportion (percent): 70"
@@ -448,11 +439,11 @@ pls::RMSEP(plsr.out, newdata = val.plsr.data)
 ```
 
     ## (Intercept)      1 comps      2 comps      3 comps      4 comps      5 comps  
-    ##      27.155       17.610       16.595       15.483       13.235       12.374  
+    ##      29.372       18.664       18.166       16.187       12.760       12.149  
     ##     6 comps      7 comps      8 comps      9 comps     10 comps     11 comps  
-    ##      11.499       10.722       10.269        9.647        9.197        9.319  
+    ##      12.004       11.465       11.144       10.389       10.063        9.732  
     ##    12 comps  
-    ##       9.515
+    ##       9.633
 
 ``` r
 plot(pls::RMSEP(plsr.out,estimate=c("test"),newdata = val.plsr.data), 
@@ -465,11 +456,11 @@ pls::R2(plsr.out, newdata = val.plsr.data)
 ```
 
     ## (Intercept)      1 comps      2 comps      3 comps      4 comps      5 comps  
-    ##   -0.006901     0.576543     0.623949     0.672643     0.760799     0.790906  
+    ##   -0.001908     0.595475     0.616770     0.695732     0.810908     0.828593  
     ##     6 comps      7 comps      8 comps      9 comps     10 comps     11 comps  
-    ##    0.819456     0.843031     0.856001     0.872913     0.884511     0.881406  
+    ##    0.832656     0.847338     0.855775     0.874647     0.882410     0.890000  
     ##    12 comps  
-    ##    0.876368
+    ##    0.892247
 
 ``` r
 plot(pls::R2(plsr.out,estimate=c("test"),newdata = val.plsr.data), main="MODEL R2",
@@ -524,20 +515,20 @@ val.plsr.output <- val.plsr.output %>%
 head(val.plsr.output)
 ```
 
-    ##      Domain Functional_type Sample_ID USDA_Species_Code LMA_gDW_m2
-    ## 4923    D08       broadleaf     P2462              <NA>      21.10
-    ## 4924    D08       broadleaf     L2462              SANI     100.72
-    ## 4925    D08       broadleaf     P2463              <NA>      29.59
-    ## 4926    D08       broadleaf     L2463              SANI      96.48
-    ## 4927    D08       broadleaf     P2464              <NA>      31.08
-    ## 4928    D08       broadleaf     L2464              SANI      61.40
-    ##      PLSR_Predicted PLSR_Residuals
-    ## 4923       21.14155     0.04155041
-    ## 4924       89.65467   -11.06533484
-    ## 4925       27.94765    -1.64234512
-    ## 4926       92.46121    -4.01879017
-    ## 4927       40.73367     9.65367301
-    ## 4928       65.94687     4.54686556
+    ##    Domain Functional_type Sample_ID USDA_Species_Code LMA_gDW_m2 PLSR_Predicted
+    ## 3     D02       broadleaf     P0002              JUNI      60.77       63.90905
+    ## 12    D02       broadleaf     L0006              JUNI      42.54       41.54133
+    ## 13    D02       broadleaf     P0007              QUVE     106.57       99.99662
+    ## 19    D02       broadleaf     P0010              PRSE      78.82       89.03078
+    ## 21    D02       broadleaf     P0011              PRSE      86.09       85.17273
+    ## 28    D02       broadleaf     L0014              PRSE      67.11       67.95549
+    ##    PLSR_Residuals
+    ## 3       3.1390459
+    ## 12     -0.9986720
+    ## 13     -6.5733831
+    ## 19     10.2107788
+    ## 21     -0.9172668
+    ## 28      0.8454930
 
 ``` r
 val.R2 <- round(pls::R2(plsr.out,newdata=val.plsr.data,intercept=F)[[1]][nComps],2)
@@ -611,7 +602,7 @@ scatterplots <- grid.arrange(cal_scatter_plot, val_scatter_plot, cal_resid_histo
 
     ## Warning: Removed 21 rows containing missing values (geom_point).
 
-    ## Warning: Removed 5 rows containing missing values (geom_point).
+    ## Warning: Removed 8 rows containing missing values (geom_point).
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
@@ -699,20 +690,20 @@ val.plsr.output$UPI <- val.plsr.output$PLSR_Predicted+1.96*sd_tot
 head(val.plsr.output)
 ```
 
-    ##      Domain Functional_type Sample_ID USDA_Species_Code LMA_gDW_m2
-    ## 4923    D08       broadleaf     P2462              <NA>      21.10
-    ## 4924    D08       broadleaf     L2462              SANI     100.72
-    ## 4925    D08       broadleaf     P2463              <NA>      29.59
-    ## 4926    D08       broadleaf     L2463              SANI      96.48
-    ## 4927    D08       broadleaf     P2464              <NA>      31.08
-    ## 4928    D08       broadleaf     L2464              SANI      61.40
-    ##      PLSR_Predicted PLSR_Residuals      LCI      UCI       LPI       UPI
-    ## 4923       21.14155     0.04155041 20.94847 21.30604  2.789108  39.49399
-    ## 4924       89.65467   -11.06533484 89.45021 89.97246 71.301221 108.00811
-    ## 4925       27.94765    -1.64234512 27.73172 28.16789  9.594597  46.30071
-    ## 4926       92.46121    -4.01879017 92.26489 92.73225 74.107998 110.81442
-    ## 4927       40.73367     9.65367301 40.50065 40.92588 22.380204  59.08714
-    ## 4928       65.94687     4.54686556 65.77618 66.17712 47.594178  84.29955
+    ##    Domain Functional_type Sample_ID USDA_Species_Code LMA_gDW_m2 PLSR_Predicted
+    ## 3     D02       broadleaf     P0002              JUNI      60.77       63.90905
+    ## 12    D02       broadleaf     L0006              JUNI      42.54       41.54133
+    ## 13    D02       broadleaf     P0007              QUVE     106.57       99.99662
+    ## 19    D02       broadleaf     P0010              PRSE      78.82       89.03078
+    ## 21    D02       broadleaf     P0011              PRSE      86.09       85.17273
+    ## 28    D02       broadleaf     L0014              PRSE      67.11       67.95549
+    ##    PLSR_Residuals      LCI       UCI      LPI       UPI
+    ## 3       3.1390459 63.75673  64.12043 45.02836  82.78973
+    ## 12     -0.9986720 41.42248  41.69728 22.66069  60.42196
+    ## 13     -6.5733831 99.88029 100.11962 81.11612 118.87712
+    ## 19     10.2107788 88.83274  89.21623 70.14949 107.91207
+    ## 21     -0.9172668 85.02330  85.32067 66.29194 104.05353
+    ## 28      0.8454930 67.82558  68.15298 49.07457  86.83642
 
 ### Jackknife coefficient plot
 

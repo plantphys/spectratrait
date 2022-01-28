@@ -17,8 +17,7 @@ For more information refer to the dataset EcoSIS page:
 ### Load libraries
 
 ``` r
-list.of.packages <- c("pls","dplyr","reshape2","here","plotrix","ggplot2","gridExtra",
-                      "spectratrait")
+list.of.packages <- c("pls","dplyr","here","plotrix","ggplot2","gridExtra","spectratrait")
 invisible(lapply(list.of.packages, library, character.only = TRUE))
 ```
 
@@ -83,7 +82,7 @@ output_dir <- "tempdir"
 
 ### Set working directory (scratch space)
 
-    ## [1] "/private/var/folders/xp/h3k9vf3n2jx181ts786_yjrn9c2gjq/T/RtmpvNSAkI"
+    ## [1] "/private/var/folders/xp/h3k9vf3n2jx181ts786_yjrn9c2gjq/T/RtmpeLrBIP"
 
 ### Grab data from EcoSIS
 
@@ -118,7 +117,7 @@ dat_raw <- spectratrait::get_ecosis_data(ecosis_id = ecosis_id)
 head(dat_raw)
 ```
 
-    ## # A tibble: 6 x 459
+    ## # A tibble: 6 × 459
     ##   Affiliation   Boron Calcium Carbon Carotenoids_area Carotenoids_mass Cellulose
     ##   <chr>         <dbl>   <dbl>  <dbl>            <dbl>            <dbl>     <dbl>
     ## 1 University … 0.0420   24.2    463.             9.19             1.18      221.
@@ -133,19 +132,7 @@ head(dat_raw)
     ## #   PI <chr>, Phenolics <dbl>, Phosphorus <dbl>, Plot_ID <chr>,
     ## #   Potassium <dbl>, Project <chr>, SLA <dbl>, Sample_Year <dbl>, Starch <dbl>,
     ## #   Sugar <dbl>, Sulfur <dbl>, Water <dbl>, d13C <dbl>, d15N <dbl>, 384 <dbl>,
-    ## #   389 <dbl>, 394 <dbl>, 399 <dbl>, 404 <dbl>, 409 <dbl>, 414 <dbl>,
-    ## #   419 <dbl>, 424 <dbl>, 429 <dbl>, 434 <dbl>, 439 <dbl>, 444 <dbl>,
-    ## #   449 <dbl>, 454 <dbl>, 459 <dbl>, 464 <dbl>, 469 <dbl>, 474 <dbl>,
-    ## #   479 <dbl>, 484 <dbl>, 489 <dbl>, 494 <dbl>, 499 <dbl>, 504 <dbl>,
-    ## #   509 <dbl>, 514 <dbl>, 519 <dbl>, 524 <dbl>, 529 <dbl>, 534 <dbl>,
-    ## #   539 <dbl>, 544 <dbl>, 549 <dbl>, 554 <dbl>, 559 <dbl>, 564 <dbl>,
-    ## #   569 <dbl>, 574 <dbl>, 579 <dbl>, 584 <dbl>, 589 <dbl>, 594 <dbl>,
-    ## #   599 <dbl>, 604 <dbl>, 609 <dbl>, 614 <dbl>, 619 <dbl>, 624 <dbl>,
-    ## #   629 <dbl>, 634 <dbl>, 639 <dbl>, 644 <dbl>, 649 <dbl>, 654 <dbl>,
-    ## #   659 <dbl>, 664 <dbl>, 669 <dbl>, 674 <dbl>, 679 <dbl>, 684 <dbl>,
-    ## #   689 <dbl>, 694 <dbl>, 699 <dbl>, 704 <dbl>, 709 <dbl>, 714 <dbl>,
-    ## #   719 <dbl>, 724 <dbl>, 729 <dbl>, 734 <dbl>, 739 <dbl>, 744 <dbl>,
-    ## #   749 <dbl>, …
+    ## #   389 <dbl>, 394 <dbl>, 399 <dbl>, 404 <dbl>, 409 <dbl>, 414 <dbl>, …
 
 ``` r
 names(dat_raw)[1:40]
@@ -174,7 +161,7 @@ sample_info <- dat_raw[,names(dat_raw) %notin% seq(300,2600,1)]
 head(sample_info)
 ```
 
-    ## # A tibble: 6 x 33
+    ## # A tibble: 6 × 33
     ##   Affiliation   Boron Calcium Carbon Carotenoids_area Carotenoids_mass Cellulose
     ##   <chr>         <dbl>   <dbl>  <dbl>            <dbl>            <dbl>     <dbl>
     ## 1 University … 0.0420   24.2    463.             9.19             1.18      221.
@@ -258,19 +245,19 @@ split_data <- spectratrait::create_data_split(dataset=plsr_data, approach=method
                                               prop=0.8, group_variables="Plot_Num")
 ```
 
-    ## D02   Cal: 80.4597701149425%
+    ## D02   Cal: 80.46%
 
-    ## D03   Cal: 80.327868852459%
+    ## D03   Cal: 80.328%
 
     ## D05   Cal: 80%
 
-    ## D06   Cal: 79.7297297297297%
+    ## D06   Cal: 79.73%
 
-    ## D07   Cal: 79.2452830188679%
+    ## D07   Cal: 79.245%
 
-    ## D08   Cal: 79.8165137614679%
+    ## D08   Cal: 79.817%
 
-    ## D09   Cal: 79.6296296296296%
+    ## D09   Cal: 79.63%
 
 ``` r
 names(split_data)
@@ -427,18 +414,21 @@ iterations <- 80
 prop <- 0.70
 if (method=="pls") {
   # pls package approach - faster but estimates more components....
-  nComps <- spectratrait::find_optimal_components(dataset=cal.plsr.data, method=method, 
+  nComps <- spectratrait::find_optimal_components(dataset=cal.plsr.data, targetVariable=inVar,
+                                                  method=method, 
                                                   maxComps=maxComps, seg=seg, 
                                                   random_seed=random_seed)
   print(paste0("*** Optimal number of components: ", nComps))
 } else {
-  nComps <- spectratrait::find_optimal_components(dataset=cal.plsr.data, method=method, 
+  nComps <- spectratrait::find_optimal_components(dataset=cal.plsr.data, targetVariable=inVar,
+                                                  method=method, 
                                                   maxComps=maxComps, iterations=iterations, 
                                                   seg=seg, prop=prop, 
                                                   random_seed=random_seed)
 }
 ```
 
+    ## [1] "*** Identifying optimal number of PLSR components ***"
     ## [1] "*** Running PLS permutation test ***"
 
 ![](neon_leafN_canopy_plsr_example_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
@@ -534,20 +524,20 @@ cal.plsr.output <- cal.plsr.output %>%
 head(cal.plsr.output)
 ```
 
-    ##   Plot_Num SampleID  Plot_ID Sample_Year      SLA Nitrogen CalVal
-    ## 2      D02     0002 D02_0002        2017 10.77861 27.70598    Cal
-    ## 3      D02     0003 D02_0003        2017 12.46154 34.63999    Cal
-    ## 5      D02     0005 D02_0005        2017 17.27620 26.64623    Cal
-    ## 6      D02     0006 D02_0006        2017 12.92806 20.69437    Cal
-    ## 7      D02     0007 D02_0007        2017 10.21521 28.87526    Cal
-    ## 8      D02     0008 D02_0008        2017 20.87397 33.63137    Cal
-    ##   PLSR_Predicted PLSR_CV_Predicted PLSR_CV_Residuals
-    ## 2       24.65561          24.59452        -3.1114612
-    ## 3       27.85223          27.64033        -6.9996606
-    ## 5       29.36467          29.54595         2.8997194
-    ## 6       21.66448          21.68116         0.9867955
-    ## 7       23.04393          22.78554        -6.0897138
-    ## 8       25.56637          25.29798        -8.3333884
+    ##   Plot_Num SampleID  Plot_ID Sample_Year      SLA Nitrogen PLSR_Predicted
+    ## 2      D02     0002 D02_0002        2017 10.77861 27.70598       24.65561
+    ## 3      D02     0003 D02_0003        2017 12.46154 34.63999       27.85223
+    ## 5      D02     0005 D02_0005        2017 17.27620 26.64623       29.36467
+    ## 6      D02     0006 D02_0006        2017 12.92806 20.69437       21.66448
+    ## 7      D02     0007 D02_0007        2017 10.21521 28.87526       23.04393
+    ## 8      D02     0008 D02_0008        2017 20.87397 33.63137       25.56637
+    ##   PLSR_CV_Predicted PLSR_CV_Residuals
+    ## 2          24.59452        -3.1114612
+    ## 3          27.64033        -6.9996606
+    ## 5          29.54595         2.8997194
+    ## 6          21.68116         0.9867955
+    ## 7          22.78554        -6.0897138
+    ## 8          25.29798        -8.3333884
 
 ``` r
 cal.R2 <- round(pls::R2(plsr.out,intercept=F)[[1]][nComps],2)
@@ -562,20 +552,20 @@ val.plsr.output <- val.plsr.output %>%
 head(val.plsr.output)
 ```
 
-    ##    Plot_Num SampleID  Plot_ID Sample_Year      SLA Nitrogen CalVal
-    ## 1       D02     0001 D02_0001        2017 13.66366 31.18030    Val
-    ## 4       D02     0004 D02_0004        2017 16.63205 34.54034    Val
-    ## 16      D02     0016 D02_0016        2017 14.44765 22.87740    Val
-    ## 18      D02     0019 D02_0019        2017 14.47103 17.73126    Val
-    ## 19      D02     0020 D02_0020        2017 18.98522 21.32929    Val
-    ## 20      D02     0021 D02_0021        2017 12.12731 29.50256    Val
-    ##    PLSR_Predicted PLSR_Residuals
-    ## 1        22.55166      -8.628643
-    ## 4        30.79494      -3.745399
-    ## 16       29.14446       6.267060
-    ## 18       23.47518       5.743923
-    ## 19       23.00736       1.678070
-    ## 20       31.93483       2.432274
+    ##    Plot_Num SampleID  Plot_ID Sample_Year      SLA Nitrogen PLSR_Predicted
+    ## 1       D02     0001 D02_0001        2017 13.66366 31.18030       22.55166
+    ## 4       D02     0004 D02_0004        2017 16.63205 34.54034       30.79494
+    ## 16      D02     0016 D02_0016        2017 14.44765 22.87740       29.14446
+    ## 18      D02     0019 D02_0019        2017 14.47103 17.73126       23.47518
+    ## 19      D02     0020 D02_0020        2017 18.98522 21.32929       23.00736
+    ## 20      D02     0021 D02_0021        2017 12.12731 29.50256       31.93483
+    ##    PLSR_Residuals
+    ## 1       -8.628643
+    ## 4       -3.745399
+    ## 16       6.267060
+    ## 18       5.743923
+    ## 19       1.678070
+    ## 20       2.432274
 
 ``` r
 val.R2 <- round(pls::R2(plsr.out,newdata=val.plsr.data,intercept=F)[[1]][nComps],2)
@@ -692,20 +682,20 @@ par(opar)
     ## [1] "Max Components: 12 Iterations: 500 Data Proportion (percent): 70"
     ## [1] "*** Providing PRESS and coefficient array output ***"
 
-    ##    Plot_Num SampleID  Plot_ID Sample_Year      SLA Nitrogen CalVal
-    ## 1       D02     0001 D02_0001        2017 13.66366 31.18030    Val
-    ## 4       D02     0004 D02_0004        2017 16.63205 34.54034    Val
-    ## 16      D02     0016 D02_0016        2017 14.44765 22.87740    Val
-    ## 18      D02     0019 D02_0019        2017 14.47103 17.73126    Val
-    ## 19      D02     0020 D02_0020        2017 18.98522 21.32929    Val
-    ## 20      D02     0021 D02_0021        2017 12.12731 29.50256    Val
-    ##    PLSR_Predicted PLSR_Residuals      LCI      UCI      LPI      UPI
-    ## 1        22.55166      -8.628643 21.75139 23.67919 13.44246 31.66086
-    ## 4        30.79494      -3.745399 29.24737 32.37867 21.60577 39.98412
-    ## 16       29.14446       6.267060 27.57462 30.82609 19.93270 38.35621
-    ## 18       23.47518       5.743923 21.73808 24.49326 14.31158 32.63878
-    ## 19       23.00736       1.678070 20.70321 24.57934 13.73687 32.27785
-    ## 20       31.93483       2.432274 30.75996 34.32739 22.69357 41.17610
+    ##    Plot_Num SampleID  Plot_ID Sample_Year      SLA Nitrogen PLSR_Predicted
+    ## 1       D02     0001 D02_0001        2017 13.66366 31.18030       22.55166
+    ## 4       D02     0004 D02_0004        2017 16.63205 34.54034       30.79494
+    ## 16      D02     0016 D02_0016        2017 14.44765 22.87740       29.14446
+    ## 18      D02     0019 D02_0019        2017 14.47103 17.73126       23.47518
+    ## 19      D02     0020 D02_0020        2017 18.98522 21.32929       23.00736
+    ## 20      D02     0021 D02_0021        2017 12.12731 29.50256       31.93483
+    ##    PLSR_Residuals      LCI      UCI      LPI      UPI
+    ## 1       -8.628643 21.75139 23.67919 13.44246 31.66086
+    ## 4       -3.745399 29.24737 32.37867 21.60577 39.98412
+    ## 16       6.267060 27.57462 30.82609 19.93270 38.35621
+    ## 18       5.743923 21.73808 24.49326 14.31158 32.63878
+    ## 19       1.678070 20.70321 24.57934 13.73687 32.27785
+    ## 20       2.432274 30.75996 34.32739 22.69357 41.17610
 
 ### Jackknife coefficient plot
 

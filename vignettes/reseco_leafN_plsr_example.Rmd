@@ -3,10 +3,10 @@ title: Spectra-trait PLSR example using leaf-level spectra and leaf nitrogen con
 author: "Shawn P. Serbin, Julien Lamour, & Jeremiah Anderson"
 output:
   pdf_document: default
-  html_notebook: default
+  github_document: default
   html_document:
     df_print: paged
-  github_document: default
+  html_notebook: default
 params:
   date: !r Sys.Date()
 ---
@@ -21,8 +21,7 @@ This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook to illustrate how
 ### Getting Started
 ### Load libraries
 ```{r, eval=TRUE, echo=TRUE}
-list.of.packages <- c("pls","dplyr","reshape2","here","plotrix","ggplot2","gridExtra",
-                      "spectratrait")
+list.of.packages <- c("pls","dplyr","here","plotrix","ggplot2","gridExtra","spectratrait")
 invisible(lapply(list.of.packages, library, character.only = TRUE))
 ```
 
@@ -187,12 +186,14 @@ iterations <- 80
 prop <- 0.70
 if (method=="pls") {
   # pls package approach - faster but estimates more components....
-  nComps <- spectratrait::find_optimal_components(dataset=cal.plsr.data, method=method, 
+  nComps <- spectratrait::find_optimal_components(dataset=cal.plsr.data, targetVariable=inVar, 
+                                                  method=method, 
                                                   maxComps=maxComps, seg=seg, 
                                                   random_seed=random_seed)
   print(paste0("*** Optimal number of components: ", nComps))
 } else {
-  nComps <- spectratrait::find_optimal_components(dataset=cal.plsr.data, method=method, 
+  nComps <- spectratrait::find_optimal_components(dataset=cal.plsr.data, targetVariable=inVar,
+                                                  method=method, 
                                                   maxComps=maxComps, iterations=iterations, 
                                                   seg=seg, prop=prop, 
                                                   random_seed=random_seed)

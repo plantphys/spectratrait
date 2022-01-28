@@ -5,15 +5,19 @@
 ##' @param split_seed random seed to use for splitting data
 ##' @param prop the proportion of data to preserve for calibration (e.g. 0.8) and validation (0.2). 
 ##' This sets the calibration proportion
-##' @param group_variables Use factor variables to conduct a stratfied sampling for cal/val
+##' @param group_variables Use factor variables to conduct a stratified sampling for cal/val
 ##' 
 ##' @return output_list A list containing the calibration dataset (cal_data)
 ##' and validation dataset (val_data)
+##' 
+##' @importFrom magrittr %>%
+##' @importFrom dplyr mutate group_by_at slice n vars all_of 
 ##' 
 ##' @author Julien Lamour, Jeremiah Anderson, Shawn P. Serbin
 ##' @export
 create_data_split <- function(dataset=NULL, approach=NULL, split_seed=123456789, prop=0.8,
                               group_variables=NULL) {
+  # TODO: import only required functions from dplyr
   set.seed(split_seed)
   
   # outer if/else to stop if approach set to NULL

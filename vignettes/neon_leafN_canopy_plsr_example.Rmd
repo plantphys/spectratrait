@@ -2,11 +2,11 @@
 title: Spectra-trait PLSR example using NEON AOP pixel spectra and field-sampled leaf nitrogen content from CONUS NEON sites
 author: "Shawn P. Serbin, Julien Lamour, & Jeremiah Anderson"
 output:
-  pdf_document: default
+  github_document: default
   html_notebook: default
   html_document:
     df_print: paged
-  github_document: default
+  pdf_document: default
 params:
   date: !r Sys.Date()
 ---
@@ -23,8 +23,7 @@ https://ecosis.org/package/canopy-spectra-to-map-foliar-functional-traits-over-n
 ### Getting Started
 ### Load libraries
 ```{r, eval=TRUE, echo=TRUE}
-list.of.packages <- c("pls","dplyr","reshape2","here","plotrix","ggplot2","gridExtra",
-                      "spectratrait")
+list.of.packages <- c("pls","dplyr","here","plotrix","ggplot2","gridExtra","spectratrait")
 invisible(lapply(list.of.packages, library, character.only = TRUE))
 ```
 
@@ -215,12 +214,14 @@ iterations <- 80
 prop <- 0.70
 if (method=="pls") {
   # pls package approach - faster but estimates more components....
-  nComps <- spectratrait::find_optimal_components(dataset=cal.plsr.data, method=method, 
+  nComps <- spectratrait::find_optimal_components(dataset=cal.plsr.data, targetVariable=inVar,
+                                                  method=method, 
                                                   maxComps=maxComps, seg=seg, 
                                                   random_seed=random_seed)
   print(paste0("*** Optimal number of components: ", nComps))
 } else {
-  nComps <- spectratrait::find_optimal_components(dataset=cal.plsr.data, method=method, 
+  nComps <- spectratrait::find_optimal_components(dataset=cal.plsr.data, targetVariable=inVar,
+                                                  method=method, 
                                                   maxComps=maxComps, iterations=iterations, 
                                                   seg=seg, prop=prop, 
                                                   random_seed=random_seed)
@@ -361,7 +362,8 @@ if(grepl("Windows", sessionInfo()$running)){
 ### PLSR bootstrap permutation uncertainty analysis
 iterations <- 500    # how many permutation iterations to run
 prop <- 0.70          # fraction of training data to keep for each iteration
-plsr_permutation <- spectratrait::pls_permutation(dataset=cal.plsr.data, maxComps=nComps, 
+plsr_permutation <- spectratrait::pls_permutation(dataset=cal.plsr.data, targetVariable=inVar,
+                                                  maxComps=nComps, 
                                                   iterations=iterations, prop=prop,
                                                   verbose = FALSE)
 bootstrap_intercept <- plsr_permutation$coef_array[1,,nComps]

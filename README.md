@@ -19,7 +19,7 @@ https://ecosml.org/package/github/TESTgroup-BNL/spectratrait
 
 ### Depends: 
 ggplot2 (>= 3.3.2), remotes (>= 2.2.0), devtools (>= 2.3.1), readr (>= 1.3.1), RCurl (>= 1.98-1.2), 
-httr (>= 1.4.2), pls (>= 2.7-2), dplyr (>= 1.0.1), reshape2 (>= 1.4.4), here (>= 0.1), 
+httr (>= 1.4.2), pls (>= 2.7-2), magrittr (>= 2.0.1), dplyr (>= 1.0.1), reshape2 (>= 1.4.4), here (>= 0.1), 
 plotrix (>= 3.7-8), gridExtra (>= 2.3), scales (>= 1.1.1), knitr
 
 ### INSTALL

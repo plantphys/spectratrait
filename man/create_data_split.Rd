@@ -22,7 +22,7 @@ create_data_split(
 \item{prop}{the proportion of data to preserve for calibration (e.g. 0.8) and validation (0.2).
 This sets the calibration proportion}
 
-\item{group_variables}{Use factor variables to conduct a stratfied sampling for cal/val}
+\item{group_variables}{Use factor variables to conduct a stratified sampling for cal/val}
 }
 \value{
 output_list A list containing the calibration dataset (cal_data)

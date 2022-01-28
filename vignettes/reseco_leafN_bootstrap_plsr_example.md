@@ -16,8 +16,7 @@ leaf nitrogen content (Narea, g/m2)
 ### Load libraries
 
 ``` r
-list.of.packages <- c("pls","dplyr","reshape2","here","plotrix","ggplot2","gridExtra",
-                      "spectratrait")
+list.of.packages <- c("pls","dplyr","here","plotrix","ggplot2","gridExtra","spectratrait")
 invisible(lapply(list.of.packages, library, character.only = TRUE))
 ```
 
@@ -82,7 +81,7 @@ output_dir <- "tempdir"
 
 ### Set working directory (scratch space)
 
-    ## [1] "/private/var/folders/xp/h3k9vf3n2jx181ts786_yjrn9c2gjq/T/RtmpmNliia"
+    ## [1] "/private/var/folders/xp/h3k9vf3n2jx181ts786_yjrn9c2gjq/T/RtmpYVNyVT"
 
 ### Grab data from EcoSIS
 
@@ -117,38 +116,22 @@ dat_raw <- spectratrait::get_ecosis_data(ecosis_id = ecosis_id)
 head(dat_raw)
 ```
 
-    ## # A tibble: 6 x 2,164
-    ##   `Cw/EWT (cm3/cm2… `Latin Species`   `Leaf area (mm2… `Leaf calcium content pe…
-    ##               <dbl> <chr>                        <dbl>                     <dbl>
-    ## 1           0.00887 Arrhenatherum el…             696.                    0.0291
-    ## 2           0.00824 Bromus sterilis               447.                    0.0230
-    ## 3           0.0280  Jacobaea vulgaris            2418.                    0.0950
-    ## 4           0.0106  Rubus caesius                5719.                    0.0700
-    ## 5           0.00851 Arrhenatherum el…             671.                    0.0286
-    ## 6           0.0153  Crepis capillaris            1401.                    0.0470
+    ## # A tibble: 6 × 2,164
+    ##   `Cw/EWT (cm3/cm2)` `Latin Species`       `Leaf area (mm2)` `Leaf calcium cont…
+    ##                <dbl> <chr>                             <dbl>               <dbl>
+    ## 1            0.00887 Arrhenatherum elatius              696.              0.0291
+    ## 2            0.00824 Bromus sterilis                    447.              0.0230
+    ## 3            0.0280  Jacobaea vulgaris                 2418.              0.0950
+    ## 4            0.0106  Rubus caesius                     5719.              0.0700
+    ## 5            0.00851 Arrhenatherum elatius              671.              0.0286
+    ## 6            0.0153  Crepis capillaris                 1401.              0.0470
     ## # … with 2,160 more variables:
     ## #   Leaf magnesium content per leaf area (mg/mm2) <dbl>,
     ## #   Leaf mass per area (g/cm2) <dbl>,
     ## #   Leaf nitrogen content per leaf area (mg/mm2) <dbl>,
     ## #   Leaf phosphorus content per leaf area (mg/mm2) <dbl>,
     ## #   Leaf potassium content per leaf area (mg/mm2) <dbl>,
-    ## #   Plant height vegetative (cm) <dbl>, ids <chr>, plot code <chr>,
-    ## #   species code <chr>, 350 <dbl>, 351 <dbl>, 352 <dbl>, 353 <dbl>, 354 <dbl>,
-    ## #   355 <dbl>, 356 <dbl>, 357 <dbl>, 358 <dbl>, 359 <dbl>, 360 <dbl>,
-    ## #   361 <dbl>, 362 <dbl>, 363 <dbl>, 364 <dbl>, 365 <dbl>, 366 <dbl>,
-    ## #   367 <dbl>, 368 <dbl>, 369 <dbl>, 370 <dbl>, 371 <dbl>, 372 <dbl>,
-    ## #   373 <dbl>, 374 <dbl>, 375 <dbl>, 376 <dbl>, 377 <dbl>, 378 <dbl>,
-    ## #   379 <dbl>, 380 <dbl>, 381 <dbl>, 382 <dbl>, 383 <dbl>, 384 <dbl>,
-    ## #   385 <dbl>, 386 <dbl>, 387 <dbl>, 388 <dbl>, 389 <dbl>, 390 <dbl>,
-    ## #   391 <dbl>, 392 <dbl>, 393 <dbl>, 394 <dbl>, 395 <dbl>, 396 <dbl>,
-    ## #   397 <dbl>, 398 <dbl>, 399 <dbl>, 400 <dbl>, 401 <dbl>, 402 <dbl>,
-    ## #   403 <dbl>, 404 <dbl>, 405 <dbl>, 406 <dbl>, 407 <dbl>, 408 <dbl>,
-    ## #   409 <dbl>, 410 <dbl>, 411 <dbl>, 412 <dbl>, 413 <dbl>, 414 <dbl>,
-    ## #   415 <dbl>, 416 <dbl>, 417 <dbl>, 418 <dbl>, 419 <dbl>, 420 <dbl>,
-    ## #   421 <dbl>, 422 <dbl>, 423 <dbl>, 424 <dbl>, 425 <dbl>, 426 <dbl>,
-    ## #   427 <dbl>, 428 <dbl>, 429 <dbl>, 430 <dbl>, 431 <dbl>, 432 <dbl>,
-    ## #   433 <dbl>, 434 <dbl>, 435 <dbl>, 436 <dbl>, 437 <dbl>, 438 <dbl>,
-    ## #   439 <dbl>, 440 <dbl>, …
+    ## #   Plant height vegetative (cm) <dbl>, ids <chr>, plot code <chr>, …
 
 ``` r
 names(dat_raw)[1:40]
@@ -208,15 +191,15 @@ sample_info <- dat_raw[,names(dat_raw) %notin% seq(350,2500,1)]
 head(sample_info)
 ```
 
-    ## # A tibble: 6 x 13
-    ##   `Cw/EWT (cm3/cm2… `Latin Species`   `Leaf area (mm2… `Leaf calcium content pe…
-    ##               <dbl> <chr>                        <dbl>                     <dbl>
-    ## 1           0.00887 Arrhenatherum el…             696.                    0.0291
-    ## 2           0.00824 Bromus sterilis               447.                    0.0230
-    ## 3           0.0280  Jacobaea vulgaris            2418.                    0.0950
-    ## 4           0.0106  Rubus caesius                5719.                    0.0700
-    ## 5           0.00851 Arrhenatherum el…             671.                    0.0286
-    ## 6           0.0153  Crepis capillaris            1401.                    0.0470
+    ## # A tibble: 6 × 13
+    ##   `Cw/EWT (cm3/cm2)` `Latin Species`       `Leaf area (mm2)` `Leaf calcium cont…
+    ##                <dbl> <chr>                             <dbl>               <dbl>
+    ## 1            0.00887 Arrhenatherum elatius              696.              0.0291
+    ## 2            0.00824 Bromus sterilis                    447.              0.0230
+    ## 3            0.0280  Jacobaea vulgaris                 2418.              0.0950
+    ## 4            0.0106  Rubus caesius                     5719.              0.0700
+    ## 5            0.00851 Arrhenatherum elatius              671.              0.0286
+    ## 6            0.0153  Crepis capillaris                 1401.              0.0470
     ## # … with 9 more variables: Leaf magnesium content per leaf area (mg/mm2) <dbl>,
     ## #   Leaf mass per area (g/cm2) <dbl>,
     ## #   Leaf nitrogen content per leaf area (mg/mm2) <dbl>,
@@ -235,7 +218,7 @@ sample_info2 <- sample_info2 %>%
 head(sample_info2)
 ```
 
-    ## # A tibble: 6 x 5
+    ## # A tibble: 6 × 5
     ##   Plant_Species         Species_Code Plot  Narea_mg_mm2 Narea_g_m2
     ##   <chr>                 <chr>        <chr>        <dbl>      <dbl>
     ## 1 Arrhenatherum elatius Arrela       DC1        0.0126       1.26 
@@ -301,20 +284,20 @@ val.plsr.data <- split_data$val_data
 head(val.plsr.data)[1:8]
 ```
 
-    ##          Plant_Species Species_Code Plot Narea_mg_mm2 Narea_g_m2   Wave_500
-    ## 184  Jacobaea vulgaris       Jacvul  WC2  0.008756996  0.8756996 0.06736887
-    ## 185 Potentilla reptans       Potrep  WC2  0.010313464  1.0313464 0.07125000
-    ## 186      Rubus caesius       Rubcae  WC2  0.007968454  0.7968454 0.05993560
-    ## 187      Urtica dioica       Urtdio  WC2  0.012737560  1.2737560 0.06508300
-    ## 188 Ammophila arenaria       Ammare  WC3  0.028072806  2.8072806 0.15175000
-    ## 189  Jacobaea vulgaris       Jacvul  WC3  0.010251687  1.0251687 0.06805547
-    ##       Wave_501   Wave_502
-    ## 184 0.06870667 0.07014220
-    ## 185 0.07235000 0.07368350
-    ## 186 0.06162000 0.06352233
-    ## 187 0.06625000 0.06758350
-    ## 188 0.15275000 0.15415000
-    ## 189 0.06938000 0.07093553
+    ##            Plant_Species Species_Code Plot Narea_mg_mm2 Narea_g_m2   Wave_500
+    ## 1  Arrhenatherum elatius       Arrela  DC1   0.01261440   1.261440 0.07066700
+    ## 4          Rubus caesius       Rubcae  DC1   0.01208978   1.208978 0.04144907
+    ## 8      Jacobaea vulgaris       Jacvul  DC2   0.01185197   1.185197 0.05563100
+    ## 11        Carex arenaria       Carare  DC3   0.02103830   2.103830 0.11588500
+    ## 14     Jacobaea vulgaris       Jacvul  DC3   0.01121247   1.121247 0.06029327
+    ## 19 Oenothera glazioviana       Oengla  DC4   0.01444293   1.444293 0.07391700
+    ##      Wave_501  Wave_502
+    ## 1  0.07160000 0.0725330
+    ## 4  0.04197333 0.0426356
+    ## 8  0.05622143 0.0569690
+    ## 11 0.11705000 0.1184500
+    ## 14 0.06112000 0.0620312
+    ## 19 0.07515000 0.0765500
 
 ``` r
 rm(split_data)
@@ -385,13 +368,13 @@ val.plsr.data <- data.frame(val.plsr.data[, which(names(val.plsr.data) %notin% p
 head(val.plsr.data)[1:5]
 ```
 
-    ##          Plant_Species Species_Code Plot Narea_mg_mm2 Narea_g_m2
-    ## 184  Jacobaea vulgaris       Jacvul  WC2  0.008756996  0.8756996
-    ## 185 Potentilla reptans       Potrep  WC2  0.010313464  1.0313464
-    ## 186      Rubus caesius       Rubcae  WC2  0.007968454  0.7968454
-    ## 187      Urtica dioica       Urtdio  WC2  0.012737560  1.2737560
-    ## 188 Ammophila arenaria       Ammare  WC3  0.028072806  2.8072806
-    ## 189  Jacobaea vulgaris       Jacvul  WC3  0.010251687  1.0251687
+    ##            Plant_Species Species_Code Plot Narea_mg_mm2 Narea_g_m2
+    ## 1  Arrhenatherum elatius       Arrela  DC1   0.01261440   1.261440
+    ## 4          Rubus caesius       Rubcae  DC1   0.01208978   1.208978
+    ## 8      Jacobaea vulgaris       Jacvul  DC2   0.01185197   1.185197
+    ## 11        Carex arenaria       Carare  DC3   0.02103830   2.103830
+    ## 14     Jacobaea vulgaris       Jacvul  DC3   0.01121247   1.121247
+    ## 19 Oenothera glazioviana       Oengla  DC4   0.01444293   1.444293
 
 ### plot cal and val spectra
 
@@ -440,18 +423,21 @@ iterations <- 80
 prop <- 0.70
 if (method=="pls") {
   # pls package approach - faster but estimates more components....
-  nComps <- spectratrait::find_optimal_components(dataset=cal.plsr.data, method=method, 
+  nComps <- spectratrait::find_optimal_components(dataset=cal.plsr.data, targetVariable=inVar, 
+                                                  method=method, 
                                                   maxComps=maxComps, seg=seg, 
                                                   random_seed=random_seed)
   print(paste0("*** Optimal number of components: ", nComps))
 } else {
-  nComps <- spectratrait::find_optimal_components(dataset=cal.plsr.data, method=method,
+  nComps <- spectratrait::find_optimal_components(dataset=cal.plsr.data, targetVariable=inVar,
+                                                  method=method,
                                                   maxComps=maxComps, iterations=iterations, 
                                                   seg=seg, prop=prop, 
                                                   random_seed=random_seed)
 }
 ```
 
+    ## [1] "*** Identifying optimal number of PLSR components ***"
     ## [1] "*** Running PLS permutation test ***"
 
 ![](reseco_leafN_bootstrap_plsr_example_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
@@ -487,9 +473,9 @@ pls::RMSEP(plsr.out, newdata = val.plsr.data)
 ```
 
     ## (Intercept)      1 comps      2 comps      3 comps      4 comps      5 comps  
-    ##      0.6346       0.5045       0.4645       0.3415       0.3296       0.3037  
+    ##      0.5594       0.6034       0.5448       0.3842       0.3481       0.3027  
     ##     6 comps      7 comps      8 comps      9 comps     10 comps  
-    ##      0.2703       0.2659       0.2524       0.2450       0.2452
+    ##      0.2429       0.2268       0.2852       0.2818       0.2780
 
 ``` r
 plot(pls::RMSEP(plsr.out,estimate=c("test"),newdata = val.plsr.data), main="MODEL RMSEP",
@@ -500,9 +486,9 @@ pls::R2(plsr.out, newdata = val.plsr.data)
 ```
 
     ## (Intercept)      1 comps      2 comps      3 comps      4 comps      5 comps  
-    ##    -0.05977      0.33000      0.43217      0.69298      0.71415      0.75732  
+    ##   -0.007544    -0.172296     0.044153     0.524579     0.609920     0.704963  
     ##     6 comps      7 comps      8 comps      9 comps     10 comps  
-    ##     0.80776      0.81389      0.83228      0.84198      0.84176
+    ##    0.809962     0.834383     0.738093     0.744325     0.751224
 
 ``` r
 plot(pls::R2(plsr.out,estimate=c("test"),newdata = val.plsr.data), main="MODEL R2",
@@ -571,20 +557,20 @@ val.plsr.output <- val.plsr.output %>%
 head(val.plsr.output)
 ```
 
-    ##          Plant_Species Species_Code Plot Narea_mg_mm2 Narea_g_m2 PLSR_Predicted
-    ## 184  Jacobaea vulgaris       Jacvul  WC2  0.008756996  0.8756996      0.9462916
-    ## 185 Potentilla reptans       Potrep  WC2  0.010313464  1.0313464      1.5386676
-    ## 186      Rubus caesius       Rubcae  WC2  0.007968454  0.7968454      0.8790482
-    ## 187      Urtica dioica       Urtdio  WC2  0.012737560  1.2737560      1.1241560
-    ## 188 Ammophila arenaria       Ammare  WC3  0.028072806  2.8072806      2.4527108
-    ## 189  Jacobaea vulgaris       Jacvul  WC3  0.010251687  1.0251687      1.1553688
-    ##     PLSR_Residuals
-    ## 184     0.07059201
-    ## 185     0.50732119
-    ## 186     0.08220284
-    ## 187    -0.14959995
-    ## 188    -0.35456980
-    ## 189     0.13020008
+    ##            Plant_Species Species_Code Plot Narea_mg_mm2 Narea_g_m2
+    ## 1  Arrhenatherum elatius       Arrela  DC1   0.01261440   1.261440
+    ## 4          Rubus caesius       Rubcae  DC1   0.01208978   1.208978
+    ## 8      Jacobaea vulgaris       Jacvul  DC2   0.01185197   1.185197
+    ## 11        Carex arenaria       Carare  DC3   0.02103830   2.103830
+    ## 14     Jacobaea vulgaris       Jacvul  DC3   0.01121247   1.121247
+    ## 19 Oenothera glazioviana       Oengla  DC4   0.01444293   1.444293
+    ##    PLSR_Predicted PLSR_Residuals
+    ## 1        1.340135     0.07869548
+    ## 4        1.288026     0.07904830
+    ## 8        1.155840    -0.02935675
+    ## 11       2.014712    -0.08911757
+    ## 14       1.328742     0.20749565
+    ## 19       1.534162     0.08986811
 
 ``` r
 val.R2 <- round(pls::R2(plsr.out,newdata=val.plsr.data,intercept=F)[[1]][nComps],2)
@@ -645,7 +631,7 @@ scatterplots <- grid.arrange(cal_scatter_plot, val_scatter_plot, cal_resid_histo
 
     ## Warning: Removed 2 rows containing missing values (geom_point).
 
-    ## Warning: Removed 3 rows containing missing values (geom_point).
+    ## Warning: Removed 2 rows containing missing values (geom_point).
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
@@ -704,7 +690,8 @@ if(grepl("Windows", sessionInfo()$running)){
 ### PLSR bootstrap permutation uncertainty analysis
 iterations <- 500    # how many permutation iterations to run
 prop <- 0.70          # fraction of training data to keep for each iteration
-plsr_permutation <- spectratrait::pls_permutation(dataset=cal.plsr.data, maxComps=nComps, 
+plsr_permutation <- spectratrait::pls_permutation(dataset=cal.plsr.data, targetVariable=inVar,
+                                                  maxComps=nComps, 
                                                   iterations=iterations, prop=prop,
                                                   verbose = FALSE)
 ```
@@ -737,20 +724,20 @@ val.plsr.output$UPI <- val.plsr.output$PLSR_Predicted+1.96*sd_tot
 head(val.plsr.output)
 ```
 
-    ##          Plant_Species Species_Code Plot Narea_mg_mm2 Narea_g_m2 PLSR_Predicted
-    ## 184  Jacobaea vulgaris       Jacvul  WC2  0.008756996  0.8756996      0.9462916
-    ## 185 Potentilla reptans       Potrep  WC2  0.010313464  1.0313464      1.5386676
-    ## 186      Rubus caesius       Rubcae  WC2  0.007968454  0.7968454      0.8790482
-    ## 187      Urtica dioica       Urtdio  WC2  0.012737560  1.2737560      1.1241560
-    ## 188 Ammophila arenaria       Ammare  WC3  0.028072806  2.8072806      2.4527108
-    ## 189  Jacobaea vulgaris       Jacvul  WC3  0.010251687  1.0251687      1.1553688
-    ##     PLSR_Residuals       LCI      UCI       LPI      UPI
-    ## 184     0.07059201 0.8915898 1.008806 0.4588988 1.433684
-    ## 185     0.50732119 1.4007173 1.636452 1.0403747 2.036960
-    ## 186     0.08220284 0.6861219 1.160030 0.3405908 1.417506
-    ## 187    -0.14959995 0.9651982 1.245464 0.6198291 1.628483
-    ## 188    -0.35456980 2.1911406 2.619696 1.9245720 2.980850
-    ## 189     0.13020008 1.0735154 1.233082 0.6651011 1.645636
+    ##            Plant_Species Species_Code Plot Narea_mg_mm2 Narea_g_m2
+    ## 1  Arrhenatherum elatius       Arrela  DC1   0.01261440   1.261440
+    ## 4          Rubus caesius       Rubcae  DC1   0.01208978   1.208978
+    ## 8      Jacobaea vulgaris       Jacvul  DC2   0.01185197   1.185197
+    ## 11        Carex arenaria       Carare  DC3   0.02103830   2.103830
+    ## 14     Jacobaea vulgaris       Jacvul  DC3   0.01121247   1.121247
+    ## 19 Oenothera glazioviana       Oengla  DC4   0.01444293   1.444293
+    ##    PLSR_Predicted PLSR_Residuals      LCI      UCI       LPI      UPI
+    ## 1        1.340135     0.07869548 1.226834 1.429328 0.7824784 1.897793
+    ## 4        1.288026     0.07904830 1.182535 1.382687 0.7308093 1.845242
+    ## 8        1.155840    -0.02935675 1.094629 1.236994 0.6033307 1.708349
+    ## 11       2.014712    -0.08911757 1.887670 2.098661 1.4570138 2.572411
+    ## 14       1.328742     0.20749565 1.278652 1.359115 0.7791767 1.878308
+    ## 19       1.534162     0.08986811 1.437618 1.642761 0.9768182 2.091505
 
 ### Jackknife coefficient plot
 
@@ -863,7 +850,7 @@ write.csv(out.jk.coefs,file=file.path(outdir,paste0(inVar,
 print(paste("Output directory: ", outdir))
 ```
 
-    ## [1] "Output directory:  /var/folders/xp/h3k9vf3n2jx181ts786_yjrn9c2gjq/T//RtmpmNliia"
+    ## [1] "Output directory:  /var/folders/xp/h3k9vf3n2jx181ts786_yjrn9c2gjq/T//RtmpYVNyVT"
 
 ``` r
 # Observed versus predicted
