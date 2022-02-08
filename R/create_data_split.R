@@ -11,7 +11,7 @@
 ##' and validation dataset (val_data)
 ##' 
 ##' @importFrom magrittr %>%
-##' @importFrom dplyr mutate group_by_at slice n vars all_of 
+##' @importFrom dplyr mutate group_by_at slice n vars all_of row_number
 ##' 
 ##' @author Julien Lamour, Jeremiah Anderson, Shawn P. Serbin
 ##' @export

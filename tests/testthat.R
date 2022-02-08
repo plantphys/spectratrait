@@ -1,4 +1,3 @@
 library(testthat)
 library(spectratrait)
-
-testthat::test_check("spectratrait")
+test_check("spectratrait")
