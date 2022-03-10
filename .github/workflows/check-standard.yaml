@@ -6,6 +6,12 @@ on:
 
 name: R-CMD-check
 
+env:
+  R_LIBS_USER: /usr/local/lib/R/site-library
+  LC_ALL: en_US.UTF-8
+  NCPUS: 2
+  CI: false
+
 jobs:
   R-CMD-check:
     runs-on: ${{ matrix.config.os }}
