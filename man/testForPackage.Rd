@@ -2,12 +2,14 @@
 % Please edit documentation in R/utils.R
 \name{testForPackage}
 \alias{testForPackage}
-\title{Function to check for installed package
-not presently used}
+\title{Function to check for installed package}
 \usage{
 testForPackage(pkg)
 }
+\arguments{
+\item{pkg}{name of package to check if installed
+not presently used}
+}
 \description{
 Function to check for installed package
-not presently used
 }

@@ -1,4 +1,5 @@
 ##' @title VIP returns all VIP values for all variables and all number of components, as a ncomp x nvars matrix.
+##' @param object fitted pls::plsr object
 ##' @export
 VIP <- function(object) {
   ## VIP returns all VIP values for all variables and all number of components,
@@ -15,6 +16,9 @@ VIP <- function(object) {
 }
 
 ##' @title VIPjh returns the VIP of variable j with h components
+##' @param object fitted pls::plsr object
+##' @param j which variable in the fitted pls::plsr object
+##' @param h the number of components in the fitted pls::plsr object to calculate the VIP
 ##' @export
 VIPjh <- function(object, j, h) {
   ## VIPjh returns the VIP of variable j with h components

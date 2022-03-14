@@ -55,11 +55,17 @@ percent_rmse <- function(plsr_dataset = NULL, inVar = NULL,
 
 
 ##' Not %in% function
-##'
+##' @param x initial list
+##' @param table list to check against
+##' 
 ##' @export
-`%notin%` <- Negate(`%in%`)
+#`%notin%` <- Negate(`%in%`)
+`%notin%` <- function(x, table) {
+  !(x %in% table)
+}
 
 ##' Function to check for installed package
+##' @param pkg name of package to check if installed
 ##' not presently used
 testForPackage <- function(pkg) {
   if (!requireNamespace(pkg)) {

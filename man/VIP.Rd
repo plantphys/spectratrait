@@ -6,6 +6,9 @@
 \usage{
 VIP(object)
 }
+\arguments{
+\item{object}{fitted pls::plsr object}
+}
 \description{
 VIP returns all VIP values for all variables and all number of components, as a ncomp x nvars matrix.
 }

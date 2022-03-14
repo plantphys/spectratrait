@@ -1,8 +1,10 @@
 Spectra-trait PLSR example using leaf-level spectra and leaf nitrogen
 content (Narea, g/m2) data from eight different crop species growing in
-a glasshouse at Brookhaven National Laboratory.
+a glasshouse at Brookhaven National Laboratory. This example illustrates
+running the PLSR permutation by group
 ================
 Shawn P. Serbin, Julien Lamour, & Jeremiah Anderson
+2022-03-14
 
 ### Overview
 
@@ -50,9 +52,7 @@ invisible(lapply(list.of.packages, library, character.only = TRUE))
 ### Setup other functions and options
 
 ``` r
-### Setup other functions and options
-# not in
-`%notin%` <- Negate(`%in%`)
+### Setup options
 
 # Script options
 pls::pls.options(plsralg = "oscorespls")
@@ -102,7 +102,7 @@ inVar <- "N_g_m2"
 
 ### Set working directory (scratch space)
 
-    ## [1] "/private/var/folders/xp/h3k9vf3n2jx181ts786_yjrn9c2gjq/T/RtmpDzC9vA"
+    ## [1] "/private/var/folders/xp/h3k9vf3n2jx181ts786_yjrn9c2gjq/T/RtmplDLTQi"
 
 ### Full PLSR dataset
 
@@ -229,7 +229,7 @@ histograms <- grid.arrange(cal_hist_plot, val_hist_plot, ncol=2)
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-![](ely_leafN_bootstrap_plsr_example_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
+![](ely_etal_ex2_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
 
 ``` r
 ggsave(filename = file.path(outdir,paste0(inVar,"_Cal_Val_Histograms.png")), 
@@ -285,7 +285,7 @@ spectratrait::f.plot.spec(Z=cal.plsr.data$Spectra,wv=wv,plot_label="Calibration"
 spectratrait::f.plot.spec(Z=val.plsr.data$Spectra,wv=wv,plot_label="Validation")
 ```
 
-![](ely_leafN_bootstrap_plsr_example_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
+![](ely_etal_ex2_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
 
 ``` r
 dev.copy(png,file.path(outdir,paste0(inVar,'_Cal_Val_Spectra.png')), 
@@ -316,37 +316,34 @@ if(grepl("Windows", sessionInfo()$running)){
   pls.options(parallel = parallel::detectCores()-1)
 }
 
-method <- "pls" #pls, firstPlateau, firstMin
+method <- "firstMin" #firstPlateau, firstMin
 random_seed <- 1245565
 seg <- 50
 maxComps <- 16
 iterations <- 80
 prop <- 0.70
-if (method=="pls") {
-  nComps <- spectratrait::find_optimal_components(dataset=cal.plsr.data, targetVariable=inVar,
-                                                  method=method, 
-                                                  maxComps=maxComps, seg=seg, 
-                                                  random_seed=random_seed)
-  print(paste0("*** Optimal number of components: ", nComps))
-} else {
-  nComps <- spectratrait::find_optimal_components(dataset=cal.plsr.data, targetVariable=inVar,
-                                                  method=method,
-                                                  maxComps=maxComps, iterations=iterations, 
-                                                  seg=seg, prop=prop, 
-                                                  random_seed=random_seed)
-}
+nComps <- spectratrait::find_optimal_comp_by_groups(dataset=cal.plsr.data, targetVariable=inVar, 
+                                                    method=method, maxComps=maxComps, 
+                                                    iterations=iterations, prop=prop, 
+                                                    random_seed=random_seed,
+                                                    group_variables="Species_Code")
 ```
 
-    ## [1] "*** Identifying optimal number of PLSR components ***"
-    ## [1] "*** Running PLS permutation test ***"
+    ## [1] "*** Identifying optimal number of PLSR components using stratified resampling by group_variables ***"
+    ## [1] "*** Running permutation test.  Please hang tight, this can take awhile ***"
+    ## [1] "Options:"
+    ## [1] "Max Components: 16 Iterations: 80 Data Proportion (percent): 70"
+    ## [1] "*** Providing PRESS and coefficient array output ***"
 
-![](ely_leafN_bootstrap_plsr_example_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
+    ## No id variables; using all as measure variables
 
-    ## [1] "*** Optimal number of components: 13"
+    ## [1] "*** Optimal number of components based on t.test: 15"
+
+![](ely_etal_ex2_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
 
 ``` r
 dev.copy(png,file.path(outdir,paste0(paste0(inVar,"_PLSR_Component_Selection.png"))), 
-         height=2800, width=3400,  res=340)
+         height=2800, width=3400, res=340)
 ```
 
     ## quartz_off_screen 
@@ -376,8 +373,8 @@ pls::RMSEP(plsr.out, newdata = val.plsr.data)
     ##      0.5908       0.4735       0.4162       0.4037       0.3347       0.3023  
     ##     6 comps      7 comps      8 comps      9 comps     10 comps     11 comps  
     ##      0.2993       0.3081       0.2814       0.2445       0.2276       0.2104  
-    ##    12 comps     13 comps  
-    ##      0.1954       0.2003
+    ##    12 comps     13 comps     14 comps     15 comps  
+    ##      0.1954       0.2003       0.1973       0.2108
 
 ``` r
 plot(pls::RMSEP(plsr.out,estimate=c("test"),newdata = val.plsr.data), main="MODEL RMSEP",
@@ -391,8 +388,8 @@ pls::R2(plsr.out, newdata = val.plsr.data)
     ##   -0.004079     0.355010     0.501632     0.531088     0.677620     0.737143  
     ##     6 comps      7 comps      8 comps      9 comps     10 comps     11 comps  
     ##    0.742224     0.726835     0.772115     0.827942     0.850962     0.872685  
-    ##    12 comps     13 comps  
-    ##    0.890124     0.884529
+    ##    12 comps     13 comps     14 comps     15 comps  
+    ##    0.890124     0.884529     0.887961     0.872129
 
 ``` r
 plot(pls::R2(plsr.out,estimate=c("test"),newdata = val.plsr.data), main="MODEL R2",
@@ -400,7 +397,7 @@ plot(pls::R2(plsr.out,estimate=c("test"),newdata = val.plsr.data), main="MODEL R
 box(lwd=2.2)
 ```
 
-![](ely_leafN_bootstrap_plsr_example_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
+![](ely_etal_ex2_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
 
 ``` r
 dev.copy(png,file.path(outdir,paste0(paste0(inVar,"_Validation_RMSEP_R2_by_Component.png"))), 
@@ -441,12 +438,12 @@ head(cal.plsr.output)
     ## 7          CUPE    field pumpkin     7.20 11.43007   128.42    25.83 1.215333
     ## 10        SOLYL    garden tomato     7.89 11.61918   142.23    27.40 1.304110
     ##    PLSR_Predicted PLSR_CV_Predicted PLSR_CV_Residuals
-    ## 1        1.820666          1.702501       -0.40119317
-    ## 2        1.609632          1.711772        0.48005882
-    ## 4        1.364985          1.275526       -0.01243687
-    ## 6        1.126062          1.060119       -0.05758587
-    ## 7        1.227538          1.226708        0.01137583
-    ## 10       1.358638          1.365181        0.06107105
+    ## 1        1.836047          1.714086       -0.38960842
+    ## 2        1.530813          1.685388        0.45367526
+    ## 4        1.254794          1.262835       -0.02512724
+    ## 6        1.127053          1.129340        0.01163542
+    ## 7        1.196259          1.188471       -0.02686200
+    ## 10       1.276380          1.281683       -0.02242624
 
 ``` r
 cal.R2 <- round(pls::R2(plsr.out,intercept=F)[[1]][nComps],2)
@@ -469,12 +466,12 @@ head(val.plsr.output)
     ## 13        SOLYL    garden tomato     7.73  7.938866   129.95    17.96 0.9483533
     ## 15         OCBA      sweet basil     8.13 16.975969   173.30    38.65 1.1246459
     ##    PLSR_Predicted PLSR_Residuals
-    ## 3       1.7125176   -0.052233917
-    ## 5       1.4618447    0.050483171
-    ## 8       1.0951891   -0.051652168
-    ## 9       1.2152379    0.076220509
-    ## 13      0.7992342   -0.149119020
-    ## 15      1.1267054    0.002059572
+    ## 3       1.7624701   -0.002281391
+    ## 5       1.2947218   -0.116639722
+    ## 8       0.9934199   -0.153421396
+    ## 9       1.1345273   -0.004490078
+    ## 13      0.7432855   -0.205067758
+    ## 15      1.1613789    0.036733007
 
 ``` r
 val.R2 <- round(pls::R2(plsr.out,newdata=val.plsr.data,intercept=F)[[1]][nComps],2)
@@ -533,14 +530,14 @@ scatterplots <- grid.arrange(cal_scatter_plot, val_scatter_plot, cal_resid_histo
                              val_resid_histogram, nrow=2,ncol=2)
 ```
 
-    ## Warning: Removed 3 rows containing missing values (geom_point).
+    ## Warning: Removed 5 rows containing missing values (geom_point).
 
-    ## Warning: Removed 3 rows containing missing values (geom_point).
+    ## Warning: Removed 4 rows containing missing values (geom_point).
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-![](ely_leafN_bootstrap_plsr_example_files/figure-gfm/unnamed-chunk-11-1.png)<!-- -->
+![](ely_etal_ex2_files/figure-gfm/unnamed-chunk-11-1.png)<!-- -->
 
 ``` r
 ggsave(filename = file.path(outdir,paste0(inVar,"_Cal_Val_Scatterplots.png")), 
@@ -565,7 +562,7 @@ abline(h=0.8,lty=2,col="dark grey")
 box(lwd=2.2)
 ```
 
-![](ely_leafN_bootstrap_plsr_example_files/figure-gfm/unnamed-chunk-12-1.png)<!-- -->
+![](ely_etal_ex2_files/figure-gfm/unnamed-chunk-12-1.png)<!-- -->
 
 ``` r
 dev.copy(png,file.path(outdir,paste0(inVar,'_Coefficient_VIP_plot.png')), 
@@ -594,15 +591,17 @@ if(grepl("Windows", sessionInfo()$running)){
 ### PLSR bootstrap permutation uncertainty analysis
 iterations <- 500    # how many permutation iterations to run
 prop <- 0.70          # fraction of training data to keep for each iteration
-plsr_permutation <- spectratrait::pls_permutation(dataset=cal.plsr.data, targetVariable=inVar,
-                                                  maxComps=nComps, 
-                                                  iterations=iterations, prop=prop,
-                                                  verbose = FALSE)
+plsr_permutation <- spectratrait::pls_permutation_by_groups(dataset=cal.plsr.data, 
+                                                            targetVariable=inVar,
+                                                            maxComps=nComps, 
+                                                            iterations=iterations, 
+                                                            prop=prop, group_variables="Species_Code", 
+                                                            verbose=FALSE)
 ```
 
     ## [1] "*** Running permutation test.  Please hang tight, this can take awhile ***"
     ## [1] "Options:"
-    ## [1] "Max Components: 13 Iterations: 500 Data Proportion (percent): 70"
+    ## [1] "Max Components: 15 Iterations: 500 Data Proportion (percent): 70"
     ## [1] "*** Providing PRESS and coefficient array output ***"
 
 ``` r
@@ -636,12 +635,12 @@ head(val.plsr.output)
     ## 13        SOLYL    garden tomato     7.73  7.938866   129.95    17.96 0.9483533
     ## 15         OCBA      sweet basil     8.13 16.975969   173.30    38.65 1.1246459
     ##    PLSR_Predicted PLSR_Residuals       LCI       UCI       LPI      UPI
-    ## 3       1.7125176   -0.052233917 1.5070086 1.8760564 1.2810247 2.144011
-    ## 5       1.4618447    0.050483171 1.2909822 1.5475356 1.0541359 1.869553
-    ## 8       1.0951891   -0.051652168 0.9595488 1.2335912 0.6846083 1.505770
-    ## 9       1.2152379    0.076220509 1.0746965 1.3367675 0.8068229 1.623653
-    ## 13      0.7992342   -0.149119020 0.6820207 0.9451323 0.3899050 1.208563
-    ## 15      1.1267054    0.002059572 1.0316572 1.2737521 0.7209233 1.532488
+    ## 3       1.7624701   -0.002281391 1.5710330 1.9443661 1.3151243 2.209816
+    ## 5       1.2947218   -0.116639722 1.2019841 1.4531979 0.8688563 1.720587
+    ## 8       0.9934199   -0.153421396 0.8544582 1.1646561 0.5564158 1.430424
+    ## 9       1.1345273   -0.004490078 0.9954061 1.2824287 0.7007745 1.568280
+    ## 13      0.7432855   -0.205067758 0.5836738 0.9094675 0.3042086 1.182362
+    ## 15      1.1613789    0.036733007 1.0021191 1.2849671 0.7291004 1.593657
 
 ### Jackknife coefficient plot
 
@@ -653,7 +652,7 @@ abline(h=0,lty=2,col="grey50")
 box(lwd=2.2)
 ```
 
-![](ely_leafN_bootstrap_plsr_example_files/figure-gfm/unnamed-chunk-14-1.png)<!-- -->
+![](ely_etal_ex2_files/figure-gfm/unnamed-chunk-14-1.png)<!-- -->
 
 ``` r
 dev.copy(png,file.path(outdir,paste0(inVar,'_Bootstrap_Regression_Coefficients.png')), 
@@ -707,7 +706,7 @@ legend("bottomright", legend=c("Prediction Interval","Confidence Interval"),
 box(lwd=2.2)
 ```
 
-![](ely_leafN_bootstrap_plsr_example_files/figure-gfm/unnamed-chunk-15-1.png)<!-- -->
+![](ely_etal_ex2_files/figure-gfm/unnamed-chunk-15-1.png)<!-- -->
 
 ``` r
 dev.copy(png,file.path(outdir,paste0(inVar,"_PLSR_Validation_Scatterplot.png")), 
@@ -734,13 +733,13 @@ names(out.jk.coefs) <- c("Iteration","Intercept",paste0("Wave_",wv))
 head(out.jk.coefs)[1:6]
 ```
 
-    ##   Iteration  Intercept      Wave_500     Wave_501     Wave_502     Wave_503
-    ## 1         1 -0.6617899 -0.0067918917 -0.006451152 -0.005571355 -0.004909648
-    ## 2         2 -0.4636504 -0.0040384348 -0.001804902  0.001375426  0.002477500
-    ## 3         3 -0.8146267  0.0031055624  0.003529288  0.005078394  0.005883173
-    ## 4         4  0.7030872  0.0003883207  0.002887701  0.003961071  0.003223096
-    ## 5         5  0.4765138  0.0045652557  0.005822813  0.005979498  0.004861387
-    ## 6         6  0.4146289  0.0085296345  0.009692141  0.010451131  0.009300204
+    ##   Iteration  Intercept      Wave_500    Wave_501    Wave_502   Wave_503
+    ## 1         1  0.4731951  0.0236618987 0.021719096 0.023063691 0.02187741
+    ## 2         2  0.5415203 -0.0007012397 0.001892634 0.008241293 0.01105366
+    ## 3         3  0.6512533  0.0123054098 0.013428257 0.015824665 0.01772586
+    ## 4         4 -0.9976728  0.0145306759 0.016119715 0.018834952 0.01959049
+    ## 5         5  0.1267626  0.0076041315 0.007329090 0.009971693 0.01339406
+    ## 6         6  0.8509641  0.0139793124 0.015195593 0.015170417 0.01434085
 
 ``` r
 write.csv(out.jk.coefs,file=file.path(outdir,paste0(inVar,
@@ -754,7 +753,7 @@ write.csv(out.jk.coefs,file=file.path(outdir,paste0(inVar,
 print(paste("Output directory: ", outdir))
 ```
 
-    ## [1] "Output directory:  /var/folders/xp/h3k9vf3n2jx181ts786_yjrn9c2gjq/T//RtmpDzC9vA"
+    ## [1] "Output directory:  /var/folders/xp/h3k9vf3n2jx181ts786_yjrn9c2gjq/T//RtmplDLTQi"
 
 ``` r
 # Observed versus predicted
@@ -801,11 +800,11 @@ print(list.files(outdir)[grep(pattern = inVar, list.files(outdir))])
     ##  [5] "N_g_m2_Cal_Val_Scatterplots.png"             
     ##  [6] "N_g_m2_Cal_Val_Spectra.png"                  
     ##  [7] "N_g_m2_Coefficient_VIP_plot.png"             
-    ##  [8] "N_g_m2_Observed_PLSR_CV_Pred_13comp.csv"     
-    ##  [9] "N_g_m2_PLSR_Coefficients_13comp.csv"         
+    ##  [8] "N_g_m2_Observed_PLSR_CV_Pred_15comp.csv"     
+    ##  [9] "N_g_m2_PLSR_Coefficients_15comp.csv"         
     ## [10] "N_g_m2_PLSR_Component_Selection.png"         
     ## [11] "N_g_m2_PLSR_Validation_Scatterplot.png"      
-    ## [12] "N_g_m2_PLSR_VIPs_13comp.csv"                 
+    ## [12] "N_g_m2_PLSR_VIPs_15comp.csv"                 
     ## [13] "N_g_m2_Val_PLSR_Dataset.csv"                 
-    ## [14] "N_g_m2_Validation_PLSR_Pred_13comp.csv"      
+    ## [14] "N_g_m2_Validation_PLSR_Pred_15comp.csv"      
     ## [15] "N_g_m2_Validation_RMSEP_R2_by_Component.png"
