@@ -1,8 +1,9 @@
 An example showing how to apply an existing PLSR model to new data. In
 this case applying the LMA model from Serbin et al., (2019; DOI -
-10.1111/nph.16123) to a dataset collected at CONUS NEON field sites.
+10.1111/nph.16123) to a dataset collected at CONUS NEON field sites
 ================
 Shawn P. Serbin, Julien Lamour, & Jeremiah Anderson
+2022-03-15
 
 ### Getting Started
 
@@ -44,9 +45,7 @@ invisible(lapply(list.of.packages, library, character.only = TRUE))
 ### Setup other functions and options
 
 ``` r
-### Setup other functions and options
-# not in
-`%notin%` <- Negate(`%in%`)
+### Setup options
 
 # Script options
 pls::pls.options(plsralg = "oscorespls")
@@ -75,7 +74,7 @@ output_dir <- "tempdir"
 
 ### Set working directory (scratch space)
 
-    ## [1] "/private/var/folders/xp/h3k9vf3n2jx181ts786_yjrn9c2gjq/T/RtmpujOJFE"
+    ## [1] "/private/var/folders/xp/h3k9vf3n2jx181ts786_yjrn9c2gjq/T/RtmpT8X0p7"
 
 ### Grab PLSR Coefficients from GitHub
 
@@ -105,30 +104,21 @@ dat_raw <- spectratrait::get_ecosis_data(ecosis_id = ecosis_id)
 
     ## Downloading data...
 
-    ## 
+    ## Rows: 6312 Columns: 2162
     ## ── Column specification ────────────────────────────────────────────────────────
-    ## cols(
-    ##   .default = col_double(),
-    ##   Affiliation = col_character(),
-    ##   `Common Name` = col_character(),
-    ##   Domain = col_character(),
-    ##   Functional_type = col_character(),
-    ##   `Latin Genus` = col_character(),
-    ##   `Latin Species` = col_character(),
-    ##   PI = col_character(),
-    ##   Project = col_character(),
-    ##   Sample_ID = col_character(),
-    ##   `USDA Symbol` = col_character()
-    ## )
-    ## ℹ Use `spec()` for the full column specifications.
-
+    ## Delimiter: ","
+    ## chr   (10): Affiliation, Common Name, Domain, Functional_type, Latin Genus, ...
+    ## dbl (2152): LMA, 350, 351, 352, 353, 354, 355, 356, 357, 358, 359, 360, 361,...
+    ## 
+    ## ℹ Use `spec()` to retrieve the full column specification for this data.
+    ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
     ## Download complete!
 
 ``` r
 head(dat_raw)
 ```
 
-    ## # A tibble: 6 x 2,162
+    ## # A tibble: 6 × 2,162
     ##   Affiliation           `Common Name` Domain Functional_type   LMA `Latin Genus`
     ##   <chr>                 <chr>         <chr>  <chr>           <dbl> <chr>        
     ## 1 University of Wiscon… black walnut  D02    broadleaf        72.9 Juglans      
@@ -137,24 +127,13 @@ head(dat_raw)
     ## 4 University of Wiscon… black walnut  D02    broadleaf        60.8 Juglans      
     ## 5 University of Wiscon… black walnut  D02    broadleaf        85.9 Juglans      
     ## 6 University of Wiscon… black walnut  D02    broadleaf        85.9 Juglans      
-    ## # … with 2,156 more variables: Latin Species <chr>, PI <chr>, Project <chr>,
-    ## #   Sample_ID <chr>, USDA Symbol <chr>, 350 <dbl>, 351 <dbl>, 352 <dbl>,
-    ## #   353 <dbl>, 354 <dbl>, 355 <dbl>, 356 <dbl>, 357 <dbl>, 358 <dbl>,
-    ## #   359 <dbl>, 360 <dbl>, 361 <dbl>, 362 <dbl>, 363 <dbl>, 364 <dbl>,
-    ## #   365 <dbl>, 366 <dbl>, 367 <dbl>, 368 <dbl>, 369 <dbl>, 370 <dbl>,
-    ## #   371 <dbl>, 372 <dbl>, 373 <dbl>, 374 <dbl>, 375 <dbl>, 376 <dbl>,
-    ## #   377 <dbl>, 378 <dbl>, 379 <dbl>, 380 <dbl>, 381 <dbl>, 382 <dbl>,
-    ## #   383 <dbl>, 384 <dbl>, 385 <dbl>, 386 <dbl>, 387 <dbl>, 388 <dbl>,
-    ## #   389 <dbl>, 390 <dbl>, 391 <dbl>, 392 <dbl>, 393 <dbl>, 394 <dbl>,
-    ## #   395 <dbl>, 396 <dbl>, 397 <dbl>, 398 <dbl>, 399 <dbl>, 400 <dbl>,
-    ## #   401 <dbl>, 402 <dbl>, 403 <dbl>, 404 <dbl>, 405 <dbl>, 406 <dbl>,
-    ## #   407 <dbl>, 408 <dbl>, 409 <dbl>, 410 <dbl>, 411 <dbl>, 412 <dbl>,
-    ## #   413 <dbl>, 414 <dbl>, 415 <dbl>, 416 <dbl>, 417 <dbl>, 418 <dbl>,
-    ## #   419 <dbl>, 420 <dbl>, 421 <dbl>, 422 <dbl>, 423 <dbl>, 424 <dbl>,
-    ## #   425 <dbl>, 426 <dbl>, 427 <dbl>, 428 <dbl>, 429 <dbl>, 430 <dbl>,
-    ## #   431 <dbl>, 432 <dbl>, 433 <dbl>, 434 <dbl>, 435 <dbl>, 436 <dbl>,
-    ## #   437 <dbl>, 438 <dbl>, 439 <dbl>, 440 <dbl>, 441 <dbl>, 442 <dbl>,
-    ## #   443 <dbl>, 444 <dbl>, …
+    ## # … with 2,156 more variables: `Latin Species` <chr>, PI <chr>, Project <chr>,
+    ## #   Sample_ID <chr>, `USDA Symbol` <chr>, `350` <dbl>, `351` <dbl>,
+    ## #   `352` <dbl>, `353` <dbl>, `354` <dbl>, `355` <dbl>, `356` <dbl>,
+    ## #   `357` <dbl>, `358` <dbl>, `359` <dbl>, `360` <dbl>, `361` <dbl>,
+    ## #   `362` <dbl>, `363` <dbl>, `364` <dbl>, `365` <dbl>, `366` <dbl>,
+    ## #   `367` <dbl>, `368` <dbl>, `369` <dbl>, `370` <dbl>, `371` <dbl>,
+    ## #   `372` <dbl>, `373` <dbl>, `374` <dbl>, `375` <dbl>, `376` <dbl>, …
 
 ``` r
 names(dat_raw)[1:40]
@@ -202,7 +181,7 @@ sample_info <- dat_raw[,names(dat_raw) %notin% seq(350,2500,1)]
 head(sample_info)
 ```
 
-    ## # A tibble: 6 x 11
+    ## # A tibble: 6 × 11
     ##   Affiliation           `Common Name` Domain Functional_type   LMA `Latin Genus`
     ##   <chr>                 <chr>         <chr>  <chr>           <dbl> <chr>        
     ## 1 University of Wiscon… black walnut  D02    broadleaf        72.9 Juglans      
@@ -211,8 +190,8 @@ head(sample_info)
     ## 4 University of Wiscon… black walnut  D02    broadleaf        60.8 Juglans      
     ## 5 University of Wiscon… black walnut  D02    broadleaf        85.9 Juglans      
     ## 6 University of Wiscon… black walnut  D02    broadleaf        85.9 Juglans      
-    ## # … with 5 more variables: Latin Species <chr>, PI <chr>, Project <chr>,
-    ## #   Sample_ID <chr>, USDA Symbol <chr>
+    ## # … with 5 more variables: `Latin Species` <chr>, PI <chr>, Project <chr>,
+    ## #   Sample_ID <chr>, `USDA Symbol` <chr>
 
 ``` r
 sample_info2 <- sample_info %>%
@@ -220,7 +199,7 @@ sample_info2 <- sample_info %>%
 head(sample_info2)
 ```
 
-    ## # A tibble: 6 x 5
+    ## # A tibble: 6 × 5
     ##   Domain Functional_type Sample_ID USDA_Species_Code LMA_gDW_m2
     ##   <chr>  <chr>           <chr>     <chr>                  <dbl>
     ## 1 D02    broadleaf       P0001     JUNI                    72.9
@@ -409,7 +388,7 @@ legend("bottomright", legend=c("Prediction Interval","Confidence Interval"),
 box(lwd=2.2)
 ```
 
-![](apply_sserbin2019_plsr_to_neon_example_files/figure-gfm/unnamed-chunk-11-1.png)<!-- -->
+![](sserbin2019_plsr_ex9_files/figure-gfm/unnamed-chunk-11-1.png)<!-- -->
 
 ``` r
 dev.copy(png,file.path(outdir,paste0(inVar,"_PLSR_Validation_Scatterplot.png")), 
@@ -430,7 +409,7 @@ dev.off();
 print(paste("Output directory: ", outdir))
 ```
 
-    ## [1] "Output directory:  /var/folders/xp/h3k9vf3n2jx181ts786_yjrn9c2gjq/T//RtmpujOJFE"
+    ## [1] "Output directory:  /var/folders/xp/h3k9vf3n2jx181ts786_yjrn9c2gjq/T//RtmpT8X0p7"
 
 ``` r
 # Observed versus predicted

@@ -2,6 +2,7 @@ Spectra-trait PLSR example using NEON AOP pixel spectra and
 field-sampled leaf nitrogen content from CONUS NEON sites
 ================
 Shawn P. Serbin, Julien Lamour, & Jeremiah Anderson
+2022-03-15
 
 ### Overview
 
@@ -51,9 +52,7 @@ invisible(lapply(list.of.packages, library, character.only = TRUE))
 ### Setup other functions and options
 
 ``` r
-### Setup other functions and options
-# not in
-`%notin%` <- Negate(`%in%`)
+### Setup options
 
 # Script options
 pls::pls.options(plsralg = "oscorespls")
@@ -82,7 +81,7 @@ output_dir <- "tempdir"
 
 ### Set working directory (scratch space)
 
-    ## [1] "/private/var/folders/xp/h3k9vf3n2jx181ts786_yjrn9c2gjq/T/RtmpeLrBIP"
+    ## [1] "/private/var/folders/xp/h3k9vf3n2jx181ts786_yjrn9c2gjq/T/Rtmp5uYCrF"
 
 ### Grab data from EcoSIS
 
@@ -100,17 +99,14 @@ dat_raw <- spectratrait::get_ecosis_data(ecosis_id = ecosis_id)
 
     ## Downloading data...
 
-    ## 
+    ## Rows: 674 Columns: 459
     ## ── Column specification ────────────────────────────────────────────────────────
-    ## cols(
-    ##   .default = col_double(),
-    ##   Affiliation = col_character(),
-    ##   PI = col_character(),
-    ##   Plot_ID = col_character(),
-    ##   Project = col_character()
-    ## )
-    ## ℹ Use `spec()` for the full column specifications.
-
+    ## Delimiter: ","
+    ## chr   (4): Affiliation, PI, Plot_ID, Project
+    ## dbl (455): Boron, Calcium, Carbon, Carotenoids_area, Carotenoids_mass, Cellu...
+    ## 
+    ## ℹ Use `spec()` to retrieve the full column specification for this data.
+    ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
     ## Download complete!
 
 ``` r
@@ -131,8 +127,8 @@ head(dat_raw)
     ## #   Lignin <dbl>, Magnesium <dbl>, Manganese <dbl>, NSC <dbl>, Nitrogen <dbl>,
     ## #   PI <chr>, Phenolics <dbl>, Phosphorus <dbl>, Plot_ID <chr>,
     ## #   Potassium <dbl>, Project <chr>, SLA <dbl>, Sample_Year <dbl>, Starch <dbl>,
-    ## #   Sugar <dbl>, Sulfur <dbl>, Water <dbl>, d13C <dbl>, d15N <dbl>, 384 <dbl>,
-    ## #   389 <dbl>, 394 <dbl>, 399 <dbl>, 404 <dbl>, 409 <dbl>, 414 <dbl>, …
+    ## #   Sugar <dbl>, Sulfur <dbl>, Water <dbl>, d13C <dbl>, d15N <dbl>,
+    ## #   `384` <dbl>, `389` <dbl>, `394` <dbl>, `399` <dbl>, `404` <dbl>, …
 
 ``` r
 names(dat_raw)[1:40]
@@ -322,7 +318,7 @@ histograms <- grid.arrange(cal_hist_plot, val_hist_plot, ncol=2)
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-![](neon_leafN_canopy_plsr_example_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
+![](neon_canopy_leafN_ex5_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
 
 ``` r
 ggsave(filename = file.path(outdir,paste0(inVar,"_Cal_Val_Histograms.png")), plot = histograms, 
@@ -376,7 +372,7 @@ spectratrait::f.plot.spec(Z=cal.plsr.data$Spectra,wv=wv,plot_label="Calibration"
 spectratrait::f.plot.spec(Z=val.plsr.data$Spectra,wv=wv,plot_label="Validation")
 ```
 
-![](neon_leafN_canopy_plsr_example_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
+![](neon_canopy_leafN_ex5_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
 
 ``` r
 dev.copy(png,file.path(outdir,paste0(inVar,'_Cal_Val_Spectra.png')), 
@@ -431,7 +427,7 @@ if (method=="pls") {
     ## [1] "*** Identifying optimal number of PLSR components ***"
     ## [1] "*** Running PLS permutation test ***"
 
-![](neon_leafN_canopy_plsr_example_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
+![](neon_canopy_leafN_ex5_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
 
     ## [1] "*** Optimal number of components: 12"
 
@@ -491,7 +487,7 @@ plot(pls::R2(plsr.out,estimate=c("test"),newdata = val.plsr.data), main="MODEL R
 box(lwd=2.2)
 ```
 
-![](neon_leafN_canopy_plsr_example_files/figure-gfm/unnamed-chunk-11-1.png)<!-- -->
+![](neon_canopy_leafN_ex5_files/figure-gfm/unnamed-chunk-11-1.png)<!-- -->
 
 ``` r
 dev.copy(png,file.path(outdir,paste0(paste0(inVar,"_Validation_RMSEP_R2_by_Component.png"))), 
@@ -631,7 +627,7 @@ scatterplots <- grid.arrange(cal_scatter_plot, val_scatter_plot, cal_resid_histo
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-![](neon_leafN_canopy_plsr_example_files/figure-gfm/unnamed-chunk-12-1.png)<!-- -->
+![](neon_canopy_leafN_ex5_files/figure-gfm/unnamed-chunk-12-1.png)<!-- -->
 
 ``` r
 ggsave(filename = file.path(outdir,paste0(inVar,"_Cal_Val_Scatterplots.png")), 
@@ -654,7 +650,7 @@ abline(h=0.8, lty=2, col="dark grey")
 box(lwd=2.2)
 ```
 
-![](neon_leafN_canopy_plsr_example_files/figure-gfm/unnamed-chunk-13-1.png)<!-- -->
+![](neon_canopy_leafN_ex5_files/figure-gfm/unnamed-chunk-13-1.png)<!-- -->
 
 ``` r
 dev.copy(png, file.path(outdir, paste0(inVar,'_Coefficient_VIP_plot.png')), 
@@ -707,7 +703,7 @@ abline(h=0,lty=2,col="grey50")
 box(lwd=2.2)
 ```
 
-![](neon_leafN_canopy_plsr_example_files/figure-gfm/unnamed-chunk-15-1.png)<!-- -->
+![](neon_canopy_leafN_ex5_files/figure-gfm/unnamed-chunk-15-1.png)<!-- -->
 
 ``` r
 dev.copy(png,file.path(outdir,paste0(inVar,'_Bootstrap_Regression_Coefficients.png')), 
@@ -761,7 +757,7 @@ legend("bottomright", legend=c("Prediction Interval","Confidence Interval"),
 box(lwd=2.2)
 ```
 
-![](neon_leafN_canopy_plsr_example_files/figure-gfm/unnamed-chunk-16-1.png)<!-- -->
+![](neon_canopy_leafN_ex5_files/figure-gfm/unnamed-chunk-16-1.png)<!-- -->
 
 ``` r
 dev.copy(png,file.path(outdir,paste0(inVar,"_PLSR_Validation_Scatterplot.png")), 

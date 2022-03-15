@@ -1,14 +1,18 @@
 ---
 title: Spectra-trait PLSR example using leaf-level spectra and leaf nitrogen content (Narea, g/m2) data from 36 species growing in Rosa rugosa invaded coastal grassland communities in Belgium
 author: "Shawn P. Serbin, Julien Lamour, & Jeremiah Anderson"
+date: "`r Sys.Date()`"
 output:
-  pdf_document: default
   github_document: default
+  html_notebook: default
   html_document:
     df_print: paged
-  html_notebook: default
-params:
-  date: !r Sys.Date()
+  rmarkdown: html_vignette
+  pdf_document: default
+vignette: >
+  %\VignetteIndexEntry{Spectra-trait PLSR example using leaf-level spectra and leaf nitrogen content (Narea, g/m2) data from 36 species growing in Rosa rugosa invaded coastal grassland communities in Belgium}
+  %\usepackage[utf8]{inputenc}
+  %\VignetteEngine{knitr::knitr}
 ---
 
 ```{r setup, include=FALSE, echo=FALSE}
@@ -27,9 +31,7 @@ invisible(lapply(list.of.packages, library, character.only = TRUE))
 
 ### Setup other functions and options
 ```{r, echo=TRUE}
-### Setup other functions and options
-# not in
-`%notin%` <- Negate(`%in%`)
+### Setup options
 
 # Script options
 pls::pls.options(plsralg = "oscorespls")

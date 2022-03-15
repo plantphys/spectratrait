@@ -1,14 +1,13 @@
 ---
-title: An example showing how to apply an existing PLSR model to new data. In this case applying the LMA model from Serbin et al., (2019; DOI - 10.1111/nph.16123) to a dataset collected at CONUS NEON field sites. 
+title: An example showing how to apply an existing PLSR model to new data. In this case applying the LMA model from Serbin et al., (2019; DOI - 10.1111/nph.16123) to a dataset collected at CONUS NEON field sites 
 author: "Shawn P. Serbin, Julien Lamour, & Jeremiah Anderson"
+date: "`r Sys.Date()`"
 output:
   github_document: default
   html_notebook: default
   pdf_document: default
   html_document:
     df_print: paged
-params:
-  date: !r Sys.Date()
 ---
 
 ```{r setup, include=FALSE, echo=FALSE}

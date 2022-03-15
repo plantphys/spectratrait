@@ -3,6 +3,7 @@ area (LMA) data from 36 species growing in Rosa rugosa invaded coastal
 grassland communities in Belgium
 ================
 Shawn P. Serbin, Julien Lamour, & Jeremiah Anderson
+2022-03-15
 
 ### Overview
 
@@ -50,9 +51,7 @@ invisible(lapply(list.of.packages, library, character.only = TRUE))
 ### Step 2. Setup other functions and options
 
 ``` r
-### Setup other functions and options
-# not in
-`%notin%` <- Negate(`%in%`)
+### Setup options
 
 # Script options
 pls::pls.options(plsralg = "oscorespls")
@@ -81,7 +80,7 @@ output_dir <- "tempdir"
 
 ### Step 3. Set working directory (scratch space)
 
-    ## [1] "/private/var/folders/xp/h3k9vf3n2jx181ts786_yjrn9c2gjq/T/Rtmpfxi2vB"
+    ## [1] "/private/var/folders/xp/h3k9vf3n2jx181ts786_yjrn9c2gjq/T/RtmpBge300"
 
 ### Step 4. Pull example dataset from EcoSIS (ecosis.org)
 
@@ -100,17 +99,14 @@ dat_raw <- spectratrait::get_ecosis_data(ecosis_id = ecosis_id)
 
     ## Downloading data...
 
-    ## 
+    ## Rows: 256 Columns: 2164
     ## ── Column specification ────────────────────────────────────────────────────────
-    ## cols(
-    ##   .default = col_double(),
-    ##   `Latin Species` = col_character(),
-    ##   ids = col_character(),
-    ##   `plot code` = col_character(),
-    ##   `species code` = col_character()
-    ## )
-    ## ℹ Use `spec()` for the full column specifications.
-
+    ## Delimiter: ","
+    ## chr    (4): Latin Species, ids, plot code, species code
+    ## dbl (2160): Cw/EWT (cm3/cm2), Leaf area (mm2), Leaf calcium content per leaf...
+    ## 
+    ## ℹ Use `spec()` to retrieve the full column specification for this data.
+    ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
     ## Download complete!
 
 ``` r
@@ -118,7 +114,7 @@ head(dat_raw)
 ```
 
     ## # A tibble: 6 × 2,164
-    ##   `Cw/EWT (cm3/cm2)` `Latin Species`       `Leaf area (mm2)` `Leaf calcium cont…
+    ##   `Cw/EWT (cm3/cm2)` `Latin Species`       `Leaf area (mm2)` `Leaf calcium con…`
     ##                <dbl> <chr>                             <dbl>               <dbl>
     ## 1            0.00887 Arrhenatherum elatius              696.              0.0291
     ## 2            0.00824 Bromus sterilis                    447.              0.0230
@@ -127,12 +123,12 @@ head(dat_raw)
     ## 5            0.00851 Arrhenatherum elatius              671.              0.0286
     ## 6            0.0153  Crepis capillaris                 1401.              0.0470
     ## # … with 2,160 more variables:
-    ## #   Leaf magnesium content per leaf area (mg/mm2) <dbl>,
-    ## #   Leaf mass per area (g/cm2) <dbl>,
-    ## #   Leaf nitrogen content per leaf area (mg/mm2) <dbl>,
-    ## #   Leaf phosphorus content per leaf area (mg/mm2) <dbl>,
-    ## #   Leaf potassium content per leaf area (mg/mm2) <dbl>,
-    ## #   Plant height vegetative (cm) <dbl>, ids <chr>, plot code <chr>, …
+    ## #   `Leaf magnesium content per leaf area (mg/mm2)` <dbl>,
+    ## #   `Leaf mass per area (g/cm2)` <dbl>,
+    ## #   `Leaf nitrogen content per leaf area (mg/mm2)` <dbl>,
+    ## #   `Leaf phosphorus content per leaf area (mg/mm2)` <dbl>,
+    ## #   `Leaf potassium content per leaf area (mg/mm2)` <dbl>,
+    ## #   `Plant height vegetative (cm)` <dbl>, ids <chr>, `plot code` <chr>, …
 
 ``` r
 names(dat_raw)[1:40]
@@ -193,7 +189,7 @@ head(sample_info)
 ```
 
     ## # A tibble: 6 × 13
-    ##   `Cw/EWT (cm3/cm2)` `Latin Species`       `Leaf area (mm2)` `Leaf calcium cont…
+    ##   `Cw/EWT (cm3/cm2)` `Latin Species`       `Leaf area (mm2)` `Leaf calcium con…`
     ##                <dbl> <chr>                             <dbl>               <dbl>
     ## 1            0.00887 Arrhenatherum elatius              696.              0.0291
     ## 2            0.00824 Bromus sterilis                    447.              0.0230
@@ -201,13 +197,13 @@ head(sample_info)
     ## 4            0.0106  Rubus caesius                     5719.              0.0700
     ## 5            0.00851 Arrhenatherum elatius              671.              0.0286
     ## 6            0.0153  Crepis capillaris                 1401.              0.0470
-    ## # … with 9 more variables: Leaf magnesium content per leaf area (mg/mm2) <dbl>,
-    ## #   Leaf mass per area (g/cm2) <dbl>,
-    ## #   Leaf nitrogen content per leaf area (mg/mm2) <dbl>,
-    ## #   Leaf phosphorus content per leaf area (mg/mm2) <dbl>,
-    ## #   Leaf potassium content per leaf area (mg/mm2) <dbl>,
-    ## #   Plant height vegetative (cm) <dbl>, ids <chr>, plot code <chr>,
-    ## #   species code <chr>
+    ## # … with 9 more variables:
+    ## #   `Leaf magnesium content per leaf area (mg/mm2)` <dbl>,
+    ## #   `Leaf mass per area (g/cm2)` <dbl>,
+    ## #   `Leaf nitrogen content per leaf area (mg/mm2)` <dbl>,
+    ## #   `Leaf phosphorus content per leaf area (mg/mm2)` <dbl>,
+    ## #   `Leaf potassium content per leaf area (mg/mm2)` <dbl>,
+    ## #   `Plant height vegetative (cm)` <dbl>, ids <chr>, `plot code` <chr>, …
 
 ``` r
 sample_info2 <- sample_info %>%
@@ -330,7 +326,7 @@ histograms <- grid.arrange(cal_hist_plot, val_hist_plot, ncol=2)
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-![](reseco_lma_plsr_example_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
+![](reseco_lma_ex8_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
 
 ``` r
 # Figure S1. The resulting leaf mass area (LMA, g/m2) distribution (histogram) for the 
@@ -399,7 +395,7 @@ spectratrait::f.plot.spec(Z=val.plsr.data$Spectra,wv=wv,
             plot_label="Validation")
 ```
 
-![](reseco_lma_plsr_example_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
+![](reseco_lma_ex8_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
 
 ``` r
 # Figure S2. The resulting calibration and validation spectral reflectance distribution by
@@ -465,7 +461,7 @@ if (method=="pls") {
 
     ## [1] "*** Optimal number of components based on t.test: 11"
 
-![](reseco_lma_plsr_example_files/figure-gfm/unnamed-chunk-11-1.png)<!-- -->
+![](reseco_lma_ex8_files/figure-gfm/unnamed-chunk-11-1.png)<!-- -->
 
 ``` r
 # Figure S3. Selection of the optimal number of components based on the 
@@ -529,7 +525,7 @@ plot(pls::R2(plsr.out,estimate=c("test"),newdata = val.plsr.data), main="MODEL R
 box(lwd=2.2)
 ```
 
-![](reseco_lma_plsr_example_files/figure-gfm/unnamed-chunk-12-1.png)<!-- -->
+![](reseco_lma_ex8_files/figure-gfm/unnamed-chunk-12-1.png)<!-- -->
 
 ``` r
 # Figure S4. A plot of the validation root mean square error of prediction (RMSEP, left) 
@@ -677,7 +673,7 @@ scatterplots <- grid.arrange(cal_scatter_plot, val_scatter_plot, cal_resid_histo
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-![](reseco_lma_plsr_example_files/figure-gfm/unnamed-chunk-13-1.png)<!-- -->
+![](reseco_lma_ex8_files/figure-gfm/unnamed-chunk-13-1.png)<!-- -->
 
 ``` r
 # Figure S5. The calibration model and independent validation scatter plot results for 
@@ -704,7 +700,7 @@ abline(h=0.8,lty=2,col="dark grey")
 box(lwd=2.2)
 ```
 
-![](reseco_lma_plsr_example_files/figure-gfm/unnamed-chunk-15-1.png)<!-- -->
+![](reseco_lma_ex8_files/figure-gfm/unnamed-chunk-15-1.png)<!-- -->
 
 ``` r
 # Figure S6. The calibration model PLSR regression coefficient (top) and variable 
@@ -785,7 +781,7 @@ legend("topleft",legend = "7.", cex=2, bty="n")
 box(lwd=2.2)
 ```
 
-![](reseco_lma_plsr_example_files/figure-gfm/unnamed-chunk-17-1.png)<!-- -->
+![](reseco_lma_ex8_files/figure-gfm/unnamed-chunk-17-1.png)<!-- -->
 
 ``` r
 # Figure S7. The calibration model jackknife PLSR regression coefficients 
@@ -832,7 +828,7 @@ legend("bottomright", legend="8.", bty="n", cex=2.2)
 box(lwd=2.2)
 ```
 
-![](reseco_lma_plsr_example_files/figure-gfm/unnamed-chunk-18-1.png)<!-- -->
+![](reseco_lma_ex8_files/figure-gfm/unnamed-chunk-18-1.png)<!-- -->
 
 ``` r
 # Figure S8. Independent validation results for the LMA PLSR model with associated 
@@ -883,7 +879,7 @@ write.csv(out.jk.coefs,file=file.path(outdir,
 print(paste("Output directory: ", outdir))
 ```
 
-    ## [1] "Output directory:  /var/folders/xp/h3k9vf3n2jx181ts786_yjrn9c2gjq/T//Rtmpfxi2vB"
+    ## [1] "Output directory:  /var/folders/xp/h3k9vf3n2jx181ts786_yjrn9c2gjq/T//RtmpBge300"
 
 ``` r
 # Observed versus predicted

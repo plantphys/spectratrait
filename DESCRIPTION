@@ -28,7 +28,7 @@ Authors@R:
            email = "sserbin@bnl.gov",
            comment = c(ORCID = "0000-0003-4136-8971")))
 Maintainer: Shawn P. Serbin <sserbin@bnl.gov>
-Description: Provides functions to conduct standardized leaf-level spectra-trait PLSR model fitting including uncertainty analysis that follow DOI: https://doi.org/10.1111/nph.16123
+Description: This package provides functions to conduct standardized spectra-trait PLSR model fitting, including uncertainty analysis that follows DOI: https://doi.org/10.1111/nph.16123
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
@@ -52,7 +52,8 @@ Suggests:
     remotes (>= 2.2.0),
     RCurl (>= 1.98-1.2),
     knitr (>= 1.37),
-    markdown
+    markdown,
+    rmarkdown
 Depends:
     R (>= 2.10)
 VignetteBuilder: knitr

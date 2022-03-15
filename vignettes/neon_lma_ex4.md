@@ -2,6 +2,7 @@ Spectra-trait PLSR example using leaf-level spectra and leaf mass per
 area (LMA) data from CONUS NEON sites
 ================
 Shawn P. Serbin, Julien Lamour, & Jeremiah Anderson
+2022-03-15
 
 ### Overview
 
@@ -49,9 +50,7 @@ invisible(lapply(list.of.packages, library, character.only = TRUE))
 ### Setup other functions and options
 
 ``` r
-### Setup other functions and options
-# not in
-`%notin%` <- Negate(`%in%`)
+### Setup options
 
 # Script options
 pls::pls.options(plsralg = "oscorespls")
@@ -80,7 +79,7 @@ output_dir <- "tempdir"
 
 ### Set working directory (scratch space)
 
-    ## [1] "/private/var/folders/xp/h3k9vf3n2jx181ts786_yjrn9c2gjq/T/Rtmp1VUVAg"
+    ## [1] "/private/var/folders/xp/h3k9vf3n2jx181ts786_yjrn9c2gjq/T/RtmplNNxbk"
 
 ### Grab data from EcoSIS
 
@@ -101,23 +100,14 @@ dat_raw <- spectratrait::get_ecosis_data(ecosis_id = ecosis_id)
 
     ## Downloading data...
 
-    ## 
+    ## Rows: 6312 Columns: 2162
     ## ── Column specification ────────────────────────────────────────────────────────
-    ## cols(
-    ##   .default = col_double(),
-    ##   Affiliation = col_character(),
-    ##   `Common Name` = col_character(),
-    ##   Domain = col_character(),
-    ##   Functional_type = col_character(),
-    ##   `Latin Genus` = col_character(),
-    ##   `Latin Species` = col_character(),
-    ##   PI = col_character(),
-    ##   Project = col_character(),
-    ##   Sample_ID = col_character(),
-    ##   `USDA Symbol` = col_character()
-    ## )
-    ## ℹ Use `spec()` for the full column specifications.
-
+    ## Delimiter: ","
+    ## chr   (10): Affiliation, Common Name, Domain, Functional_type, Latin Genus, ...
+    ## dbl (2152): LMA, 350, 351, 352, 353, 354, 355, 356, 357, 358, 359, 360, 361,...
+    ## 
+    ## ℹ Use `spec()` to retrieve the full column specification for this data.
+    ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
     ## Download complete!
 
 ``` r
@@ -133,13 +123,13 @@ head(dat_raw)
     ## 4 University of Wiscon… black walnut  D02    broadleaf        60.8 Juglans      
     ## 5 University of Wiscon… black walnut  D02    broadleaf        85.9 Juglans      
     ## 6 University of Wiscon… black walnut  D02    broadleaf        85.9 Juglans      
-    ## # … with 2,156 more variables: Latin Species <chr>, PI <chr>, Project <chr>,
-    ## #   Sample_ID <chr>, USDA Symbol <chr>, 350 <dbl>, 351 <dbl>, 352 <dbl>,
-    ## #   353 <dbl>, 354 <dbl>, 355 <dbl>, 356 <dbl>, 357 <dbl>, 358 <dbl>,
-    ## #   359 <dbl>, 360 <dbl>, 361 <dbl>, 362 <dbl>, 363 <dbl>, 364 <dbl>,
-    ## #   365 <dbl>, 366 <dbl>, 367 <dbl>, 368 <dbl>, 369 <dbl>, 370 <dbl>,
-    ## #   371 <dbl>, 372 <dbl>, 373 <dbl>, 374 <dbl>, 375 <dbl>, 376 <dbl>,
-    ## #   377 <dbl>, 378 <dbl>, 379 <dbl>, 380 <dbl>, 381 <dbl>, 382 <dbl>, …
+    ## # … with 2,156 more variables: `Latin Species` <chr>, PI <chr>, Project <chr>,
+    ## #   Sample_ID <chr>, `USDA Symbol` <chr>, `350` <dbl>, `351` <dbl>,
+    ## #   `352` <dbl>, `353` <dbl>, `354` <dbl>, `355` <dbl>, `356` <dbl>,
+    ## #   `357` <dbl>, `358` <dbl>, `359` <dbl>, `360` <dbl>, `361` <dbl>,
+    ## #   `362` <dbl>, `363` <dbl>, `364` <dbl>, `365` <dbl>, `366` <dbl>,
+    ## #   `367` <dbl>, `368` <dbl>, `369` <dbl>, `370` <dbl>, `371` <dbl>,
+    ## #   `372` <dbl>, `373` <dbl>, `374` <dbl>, `375` <dbl>, `376` <dbl>, …
 
 ``` r
 names(dat_raw)[1:40]
@@ -178,8 +168,8 @@ head(sample_info)
     ## 4 University of Wiscon… black walnut  D02    broadleaf        60.8 Juglans      
     ## 5 University of Wiscon… black walnut  D02    broadleaf        85.9 Juglans      
     ## 6 University of Wiscon… black walnut  D02    broadleaf        85.9 Juglans      
-    ## # … with 5 more variables: Latin Species <chr>, PI <chr>, Project <chr>,
-    ## #   Sample_ID <chr>, USDA Symbol <chr>
+    ## # … with 5 more variables: `Latin Species` <chr>, PI <chr>, Project <chr>,
+    ## #   Sample_ID <chr>, `USDA Symbol` <chr>
 
 ``` r
 sample_info2 <- sample_info %>%
@@ -288,7 +278,7 @@ histograms <- grid.arrange(cal_hist_plot, val_hist_plot, ncol=2)
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-![](neon_lma_plsr_example_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
+![](neon_lma_ex4_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
 
 ``` r
 ggsave(filename = file.path(outdir,paste0(inVar,"_Cal_Val_Histograms.png")), 
@@ -342,7 +332,7 @@ spectratrait::f.plot.spec(Z=cal.plsr.data$Spectra,wv=wv,plot_label="Calibration"
 spectratrait::f.plot.spec(Z=val.plsr.data$Spectra,wv=wv,plot_label="Validation")
 ```
 
-![](neon_lma_plsr_example_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
+![](neon_lma_ex4_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
 
 ``` r
 dev.copy(png,file.path(outdir,paste0(inVar,'_Cal_Val_Spectra.png')), 
@@ -404,7 +394,7 @@ if (method=="pls") {
 
     ## [1] "*** Optimal number of components based on t.test: 12"
 
-![](neon_lma_plsr_example_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
+![](neon_lma_ex4_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
 
 ``` r
 dev.copy(png,file.path(outdir,paste0(paste0(inVar,"_PLSR_Component_Selection.png"))), 
@@ -469,7 +459,7 @@ plot(pls::R2(plsr.out,estimate=c("test"),newdata = val.plsr.data), main="MODEL R
 box(lwd=2.2)
 ```
 
-![](neon_lma_plsr_example_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
+![](neon_lma_ex4_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
 
 ``` r
 par(opar)
@@ -607,7 +597,7 @@ scatterplots <- grid.arrange(cal_scatter_plot, val_scatter_plot, cal_resid_histo
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-![](neon_lma_plsr_example_files/figure-gfm/unnamed-chunk-11-1.png)<!-- -->
+![](neon_lma_ex4_files/figure-gfm/unnamed-chunk-11-1.png)<!-- -->
 
 ``` r
 ggsave(filename = file.path(outdir,paste0(inVar,"_Cal_Val_scatterplots.png")), 
@@ -631,7 +621,7 @@ abline(h=0.8,lty=2,col="dark grey")
 box(lwd=2.2)
 ```
 
-![](neon_lma_plsr_example_files/figure-gfm/unnamed-chunk-12-1.png)<!-- -->
+![](neon_lma_ex4_files/figure-gfm/unnamed-chunk-12-1.png)<!-- -->
 
 ``` r
 dev.copy(png,file.path(outdir,paste0(inVar,'_Coefficient_VIP_plot.png')), 
@@ -714,7 +704,7 @@ abline(h=0,lty=2,col="grey50")
 box(lwd=2.2)
 ```
 
-![](neon_lma_plsr_example_files/figure-gfm/unnamed-chunk-14-1.png)<!-- -->
+![](neon_lma_ex4_files/figure-gfm/unnamed-chunk-14-1.png)<!-- -->
 
 ``` r
 dev.copy(png,file.path(outdir,paste0(inVar,'_Jackknife_Regression_Coefficients.png')), 
@@ -759,7 +749,7 @@ legend("topleft", legend=expr, bty="n", cex=1.5)
 box(lwd=2.2)
 ```
 
-![](neon_lma_plsr_example_files/figure-gfm/unnamed-chunk-15-1.png)<!-- -->
+![](neon_lma_ex4_files/figure-gfm/unnamed-chunk-15-1.png)<!-- -->
 
 ``` r
 dev.copy(png,file.path(outdir,paste0(inVar,"_PLSR_Validation_Scatterplot.png")), 

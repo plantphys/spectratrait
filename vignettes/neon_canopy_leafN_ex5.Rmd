@@ -1,36 +1,39 @@
 ---
-title: Spectra-trait PLSR example using leaf-level spectra and specific leaf area (SLA) data from more than 40 species grassland species comprising both herbs and graminoids. 
+title: Spectra-trait PLSR example using NEON AOP pixel spectra and field-sampled leaf nitrogen content from CONUS NEON sites
 author: "Shawn P. Serbin, Julien Lamour, & Jeremiah Anderson"
+date: "`r Sys.Date()`"
 output:
   pdf_document: default
   html_notebook: default
-  github_document: default
   html_document:
     df_print: paged
-params:
-  date: !r Sys.Date()
+  github_document: default
+  rmarkdown: html_vignette
+vignette: >
+  %\VignetteIndexEntry{Spectra-trait PLSR example using NEON AOP pixel spectra and field-sampled leaf nitrogen content from CONUS NEON sites}
+  %\usepackage[utf8]{inputenc}
+  %\VignetteEngine{knitr::knitr}
 ---
 
-```{r setup, include=FALSE, echo=FALSE}
+```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ### Overview
-This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook to illustrate how to retrieve a dataset from the EcoSIS spectral database, choose the "optimal" number of plsr components, and fit a plsr model for specific leaf area (SLA). In this example, the plants were cultivated in an outdoor setting in the botanical garden of the KIT using 40x40 cm pots with an standardized substrate. The data was measured on a weekly basis (the timestamp is included in the dataset). 
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook to illustrate how to develop
+pixel-scale spectra-trait PLSR models. This example uses image data from NEON AOP and associated field measurements of leaf nitrogen content collected across a range of CONUS NEON sites.  For more information refer to the dataset EcoSIS page:
+https://ecosis.org/package/canopy-spectra-to-map-foliar-functional-traits-over-neon-domains-in-eastern-united-states
 
 ### Getting Started
 ### Load libraries
 ```{r, eval=TRUE, echo=TRUE}
-list.of.packages <- c("pls","dplyr","reshape2","here","plotrix","ggplot2","gridExtra",
-                      "spectratrait")
+list.of.packages <- c("pls","dplyr","here","plotrix","ggplot2","gridExtra","spectratrait")
 invisible(lapply(list.of.packages, library, character.only = TRUE))
 ```
 
 ### Setup other functions and options
 ```{r, echo=TRUE}
-### Setup other functions and options
-# not in
-`%notin%` <- Negate(`%in%`)
+### Setup options
 
 # Script options
 pls::pls.options(plsralg = "oscorespls")
@@ -39,11 +42,11 @@ pls::pls.options("plsralg")
 # Default par options
 opar <- par(no.readonly = T)
 
-# What is the target variable?
-inVar <- "SLA_g_cm"
+# What is the target variable? What is the variable name in the input dataset?
+inVar <- "Nitrogen"
 
 # What is the source dataset from EcoSIS?
-ecosis_id <- "3cf6b27e-d80e-4bc7-b214-c95506e46daa"
+ecosis_id <- "b9dbf3db-5b9c-4ab2-88c2-26c8b39d0903"
 
 # Specify output directory, output_dir 
 # Options: 
@@ -54,15 +57,19 @@ output_dir <- "tempdir"
 
 ### Set working directory (scratch space)
 ```{r, echo=FALSE}
-outdir <- tempdir()
+if (output_dir=="tempdir") {
+  outdir <- tempdir()
+} else {
+  if (! file.exists(output_dir)) dir.create(output_dir,recursive=TRUE)
+  outdir <- file.path(path.expand(output_dir))
+}
 setwd(outdir) # set working directory
-print(paste0("Output directory: ",getwd()))
+print(getwd())  # check wd
 ```
 
 ### Grab data from EcoSIS
 ```{r, echo=TRUE}
 print(paste0("Output directory: ",getwd()))  # check wd
-### Get source dataset from EcoSIS
 dat_raw <- spectratrait::get_ecosis_data(ecosis_id = ecosis_id)
 head(dat_raw)
 names(dat_raw)[1:40]
@@ -70,47 +77,78 @@ names(dat_raw)[1:40]
 
 ### Create full plsr dataset
 ```{r, echo=TRUE}
-### Create plsr dataset
+# identify the trait data and other metadata
+sample_info <- dat_raw[,names(dat_raw) %notin% seq(300,2600,1)]
+head(sample_info)
+
+# spectra matrix
+Spectra <- as.matrix(dat_raw[,names(dat_raw) %notin% names(sample_info)])
+
+# set the desired spectra wavelength range to include
 Start.wave <- 500
 End.wave <- 2400
 wv <- seq(Start.wave,End.wave,1)
-Spectra <- as.matrix(dat_raw[,names(dat_raw) %in% wv])
-colnames(Spectra) <- c(paste0("Wave_",wv))
-sample_info <- dat_raw[,names(dat_raw) %notin% seq(350,2500,1)]
-head(sample_info)
+final_spec <- Spectra[,round(as.numeric(colnames(Spectra))) %in% wv]
+colnames(final_spec) <- c(paste0("Wave_",colnames(final_spec)))
 
+## Drop bad spectra data - for canopy-scale reflectance, often the "water band" wavelengths
+## are too noisy to use for trait estimation.  Its possible to remove these wavelengths
+## prior to model fitting. Its best to first identify which wavelengths to drop
+## before attempting PLSR, as these ranges may need to be considered on a case-by-case 
+## basis or generalized for multiple datasets
+dropwaves <- c(1350:1440, 1826:1946)
+final_spec <- final_spec[,colnames(final_spec) %notin% paste0("Wave_",dropwaves)]
+wv <- as.numeric(gsub(pattern = "Wave_",replacement = "", x = colnames(final_spec)))
+
+## Drop bad spectra data - for canopy-scale reflectance, often the "water band" wavelengths
+## are too noisy to use for trait estimation.  Its possible to remove these wavelengths
+## prior to model fitting. Its best to first identify which wavelengths to drop
+## before attempting PLSR, as these ranges may need to be considered on a case-by-case 
+## basis or generalized for multiple datasets
+dropwaves <- c(1350:1440, 1826:1946)
+final_spec <- final_spec[,colnames(final_spec) %notin% paste0("Wave_",dropwaves)]
+wv <- as.numeric(gsub(pattern = "Wave_",replacement = "", x = colnames(final_spec)))
+
+# assemble example dataset
 sample_info2 <- sample_info %>%
-  select(Plant_Species=species,Growth_Form=`growth form`,timestamp,
-         SLA_g_cm=`SLA (g/cm )`) %>%
-  mutate(SLA_g_cm=as.numeric(SLA_g_cm)) # ensure SLA is numeric
-head(sample_info2)
+  select(Plot_ID,Sample_Year,SLA,Nitrogen)
+site_plot <- data.frame(matrix(unlist(strsplit(sample_info2$Plot_ID, "_")), 
+                               ncol=2, byrow=TRUE))
+colnames(site_plot) <- c("Plot_Num","SampleID")
+sample_info3 <- data.frame(site_plot,sample_info2)
 
-plsr_data <- data.frame(sample_info2,Spectra)
-rm(sample_info,sample_info2,Spectra)
+plsr_data <- data.frame(sample_info3,final_spec*0.01)
+rm(sample_info,sample_info2,sample_info3,Spectra, site_plot)
 ```
 
-### Example data cleaning
-```{r}
-#### End user needs to do what's appropriate for their data.  This may be an iterative process.
+#### Example data cleaning.
+```{r, echo=TRUE}
+# Example data cleaning.  End user needs to do what's appropriate for their 
+# data. This may be an iterative process.
 # Keep only complete rows of inVar and spec data before fitting
-plsr_data <- plsr_data[complete.cases(plsr_data[,names(plsr_data) %in% c(inVar,wv)]),]
-# Remove suspect high values
-plsr_data <- plsr_data[ plsr_data[,inVar] <= 500, ]
+#
+plsr_data <- plsr_data %>%  # remove erroneously high values, or "bad spectra"
+  filter(Nitrogen<50) %>%
+  filter(Wave_859<80) %>%
+  filter(Wave_859>15)
+plsr_data <- plsr_data[complete.cases(plsr_data[,names(plsr_data) %in% 
+                                                  c(inVar,paste0("Wave_",wv))]),]
 ```
 
 ### Create cal/val datasets
 ```{r, fig.height = 5, fig.width = 12, echo=TRUE}
-### Create cal/val datasets
 ## Make a stratified random sampling in the strata USDA_Species_Code and Domain
 
 method <- "base" #base/dplyr
 # base R - a bit slow
 # dplyr - much faster
-split_data <- spectratrait::create_data_split(dataset=plsr_data, approach=method, split_seed=2356812, 
-                                              prop=0.8, group_variables="Plant_Species")
+split_data <- spectratrait::create_data_split(dataset=plsr_data, approach=method, split_seed=2356326,
+                                              prop=0.8, group_variables="Plot_Num")
 names(split_data)
 cal.plsr.data <- split_data$cal_data
+head(cal.plsr.data)[1:8]
 val.plsr.data <- split_data$val_data
+head(val.plsr.data)[1:8]
 rm(split_data)
 
 # Datasets:
@@ -119,15 +157,16 @@ print(paste("Val observations: ",dim(val.plsr.data)[1],sep=""))
 
 cal_hist_plot <- qplot(cal.plsr.data[,paste0(inVar)],geom="histogram",
                        main = paste0("Cal. Histogram for ",inVar),
-                       xlab = paste0(inVar),ylab = "Count",fill=I("grey50"),
-                       col=I("black"),alpha=I(.7))
+                       xlab = paste0(inVar),ylab = "Count",fill=I("grey50"),col=I("black"),
+                       alpha=I(.7))
 val_hist_plot <- qplot(val.plsr.data[,paste0(inVar)],geom="histogram",
                        main = paste0("Val. Histogram for ",inVar),
-                       xlab = paste0(inVar),ylab = "Count",fill=I("grey50"),
-                       col=I("black"),alpha=I(.7))
+                       xlab = paste0(inVar),ylab = "Count",fill=I("grey50"),col=I("black"),
+                       alpha=I(.7))
 histograms <- grid.arrange(cal_hist_plot, val_hist_plot, ncol=2)
-ggsave(filename = file.path(outdir,paste0(inVar,"_Cal_Val_Histograms.png")), 
-       plot = histograms, device="png", width = 30, height = 12, units = "cm",
+ggsave(filename = file.path(outdir,paste0(inVar,"_Cal_Val_Histograms.png")), plot = histograms, 
+       device="png", width = 30, 
+       height = 12, units = "cm",
        dpi = 300)
 # output cal/val data
 write.csv(cal.plsr.data,file=file.path(outdir,paste0(inVar,'_Cal_PLSR_Dataset.csv')),
@@ -138,7 +177,6 @@ write.csv(val.plsr.data,file=file.path(outdir,paste0(inVar,'_Val_PLSR_Dataset.cs
 
 ### Create calibration and validation PLSR datasets
 ```{r, echo=TRUE}
-### Format PLSR data for model fitting 
 cal_spec <- as.matrix(cal.plsr.data[, which(names(cal.plsr.data) %in% paste0("Wave_",wv))])
 cal.plsr.data <- data.frame(cal.plsr.data[, which(names(cal.plsr.data) %notin% paste0("Wave_",wv))],
                             Spectra=I(cal_spec))
@@ -162,9 +200,8 @@ dev.off();
 par(mfrow=c(1,1))
 ```
 
-### Use Jackknife permutation to determine optimal number of components
+### Use permutation to determine optimal number of components
 ```{r, fig.height = 6, fig.width = 10, echo=TRUE}
-### Use permutation to determine the optimal number of components
 if(grepl("Windows", sessionInfo()$running)){
   pls.options(parallel = NULL)
 } else {
@@ -172,23 +209,22 @@ if(grepl("Windows", sessionInfo()$running)){
 }
 
 method <- "pls" #pls, firstPlateau, firstMin
-random_seed <- 2356812
-seg <- 100
-maxComps <- 18
-iterations <- 50
+random_seed <- 1245565
+seg <- 50
+maxComps <- 16
+iterations <- 80
 prop <- 0.70
 if (method=="pls") {
   # pls package approach - faster but estimates more components....
-  nComps <- spectratrait::find_optimal_components(dataset=cal.plsr.data, targetVariable=inVar, 
+  nComps <- spectratrait::find_optimal_components(dataset=cal.plsr.data, targetVariable=inVar,
                                                   method=method, 
                                                   maxComps=maxComps, seg=seg, 
                                                   random_seed=random_seed)
   print(paste0("*** Optimal number of components: ", nComps))
 } else {
-  nComps <- spectratrait::find_optimal_components(dataset=cal.plsr.data, targetVariable=inVar, 
+  nComps <- spectratrait::find_optimal_components(dataset=cal.plsr.data, targetVariable=inVar,
                                                   method=method, 
-                                                  maxComps=maxComps, 
-                                                  iterations=iterations, 
+                                                  maxComps=maxComps, iterations=iterations, 
                                                   seg=seg, prop=prop, 
                                                   random_seed=random_seed)
 }
@@ -199,9 +235,8 @@ dev.off();
 
 ### Fit final model
 ```{r, fig.height = 5, fig.width = 12, echo=TRUE}
-segs <- 100
-plsr.out <- plsr(as.formula(paste(inVar,"~","Spectra")),scale=FALSE,ncomp=nComps,validation="CV",
-                 segments=segs, segment.type="interleaved",trace=FALSE,data=cal.plsr.data)
+plsr.out <- plsr(as.formula(paste(inVar,"~","Spectra")),scale=FALSE,ncomp=nComps,validation="LOO",
+                 trace=FALSE,data=cal.plsr.data)
 fit <- plsr.out$fitted.values[,1,nComps]
 pls.options(parallel = NULL)
 
@@ -212,8 +247,8 @@ plot(pls::RMSEP(plsr.out,estimate=c("test"),newdata = val.plsr.data), main="MODE
      xlab="Number of Components",ylab="Model Validation RMSEP",lty=1,col="black",cex=1.5,lwd=2)
 box(lwd=2.2)
 
-pls::R2(plsr.out, newdata = val.plsr.data)
-plot(R2(plsr.out,estimate=c("test"),newdata = val.plsr.data), main="MODEL R2",
+R2(plsr.out, newdata = val.plsr.data)
+plot(pls::R2(plsr.out,estimate=c("test"),newdata = val.plsr.data), main="MODEL R2",
      xlab="Number of Components",ylab="Model Validation R2",lty=1,col="black",cex=1.5,lwd=2)
 box(lwd=2.2)
 dev.copy(png,file.path(outdir,paste0(paste0(inVar,"_Validation_RMSEP_R2_by_Component.png"))), 
@@ -223,9 +258,9 @@ par(opar)
 ```
 
 ### PLSR fit observed vs. predicted plot data
-```{r, fig.height = 15, fig.width = 15, echo=TRUE}  
+```{r, fig.height = 15, fig.width = 15, echo=TRUE} 
 #calibration
-cal.plsr.output <- data.frame(cal.plsr.data[, which(names(cal.plsr.data) %notin% "Spectra")],
+cal.plsr.output <- data.frame(cal.plsr.data[, which(names(cal.plsr.data) %notin% "Spectra")], 
                               PLSR_Predicted=fit,
                               PLSR_CV_Predicted=as.vector(plsr.out$validation$pred[,,nComps]))
 cal.plsr.output <- cal.plsr.output %>%
@@ -294,7 +329,7 @@ val_resid_histogram <- ggplot(val.plsr.output, aes(x=PLSR_Residuals)) +
 
 # plot cal/val side-by-side
 scatterplots <- grid.arrange(cal_scatter_plot, val_scatter_plot, cal_resid_histogram, 
-                             val_resid_histogram, nrow=2, ncol=2)
+                             val_resid_histogram, nrow=2,ncol=2)
 ggsave(filename = file.path(outdir,paste0(inVar,"_Cal_Val_Scatterplots.png")), 
        plot = scatterplots, device="png", width = 32, height = 30, units = "cm",
        dpi = 300)
@@ -305,47 +340,47 @@ ggsave(filename = file.path(outdir,paste0(inVar,"_Cal_Val_Scatterplots.png")),
 vips <- spectratrait::VIP(plsr.out)[nComps,]
 
 par(mfrow=c(2,1))
-plot(plsr.out, plottype = "coef",xlab="Wavelength (nm)",
-     ylab="Regression coefficients",legendpos = "bottomright",
-     ncomp=nComps,lwd=2)
+plot(plsr.out$coefficients[,,nComps], x=wv,xlab="Wavelength (nm)",
+     ylab="Regression coefficients",lwd=2,type='l')
 box(lwd=2.2)
-plot(seq(Start.wave,End.wave,1),vips,xlab="Wavelength (nm)",ylab="VIP",cex=0.01)
-lines(seq(Start.wave,End.wave,1),vips,lwd=3)
-abline(h=0.8,lty=2,col="dark grey")
+plot(wv, vips, xlab="Wavelength (nm)",ylab="VIP",cex=0.01)
+lines(wv, vips, lwd=3)
+abline(h=0.8, lty=2, col="dark grey")
 box(lwd=2.2)
-dev.copy(png,file.path(outdir,paste0(inVar,'_Coefficient_VIP_plot.png')), 
+dev.copy(png, file.path(outdir, paste0(inVar,'_Coefficient_VIP_plot.png')), 
          height=3100, width=4100, res=340)
 dev.off();
 par(opar)
 ```
 
-### Jackknife validation
-```{r, echo=TRUE}
+### Bootstrap validation
+```{r, echo=FALSE}
 if(grepl("Windows", sessionInfo()$running)){
   pls.options(parallel =NULL)
 } else {
   pls.options(parallel = parallel::detectCores()-1)
 }
 
-seg <- 100
-jk.plsr.out <- pls::plsr(as.formula(paste(inVar,"~","Spectra")), scale=FALSE, 
-                         center=TRUE, ncomp=nComps, validation="CV", 
-                         segments = seg, segment.type="interleaved", trace=FALSE, 
-                         jackknife=TRUE, data=cal.plsr.data)
-pls.options(parallel = NULL)
+### PLSR bootstrap permutation uncertainty analysis
+iterations <- 500    # how many permutation iterations to run
+prop <- 0.70          # fraction of training data to keep for each iteration
+plsr_permutation <- spectratrait::pls_permutation(dataset=cal.plsr.data, targetVariable=inVar,
+                                                  maxComps=nComps, 
+                                                  iterations=iterations, prop=prop,
+                                                  verbose = FALSE)
+bootstrap_intercept <- plsr_permutation$coef_array[1,,nComps]
+bootstrap_coef <- plsr_permutation$coef_array[2:length(plsr_permutation$coef_array[,1,nComps]),
+                                              ,nComps]
+rm(plsr_permutation)
 
-Jackknife_coef <- f.coef.valid(plsr.out = jk.plsr.out, data_plsr = cal.plsr.data, 
-                               ncomp = nComps, inVar=inVar)
-Jackknife_intercept <- Jackknife_coef[1,,,]
-Jackknife_coef <- Jackknife_coef[2:dim(Jackknife_coef)[1],,,]
-
+# apply coefficients to left-out validation data
 interval <- c(0.025,0.975)
-Jackknife_Pred <- val.plsr.data$Spectra %*% Jackknife_coef + 
-  matrix(rep(Jackknife_intercept, length(val.plsr.data[,inVar])), byrow=TRUE, 
-         ncol=length(Jackknife_intercept))
-Interval_Conf <- apply(X = Jackknife_Pred, MARGIN = 1, FUN = quantile, 
+Bootstrap_Pred <- val.plsr.data$Spectra %*% bootstrap_coef + 
+  matrix(rep(bootstrap_intercept, length(val.plsr.data[,inVar])), byrow=TRUE, 
+         ncol=length(bootstrap_intercept))
+Interval_Conf <- apply(X = Bootstrap_Pred, MARGIN = 1, FUN = quantile, 
                        probs=c(interval[1], interval[2]))
-sd_mean <- apply(X = Jackknife_Pred, MARGIN = 1, FUN =sd)
+sd_mean <- apply(X = Bootstrap_Pred, MARGIN = 1, FUN = sd)
 sd_res <- sd(val.plsr.output$PLSR_Residuals)
 sd_tot <- sqrt(sd_mean^2+sd_res^2)
 val.plsr.output$LCI <- Interval_Conf[1,]
@@ -357,16 +392,18 @@ head(val.plsr.output)
 
 ### Jackknife coefficient plot
 ```{r, fig.height = 6, fig.width = 10, echo=TRUE}
-spectratrait::f.plot.coef(Z = t(Jackknife_coef), wv = wv, 
-            plot_label="Jackknife regression coefficients",position = 'bottomleft')
+spectratrait::f.plot.coef(Z = t(bootstrap_coef), wv = wv, 
+                          plot_label="Bootstrap regression coefficients", 
+                          position = 'bottomleft')
 abline(h=0,lty=2,col="grey50")
 box(lwd=2.2)
-dev.copy(png,file.path(outdir,paste0(inVar,'_Jackknife_Regression_Coefficients.png')), 
+dev.copy(png,file.path(outdir,paste0(inVar,'_Bootstrap_Regression_Coefficients.png')), 
          height=2100, width=3800, res=340)
 dev.off();
 ```
 
-### Jackknife validation plot
+
+### Bootstrap validation plot
 ```{r, fig.height = 7, fig.width = 8, echo=TRUE}
 rmsep_percrmsep <- spectratrait::percent_rmse(plsr_dataset = val.plsr.output, 
                                               inVar = inVar, 
@@ -382,28 +419,36 @@ expr[[3]] <- bquote("%RMSEP"==.(round(perc_RMSEP,2)))
 rng_vals <- c(min(val.plsr.output$LPI), max(val.plsr.output$UPI))
 par(mfrow=c(1,1), mar=c(4.2,5.3,1,0.4), oma=c(0, 0.1, 0, 0.2))
 plotrix::plotCI(val.plsr.output$PLSR_Predicted,val.plsr.output[,inVar], 
-       li=val.plsr.output$LPI, ui=val.plsr.output$UPI, gap=0.009,sfrac=0.004, 
-       lwd=1.6, xlim=c(rng_vals[1], rng_vals[2]), ylim=c(rng_vals[1], rng_vals[2]), 
-       err="x", pch=21, col="black", pt.bg=scales::alpha("grey70",0.7), scol="grey50",
-       cex=2, xlab=paste0("Predicted ", paste(inVar), " (units)"),
-       ylab=paste0("Observed ", paste(inVar), " (units)"),
-       cex.axis=1.5,cex.lab=1.8)
+                li=val.plsr.output$LPI, ui=val.plsr.output$UPI, gap=0.009,sfrac=0.000, 
+                lwd=1.6, xlim=c(rng_vals[1], rng_vals[2]), ylim=c(rng_vals[1], rng_vals[2]), 
+                err="x", pch=21, col="black", pt.bg=scales::alpha("grey70",0.7), scol="grey80",
+                cex=2, xlab=paste0("Predicted ", paste(inVar), " (units)"),
+                ylab=paste0("Observed ", paste(inVar), " (units)"),
+                cex.axis=1.5,cex.lab=1.8)
 abline(0,1,lty=2,lw=2)
+plotrix::plotCI(val.plsr.output$PLSR_Predicted,val.plsr.output[,inVar], 
+                li=val.plsr.output$LCI, ui=val.plsr.output$UCI, gap=0.009,sfrac=0.004, 
+                lwd=1.6, xlim=c(rng_vals[1], rng_vals[2]), ylim=c(rng_vals[1], rng_vals[2]), 
+                err="x", pch=21, col="black", pt.bg=scales::alpha("grey70",0.7), scol="black",
+                cex=2, xlab=paste0("Predicted ", paste(inVar), " (units)"),
+                ylab=paste0("Observed ", paste(inVar), " (units)"),
+                cex.axis=1.5,cex.lab=1.8, add=T)
 legend("topleft", legend=expr, bty="n", cex=1.5)
+legend("bottomright", legend=c("Prediction Interval","Confidence Interval"), 
+       lty=c(1,1), col = c("grey80","black"), lwd=3, bty="n", cex=1.5)
 box(lwd=2.2)
 dev.copy(png,file.path(outdir,paste0(inVar,"_PLSR_Validation_Scatterplot.png")), 
          height=2800, width=3200,  res=340)
 dev.off();
 ```
 
-### Output jackknife results
+### Output bootstrap results
 ```{r, echo=TRUE}
-out.jk.coefs <- data.frame(Iteration=seq(1,seg,1),
-                           Intercept=Jackknife_intercept,t(Jackknife_coef))
+out.jk.coefs <- data.frame(Iteration=seq(1,length(bootstrap_intercept),1),
+                           Intercept=bootstrap_intercept,t(bootstrap_coef))
+names(out.jk.coefs) <- c("Iteration","Intercept",paste0("Wave_",wv))
 head(out.jk.coefs)[1:6]
-write.csv(out.jk.coefs,file=file.path(outdir,
-                                      paste0(inVar,
-                                             '_Jackkife_PLSR_Coefficients.csv')),
+write.csv(out.jk.coefs,file=file.path(outdir,paste0(inVar,'_Bootstrap_PLSR_Coefficients.csv')),
           row.names=FALSE)
 ```
 
@@ -413,31 +458,30 @@ print(paste("Output directory: ", getwd()))
 
 # Observed versus predicted
 write.csv(cal.plsr.output,file=file.path(outdir,
-                                         paste0(inVar,'_Observed_PLSR_CV_Pred_',
-                                                nComps,'comp.csv')),
-          row.names=FALSE)
+                                         paste0(inVar,'_Observed_PLSR_CV_Pred_',nComps,
+                                                'comp.csv')),row.names=FALSE)
 
 # Validation data
 write.csv(val.plsr.output,file=file.path(outdir,
-                                         paste0(inVar,'_Validation_PLSR_Pred_',
-                                                nComps,'comp.csv')),
-          row.names=FALSE)
+                                         paste0(inVar,'_Validation_PLSR_Pred_',nComps,
+                                                'comp.csv')),row.names=FALSE)
 
 # Model coefficients
 coefs <- coef(plsr.out,ncomp=nComps,intercept=TRUE)
-write.csv(coefs,file=file.path(outdir,
-                               paste0(inVar,'_PLSR_Coefficients_',
-                                      nComps,'comp.csv')),
+write.csv(coefs,file=file.path(outdir,paste0(inVar,'_PLSR_Coefficients_',
+                                             nComps,'comp.csv')),
           row.names=TRUE)
 
 # PLSR VIP
-write.csv(vips,file=file.path(outdir,
-                              paste0(inVar,'_PLSR_VIPs_',
-                                     nComps,'comp.csv')))
+write.csv(vips,file=file.path(outdir,paste0(inVar,
+                                            '_PLSR_VIPs_',nComps,
+                                            'comp.csv')))
 ```
 
 ### Confirm files were written to temp space
 ```{r, echo=TRUE}
 print("**** PLSR output files: ")
-print(list.files(outdir)[grep(pattern = inVar, list.files(outdir))])
+print(list.files(outdir)[grep(pattern = inVar, 
+                               list.files(outdir))])
+
 ```

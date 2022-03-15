@@ -1,8 +1,10 @@
 Spectra-trait PLSR example using leaf-level spectra and leaf nitrogen
 content (Narea, g/m2) data from 36 species growing in Rosa rugosa
-invaded coastal grassland communities in Belgium
+invaded coastal grassland communities in Belgium. Bootstrap validation
+example
 ================
 Shawn P. Serbin, Julien Lamour, & Jeremiah Anderson
+2022-03-15
 
 ### Overview
 
@@ -50,9 +52,7 @@ invisible(lapply(list.of.packages, library, character.only = TRUE))
 ### Setup other functions and options
 
 ``` r
-### Setup other functions and options
-# not in
-`%notin%` <- Negate(`%in%`)
+### Setup options
 
 # Script options
 pls::pls.options(plsralg = "oscorespls")
@@ -81,7 +81,7 @@ output_dir <- "tempdir"
 
 ### Set working directory (scratch space)
 
-    ## [1] "/private/var/folders/xp/h3k9vf3n2jx181ts786_yjrn9c2gjq/T/RtmpYVNyVT"
+    ## [1] "/private/var/folders/xp/h3k9vf3n2jx181ts786_yjrn9c2gjq/T/RtmpvqmQPe"
 
 ### Grab data from EcoSIS
 
@@ -99,17 +99,14 @@ dat_raw <- spectratrait::get_ecosis_data(ecosis_id = ecosis_id)
 
     ## Downloading data...
 
-    ## 
+    ## Rows: 256 Columns: 2164
     ## ── Column specification ────────────────────────────────────────────────────────
-    ## cols(
-    ##   .default = col_double(),
-    ##   `Latin Species` = col_character(),
-    ##   ids = col_character(),
-    ##   `plot code` = col_character(),
-    ##   `species code` = col_character()
-    ## )
-    ## ℹ Use `spec()` for the full column specifications.
-
+    ## Delimiter: ","
+    ## chr    (4): Latin Species, ids, plot code, species code
+    ## dbl (2160): Cw/EWT (cm3/cm2), Leaf area (mm2), Leaf calcium content per leaf...
+    ## 
+    ## ℹ Use `spec()` to retrieve the full column specification for this data.
+    ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
     ## Download complete!
 
 ``` r
@@ -117,7 +114,7 @@ head(dat_raw)
 ```
 
     ## # A tibble: 6 × 2,164
-    ##   `Cw/EWT (cm3/cm2)` `Latin Species`       `Leaf area (mm2)` `Leaf calcium cont…
+    ##   `Cw/EWT (cm3/cm2)` `Latin Species`       `Leaf area (mm2)` `Leaf calcium con…`
     ##                <dbl> <chr>                             <dbl>               <dbl>
     ## 1            0.00887 Arrhenatherum elatius              696.              0.0291
     ## 2            0.00824 Bromus sterilis                    447.              0.0230
@@ -126,12 +123,12 @@ head(dat_raw)
     ## 5            0.00851 Arrhenatherum elatius              671.              0.0286
     ## 6            0.0153  Crepis capillaris                 1401.              0.0470
     ## # … with 2,160 more variables:
-    ## #   Leaf magnesium content per leaf area (mg/mm2) <dbl>,
-    ## #   Leaf mass per area (g/cm2) <dbl>,
-    ## #   Leaf nitrogen content per leaf area (mg/mm2) <dbl>,
-    ## #   Leaf phosphorus content per leaf area (mg/mm2) <dbl>,
-    ## #   Leaf potassium content per leaf area (mg/mm2) <dbl>,
-    ## #   Plant height vegetative (cm) <dbl>, ids <chr>, plot code <chr>, …
+    ## #   `Leaf magnesium content per leaf area (mg/mm2)` <dbl>,
+    ## #   `Leaf mass per area (g/cm2)` <dbl>,
+    ## #   `Leaf nitrogen content per leaf area (mg/mm2)` <dbl>,
+    ## #   `Leaf phosphorus content per leaf area (mg/mm2)` <dbl>,
+    ## #   `Leaf potassium content per leaf area (mg/mm2)` <dbl>,
+    ## #   `Plant height vegetative (cm)` <dbl>, ids <chr>, `plot code` <chr>, …
 
 ``` r
 names(dat_raw)[1:40]
@@ -192,7 +189,7 @@ head(sample_info)
 ```
 
     ## # A tibble: 6 × 13
-    ##   `Cw/EWT (cm3/cm2)` `Latin Species`       `Leaf area (mm2)` `Leaf calcium cont…
+    ##   `Cw/EWT (cm3/cm2)` `Latin Species`       `Leaf area (mm2)` `Leaf calcium con…`
     ##                <dbl> <chr>                             <dbl>               <dbl>
     ## 1            0.00887 Arrhenatherum elatius              696.              0.0291
     ## 2            0.00824 Bromus sterilis                    447.              0.0230
@@ -200,13 +197,13 @@ head(sample_info)
     ## 4            0.0106  Rubus caesius                     5719.              0.0700
     ## 5            0.00851 Arrhenatherum elatius              671.              0.0286
     ## 6            0.0153  Crepis capillaris                 1401.              0.0470
-    ## # … with 9 more variables: Leaf magnesium content per leaf area (mg/mm2) <dbl>,
-    ## #   Leaf mass per area (g/cm2) <dbl>,
-    ## #   Leaf nitrogen content per leaf area (mg/mm2) <dbl>,
-    ## #   Leaf phosphorus content per leaf area (mg/mm2) <dbl>,
-    ## #   Leaf potassium content per leaf area (mg/mm2) <dbl>,
-    ## #   Plant height vegetative (cm) <dbl>, ids <chr>, plot code <chr>,
-    ## #   species code <chr>
+    ## # … with 9 more variables:
+    ## #   `Leaf magnesium content per leaf area (mg/mm2)` <dbl>,
+    ## #   `Leaf mass per area (g/cm2)` <dbl>,
+    ## #   `Leaf nitrogen content per leaf area (mg/mm2)` <dbl>,
+    ## #   `Leaf phosphorus content per leaf area (mg/mm2)` <dbl>,
+    ## #   `Leaf potassium content per leaf area (mg/mm2)` <dbl>,
+    ## #   `Plant height vegetative (cm)` <dbl>, ids <chr>, `plot code` <chr>, …
 
 ``` r
 sample_info2 <- sample_info %>%
@@ -329,7 +326,7 @@ histograms <- grid.arrange(cal_hist_plot, val_hist_plot, ncol=2)
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-![](reseco_leafN_bootstrap_plsr_example_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
+![](reseco_leafN_ex7_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
 
 ``` r
 ggsave(filename = file.path(outdir,paste0(inVar,"_Cal_Val_Histograms.png")), plot = histograms, 
@@ -384,7 +381,7 @@ spectratrait::f.plot.spec(Z=cal.plsr.data$Spectra,wv=wv,plot_label="Calibration"
 spectratrait::f.plot.spec(Z=val.plsr.data$Spectra,wv=wv,plot_label="Validation")
 ```
 
-![](reseco_leafN_bootstrap_plsr_example_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
+![](reseco_leafN_ex7_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
 
 ``` r
 dev.copy(png,file.path(outdir,paste0(inVar,'_Cal_Val_Spectra.png')), 
@@ -440,7 +437,7 @@ if (method=="pls") {
     ## [1] "*** Identifying optimal number of PLSR components ***"
     ## [1] "*** Running PLS permutation test ***"
 
-![](reseco_leafN_bootstrap_plsr_example_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
+![](reseco_leafN_ex7_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
 
     ## [1] "*** Optimal number of components: 10"
 
@@ -496,7 +493,7 @@ plot(pls::R2(plsr.out,estimate=c("test"),newdata = val.plsr.data), main="MODEL R
 box(lwd=2.2)
 ```
 
-![](reseco_leafN_bootstrap_plsr_example_files/figure-gfm/unnamed-chunk-11-1.png)<!-- -->
+![](reseco_leafN_ex7_files/figure-gfm/unnamed-chunk-11-1.png)<!-- -->
 
 ``` r
 dev.copy(png,file.path(outdir,paste0(paste0(inVar,"_Validation_RMSEP_R2_by_Component.png"))), 
@@ -630,13 +627,12 @@ scatterplots <- grid.arrange(cal_scatter_plot, val_scatter_plot, cal_resid_histo
 ```
 
     ## Warning: Removed 2 rows containing missing values (geom_point).
-
-    ## Warning: Removed 2 rows containing missing values (geom_point).
+    ## Removed 2 rows containing missing values (geom_point).
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-![](reseco_leafN_bootstrap_plsr_example_files/figure-gfm/unnamed-chunk-12-1.png)<!-- -->
+![](reseco_leafN_ex7_files/figure-gfm/unnamed-chunk-12-1.png)<!-- -->
 
 ``` r
 ggsave(filename = file.path(outdir,paste0(inVar,"_Cal_Val_Scatterplots.png")), 
@@ -661,7 +657,7 @@ abline(h=0.8,lty=2,col="dark grey")
 box(lwd=2.2)
 ```
 
-![](reseco_leafN_bootstrap_plsr_example_files/figure-gfm/unnamed-chunk-13-1.png)<!-- -->
+![](reseco_leafN_ex7_files/figure-gfm/unnamed-chunk-13-1.png)<!-- -->
 
 ``` r
 dev.copy(png,file.path(outdir,paste0(inVar,'_Coefficient_VIP_plot.png')), 
@@ -749,7 +745,7 @@ abline(h=0,lty=2,col="grey50")
 box(lwd=2.2)
 ```
 
-![](reseco_leafN_bootstrap_plsr_example_files/figure-gfm/unnamed-chunk-15-1.png)<!-- -->
+![](reseco_leafN_ex7_files/figure-gfm/unnamed-chunk-15-1.png)<!-- -->
 
 ``` r
 dev.copy(png,file.path(outdir,paste0(inVar,'_Bootstrap_Regression_Coefficients.png')), 
@@ -803,7 +799,7 @@ legend("bottomright", legend=c("Prediction Interval","Confidence Interval"),
 box(lwd=2.2)
 ```
 
-![](reseco_leafN_bootstrap_plsr_example_files/figure-gfm/unnamed-chunk-16-1.png)<!-- -->
+![](reseco_leafN_ex7_files/figure-gfm/unnamed-chunk-16-1.png)<!-- -->
 
 ``` r
 dev.copy(png,file.path(outdir,paste0(inVar,"_PLSR_Validation_Scatterplot.png")), 
@@ -850,7 +846,7 @@ write.csv(out.jk.coefs,file=file.path(outdir,paste0(inVar,
 print(paste("Output directory: ", outdir))
 ```
 
-    ## [1] "Output directory:  /var/folders/xp/h3k9vf3n2jx181ts786_yjrn9c2gjq/T//RtmpYVNyVT"
+    ## [1] "Output directory:  /var/folders/xp/h3k9vf3n2jx181ts786_yjrn9c2gjq/T//RtmpvqmQPe"
 
 ``` r
 # Observed versus predicted

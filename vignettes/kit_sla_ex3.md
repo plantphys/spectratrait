@@ -1,8 +1,9 @@
 Spectra-trait PLSR example using leaf-level spectra and specific leaf
 area (SLA) data from more than 40 species grassland species comprising
-both herbs and graminoids.
+both herbs and graminoids
 ================
 Shawn P. Serbin, Julien Lamour, & Jeremiah Anderson
+2022-03-15
 
 ### Overview
 
@@ -54,9 +55,7 @@ invisible(lapply(list.of.packages, library, character.only = TRUE))
 ### Setup other functions and options
 
 ``` r
-### Setup other functions and options
-# not in
-`%notin%` <- Negate(`%in%`)
+### Setup options
 
 # Script options
 pls::pls.options(plsralg = "oscorespls")
@@ -85,7 +84,7 @@ output_dir <- "tempdir"
 
 ### Set working directory (scratch space)
 
-    ## [1] "Output directory: /private/var/folders/xp/h3k9vf3n2jx181ts786_yjrn9c2gjq/T/Rtmp952NtZ"
+    ## [1] "Output directory: /private/var/folders/xp/h3k9vf3n2jx181ts786_yjrn9c2gjq/T/Rtmp3O4Thi"
 
 ### Grab data from EcoSIS
 
@@ -104,16 +103,14 @@ dat_raw <- spectratrait::get_ecosis_data(ecosis_id = ecosis_id)
 
     ## Downloading data...
 
-    ## 
+    ## Rows: 739 Columns: 2114
     ## ── Column specification ────────────────────────────────────────────────────────
-    ## cols(
-    ##   .default = col_double(),
-    ##   `growth form` = col_character(),
-    ##   species = col_character(),
-    ##   timestamp = col_character()
-    ## )
-    ## ℹ Use `spec()` for the full column specifications.
-
+    ## Delimiter: ","
+    ## chr    (3): growth form, species, timestamp
+    ## dbl (2111): Anthocyanin concentration (mg/g), Anthocyanin content ( g/cm ), ...
+    ## 
+    ## ℹ Use `spec()` to retrieve the full column specification for this data.
+    ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
     ## Download complete!
 
 ``` r
@@ -121,21 +118,21 @@ head(dat_raw)
 ```
 
     ## # A tibble: 6 × 2,114
-    ##   `Anthocyanin concen… `Anthocyanin cont… `Carotenoid concen… `Carotenoid conte…
-    ##                  <dbl>              <dbl>               <dbl>              <dbl>
-    ## 1              0.00106              0.997             0.00799               7.49
-    ## 2              0.00357              1.22              0.0221                7.53
-    ## 3              0.00252              1.14              0.0188                8.55
-    ## 4              0.00310              2.26              0.0158               11.5 
-    ## 5              0.00412              1.73              0.0216                9.08
-    ## 6              0.00397              1.02              0.0336                8.66
-    ## # … with 2,110 more variables: Chlorophyll concentration (mg/g) <dbl>,
-    ## #   Chlorophyll content ( g/cm ) <dbl>, LDMC (g/g) <dbl>, LFA (mg/cm ) <dbl>,
-    ## #   LWC (mg/cm ) <dbl>, SLA (g/cm ) <dbl>, growth form <chr>, species <chr>,
-    ## #   timestamp <chr>, 400 <dbl>, 401 <dbl>, 402 <dbl>, 403 <dbl>, 404 <dbl>,
-    ## #   405 <dbl>, 406 <dbl>, 407 <dbl>, 408 <dbl>, 409 <dbl>, 410 <dbl>,
-    ## #   411 <dbl>, 412 <dbl>, 413 <dbl>, 414 <dbl>, 415 <dbl>, 416 <dbl>,
-    ## #   417 <dbl>, 418 <dbl>, 419 <dbl>, 420 <dbl>, 421 <dbl>, 422 <dbl>, …
+    ##   `Anthocyanin concentratio…` `Anthocyanin c…` `Carotenoid co…` `Carotenoid co…`
+    ##                         <dbl>            <dbl>            <dbl>            <dbl>
+    ## 1                     0.00106            0.997          0.00799             7.49
+    ## 2                     0.00357            1.22           0.0221              7.53
+    ## 3                     0.00252            1.14           0.0188              8.55
+    ## 4                     0.00310            2.26           0.0158             11.5 
+    ## 5                     0.00412            1.73           0.0216              9.08
+    ## 6                     0.00397            1.02           0.0336              8.66
+    ## # … with 2,110 more variables: `Chlorophyll concentration (mg/g)` <dbl>,
+    ## #   `Chlorophyll content ( g/cm )` <dbl>, `LDMC (g/g)` <dbl>,
+    ## #   `LFA (mg/cm )` <dbl>, `LWC (mg/cm )` <dbl>, `SLA (g/cm )` <dbl>,
+    ## #   `growth form` <chr>, species <chr>, timestamp <chr>, `400` <dbl>,
+    ## #   `401` <dbl>, `402` <dbl>, `403` <dbl>, `404` <dbl>, `405` <dbl>,
+    ## #   `406` <dbl>, `407` <dbl>, `408` <dbl>, `409` <dbl>, `410` <dbl>,
+    ## #   `411` <dbl>, `412` <dbl>, `413` <dbl>, `414` <dbl>, `415` <dbl>, …
 
 ``` r
 names(dat_raw)[1:40]
@@ -176,18 +173,18 @@ head(sample_info)
 ```
 
     ## # A tibble: 6 × 13
-    ##   `Anthocyanin concen… `Anthocyanin cont… `Carotenoid concen… `Carotenoid conte…
-    ##                  <dbl>              <dbl>               <dbl>              <dbl>
-    ## 1              0.00106              0.997             0.00799               7.49
-    ## 2              0.00357              1.22              0.0221                7.53
-    ## 3              0.00252              1.14              0.0188                8.55
-    ## 4              0.00310              2.26              0.0158               11.5 
-    ## 5              0.00412              1.73              0.0216                9.08
-    ## 6              0.00397              1.02              0.0336                8.66
-    ## # … with 9 more variables: Chlorophyll concentration (mg/g) <dbl>,
-    ## #   Chlorophyll content ( g/cm ) <dbl>, LDMC (g/g) <dbl>, LFA (mg/cm ) <dbl>,
-    ## #   LWC (mg/cm ) <dbl>, SLA (g/cm ) <dbl>, growth form <chr>, species <chr>,
-    ## #   timestamp <chr>
+    ##   `Anthocyanin concentratio…` `Anthocyanin c…` `Carotenoid co…` `Carotenoid co…`
+    ##                         <dbl>            <dbl>            <dbl>            <dbl>
+    ## 1                     0.00106            0.997          0.00799             7.49
+    ## 2                     0.00357            1.22           0.0221              7.53
+    ## 3                     0.00252            1.14           0.0188              8.55
+    ## 4                     0.00310            2.26           0.0158             11.5 
+    ## 5                     0.00412            1.73           0.0216              9.08
+    ## 6                     0.00397            1.02           0.0336              8.66
+    ## # … with 9 more variables: `Chlorophyll concentration (mg/g)` <dbl>,
+    ## #   `Chlorophyll content ( g/cm )` <dbl>, `LDMC (g/g)` <dbl>,
+    ## #   `LFA (mg/cm )` <dbl>, `LWC (mg/cm )` <dbl>, `SLA (g/cm )` <dbl>,
+    ## #   `growth form` <chr>, species <chr>, timestamp <chr>
 
 ``` r
 sample_info2 <- sample_info %>%
@@ -364,7 +361,7 @@ histograms <- grid.arrange(cal_hist_plot, val_hist_plot, ncol=2)
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-![](kit_sla_plsr_example_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
+![](kit_sla_ex3_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
 
 ``` r
 ggsave(filename = file.path(outdir,paste0(inVar,"_Cal_Val_Histograms.png")), 
@@ -6442,7 +6439,7 @@ head(val.plsr.data)[1:5]
     ## 23        0.13114422        0.13173930        0.13233132        0.13292035
     ## 44        0.14035330        0.14102638        0.14169735        0.14236617
     ## 46        0.13576063        0.13641384        0.13706527        0.13771485
-    ## 47        0.08674581        0.08727845        0.08781028        0.08834133
+    ## 47        0.08674581        0.08727845        0.08781028        0.08834134
     ##    Spectra.Wave_2049 Spectra.Wave_2050 Spectra.Wave_2051 Spectra.Wave_2052
     ## 9         0.11252288        0.11318057        0.11383750        0.11449413
     ## 15        0.05869478        0.05920211        0.05971230        0.06022535
@@ -6692,7 +6689,7 @@ head(val.plsr.data)[1:5]
     ## 9         0.17459234        0.17471639        0.17483767        0.17495602
     ## 15        0.11900502        0.11910486        0.11920045        0.11929147
     ## 23        0.18956770        0.18964676        0.18972298        0.18979607
-    ## 44        0.20551219        0.20558308        0.20565096        0.20571562
+    ## 44        0.20551218        0.20558308        0.20565096        0.20571562
     ## 46        0.19599448        0.19604878        0.19610115        0.19615136
     ## 47        0.14005093        0.14013975        0.14022655        0.14031084
     ##    Spectra.Wave_2193 Spectra.Wave_2194 Spectra.Wave_2195 Spectra.Wave_2196
@@ -7068,7 +7065,7 @@ spectratrait::f.plot.spec(Z=cal.plsr.data$Spectra,wv=wv,plot_label="Calibration"
 spectratrait::f.plot.spec(Z=val.plsr.data$Spectra,wv=wv,plot_label="Validation")
 ```
 
-![](kit_sla_plsr_example_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
+![](kit_sla_ex3_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
 
 ``` r
 dev.copy(png,file.path(outdir,paste0(inVar,'_Cal_Val_Spectra.png')), 
@@ -7125,7 +7122,7 @@ if (method=="pls") {
     ## [1] "*** Identifying optimal number of PLSR components ***"
     ## [1] "*** Running PLS permutation test ***"
 
-![](kit_sla_plsr_example_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
+![](kit_sla_ex3_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
 
     ## [1] "*** Optimal number of components: 10"
 
@@ -7182,7 +7179,7 @@ plot(R2(plsr.out,estimate=c("test"),newdata = val.plsr.data), main="MODEL R2",
 box(lwd=2.2)
 ```
 
-![](kit_sla_plsr_example_files/figure-gfm/unnamed-chunk-11-1.png)<!-- -->
+![](kit_sla_ex3_files/figure-gfm/unnamed-chunk-11-1.png)<!-- -->
 
 ``` r
 dev.copy(png,file.path(outdir,paste0(paste0(inVar,"_Validation_RMSEP_R2_by_Component.png"))), 
@@ -7322,7 +7319,7 @@ scatterplots <- grid.arrange(cal_scatter_plot, val_scatter_plot, cal_resid_histo
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-![](kit_sla_plsr_example_files/figure-gfm/unnamed-chunk-12-1.png)<!-- -->
+![](kit_sla_ex3_files/figure-gfm/unnamed-chunk-12-1.png)<!-- -->
 
 ``` r
 ggsave(filename = file.path(outdir,paste0(inVar,"_Cal_Val_Scatterplots.png")), 
@@ -7346,7 +7343,7 @@ abline(h=0.8,lty=2,col="dark grey")
 box(lwd=2.2)
 ```
 
-![](kit_sla_plsr_example_files/figure-gfm/unnamed-chunk-13-1.png)<!-- -->
+![](kit_sla_ex3_files/figure-gfm/unnamed-chunk-13-1.png)<!-- -->
 
 ``` r
 dev.copy(png,file.path(outdir,paste0(inVar,'_Coefficient_VIP_plot.png')), 
@@ -7428,7 +7425,7 @@ abline(h=0,lty=2,col="grey50")
 box(lwd=2.2)
 ```
 
-![](kit_sla_plsr_example_files/figure-gfm/unnamed-chunk-15-1.png)<!-- -->
+![](kit_sla_ex3_files/figure-gfm/unnamed-chunk-15-1.png)<!-- -->
 
 ``` r
 dev.copy(png,file.path(outdir,paste0(inVar,'_Jackknife_Regression_Coefficients.png')), 
@@ -7473,7 +7470,7 @@ legend("topleft", legend=expr, bty="n", cex=1.5)
 box(lwd=2.2)
 ```
 
-![](kit_sla_plsr_example_files/figure-gfm/unnamed-chunk-16-1.png)<!-- -->
+![](kit_sla_ex3_files/figure-gfm/unnamed-chunk-16-1.png)<!-- -->
 
 ``` r
 dev.copy(png,file.path(outdir,paste0(inVar,"_PLSR_Validation_Scatterplot.png")), 
