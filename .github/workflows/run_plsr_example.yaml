@@ -45,5 +45,5 @@ jobs:
 
       # Run R script
       - name: Run Ely et al. (2019) PLSR Example
-        run: Rscript ./inst/scripts/spectra-trait_ely_leafN_plsr_bootstrap_example.R
+        run: Rscript inst/scripts/spectra-trait_ely_leafN_plsr_bootstrap_example.R
         shell: Rscript {0}
