@@ -4,10 +4,6 @@ author: "Shawn P. Serbin, Julien Lamour, & Jeremiah Anderson"
 date: "`r Sys.Date()`"
 output:
   html_notebook: default
-  github_document: default
-  pdf_document: default
-  html_document:
-    df_print: paged
 ---
 
 ```{r setup, include=FALSE, echo=FALSE}
