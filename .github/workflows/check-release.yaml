@@ -40,6 +40,6 @@ jobs:
           extra-packages: any::rcmdcheck
           needs: check
           run: rcmdcheck::rcmdcheck(args = c("--no-manual", "--no-build-vignettes"), error_on = "error", check_dir = "check")
-        shell: Rscript {0}
+          shell: Rscript {0}
 
       - uses: r-lib/actions/check-r-package@v2
