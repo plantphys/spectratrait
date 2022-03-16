@@ -29,10 +29,8 @@ jobs:
       fail-fast: false
       matrix:
         R:
-          - "3.6"
           - "4.0"
-          - "4.1"
-
+ 
     steps:
       #check out source code
       - uses: actions/checkout@v2
@@ -45,5 +43,6 @@ jobs:
 
       # Run R script
       - name: Run Ely et al. (2019) PLSR Example
-        run: Rscript ./inst/scripts/spectra-trait_ely_leafN_plsr_bootstrap_example.R
+        run: |
+          source("R/inst/scripts/spectra-trait_ely_leafN_plsr_bootstrap_example.R")
         shell: Rscript {0}
