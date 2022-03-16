@@ -1,14 +1,9 @@
 name: run_PLSR_example
 
-# Controls when the action will run.
-#on:
-#  schedule:
-#    - cron:  '0 13 * * *'
+# Controls when the action will run. In this case midnight every 5 days
 on:
-  push:
-    branches: [main, master]
-  pull_request:
-    branches: [main, master]
+  schedule:
+    - cron:  '0 0 */5 * *'
 
 env:
   R_LIBS_USER: /usr/local/lib/R/site-library
@@ -29,7 +24,9 @@ jobs:
       fail-fast: false
       matrix:
         R:
+          - "3.6"
           - "4.0"
+          - "4.1"
  
     steps:
       #check out source code
