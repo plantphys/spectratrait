@@ -41,12 +41,16 @@ jobs:
 
       - uses: r-lib/actions/setup-r-dependencies@v2
 
-      - name: Install dependencies
+      - name: Query dependencies
         run: |
           install.packages('remotes')
-          remotes::install_github(repo='TESTgroup-BNL/spectratrait', dependencies=TRUE)
           saveRDS(remotes::dev_package_deps(dependencies = TRUE), ".github/depends.Rds", version = 2)
           writeLines(sprintf("R-%i.%i", getRversion()$major, getRversion()$minor), ".github/R-version")
+        shell: Rscript {0}
+      
+      - name: Install dependencies
+        run: |
+          Rscript -e 'remotes::install_github(repo="TESTgroup-BNL/spectratrait", dependencies=TRUE)'
 
       # Run R script
       - name: Run Ely et al. (2019) PLSR Example
