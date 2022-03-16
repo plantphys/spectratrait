@@ -3,8 +3,8 @@ title: Spectra-trait PLSR example using leaf-level spectra and specific leaf are
 author: "Shawn P. Serbin, Julien Lamour, & Jeremiah Anderson"
 date: "`r Sys.Date()`"
 output:
-  github_document: default
   pdf_document: default
+  github_document: default
   html_notebook: default
   html_document:
     df_print: paged

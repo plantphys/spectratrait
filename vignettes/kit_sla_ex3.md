@@ -3,7 +3,7 @@ area (SLA) data from more than 40 species grassland species comprising
 both herbs and graminoids
 ================
 Shawn P. Serbin, Julien Lamour, & Jeremiah Anderson
-2022-03-15
+2022-03-16
 
 ### Overview
 
@@ -84,7 +84,7 @@ output_dir <- "tempdir"
 
 ### Set working directory (scratch space)
 
-    ## [1] "Output directory: /private/var/folders/xp/h3k9vf3n2jx181ts786_yjrn9c2gjq/T/Rtmp3O4Thi"
+    ## [1] "Output directory: /private/var/folders/xp/h3k9vf3n2jx181ts786_yjrn9c2gjq/T/Rtmp83RkYg"
 
 ### Grab data from EcoSIS
 
