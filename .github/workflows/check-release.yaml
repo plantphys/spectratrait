@@ -23,6 +23,7 @@ jobs:
       fail-fast: false
       matrix:
         R:
+          - "3.6"
           - "4.0"
           - "4.1"
 
@@ -38,5 +39,7 @@ jobs:
         with:
           extra-packages: any::rcmdcheck
           needs: check
+          run: rcmdcheck::rcmdcheck(args = c("--no-manual", "--no-build-vignettes"), error_on = "error", check_dir = "check")
+        shell: Rscript {0}
 
       - uses: r-lib/actions/check-r-package@v2

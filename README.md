@@ -78,7 +78,7 @@ EcoSIS URL: https://ecosis.org/package/fresh-leaf-spectra-to-estimate-lma-over-n
 EcoSIS ID: 5617da17-c925-49fb-b395-45a51291bd2d <br>
 DOI: https://doi.org/doi:10.21232/9831-rq60 <br>
 Rpubs example output: https://rpubs.com/sserbin/spectratrait_ex4 <br>
-Rpubs example showing Serbin et al. (2019) applied to NEON data:  <br>
+Rpubs example showing Serbin et al. (2019) applied to NEON data: https://rpubs.com/sserbin/spectratrait_ex9 <br>
 
 4) Canopy spectra to map foliar functional traits over NEON domains in eastern United States <br>
 Target variable: leaf nitrogen <br>
