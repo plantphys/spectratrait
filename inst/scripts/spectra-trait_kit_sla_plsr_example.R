@@ -26,9 +26,7 @@ invisible(lapply(list.of.packages, library, character.only = TRUE))
 
 
 #--------------------------------------------------------------------------------------------------#
-### Setup other functions and options
-# not in
-`%notin%` <- Negate(`%in%`)
+### Setup options
 
 # Script options
 pls::pls.options(plsralg = "oscorespls")

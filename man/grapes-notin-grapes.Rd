@@ -4,7 +4,12 @@
 \alias{\%notin\%}
 \title{Not \%in\% function}
 \usage{
-... \%notin\% NA
+x \%notin\% table
+}
+\arguments{
+\item{x}{initial list}
+
+\item{table}{list to check against}
 }
 \description{
 Not \%in\% function

@@ -121,7 +121,7 @@ find_optimal_components <- function(dataset=NULL, targetVariable=NULL, method="p
 ##' @export 
 find_optimal_comp_by_groups <- function (dataset = NULL, targetVariable = NULL, method = "firstPlateau",
                                          maxComps = 20, iterations = 20, prop = 0.7, random_seed = 123456789, 
-                                         group_variables=NULL) {
+                                         group_variables = NULL) {
   set.seed(random_seed)
   inVar <- targetVariable
   # TODO - really should merge this with the original and have an if/else if not NULL and select either

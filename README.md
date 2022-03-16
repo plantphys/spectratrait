@@ -20,7 +20,7 @@ https://ecosml.org/package/github/TESTgroup-BNL/spectratrait
 ### Depends: 
 ggplot2 (>= 3.3.2), remotes (>= 2.2.0), devtools (>= 2.3.1), readr (>= 1.3.1), RCurl (>= 1.98-1.2), 
 httr (>= 1.4.2), pls (>= 2.7-2), magrittr (>= 2.0.1), dplyr (>= 1.0.1), reshape2 (>= 1.4.4), here (>= 0.1), 
-plotrix (>= 3.7-8), gridExtra (>= 2.3), scales (>= 1.1.1), knitr
+plotrix (>= 3.7-8), gridExtra (>= 2.3), scales (>= 1.1.1), knitr (>= 1.4.2)
 
 ### INSTALL
 spectratrait is not currently on CRAN, but you can install from GitHub using devtools().  First, make sure you have all of the package dependencies installed. You can do this either by 1) installing the packages individually using install.packages(), for example:
@@ -59,38 +59,39 @@ devtools::install_github(repo = "TESTgroup-BNL/spectratrait", ref = "devbranch",
 7. spectratrait_X.X.X.pdf (where X.X.X is the current release number) is the pdf documentation
 
 ### Linked dataset citations, DOIs, and EcoSIS IDs/URLs: <br>
-1) Leaf reflectance plant functional gradient IFGG/KIT <br>
+1) Leaf spectra, structural and biochemical leaf traits of eight crop species (Ely et al., 2019) <br>
+EcoSIS URL: https://ecosis.org/package/leaf-spectra--structural-and-biochemical-leaf-traits-of-eight-crop-species <br>
+EcoSIS ID: 25770ad9-d47c-428b-bf99-d1543a4b0ec9 <br>
+DOI: https://doi.org/doi:10.21232/C2GM2Z <br>
+Rpubs LeafN bootstrap example output: https://rpubs.com/sserbin/spectratrait_ex1 <br>
+Rpubs LeafN bootstrap by group (species) example output: https://rpubs.com/sserbin/spectratrait_ex2 <br>
+
+2) Leaf reflectance plant functional gradient IFGG/KIT <br>
 Target variable: SLA <br>
 EcoSIS URL: https://ecosis.org/package/leaf-reflectance-plant-functional-gradient-ifgg-kit <br>
 EcoSIS ID: 3cf6b27e-d80e-4bc7-b214-c95506e46daa <br>
-Rpubs example output: https://rpubs.com/sserbin/736799
+Rpubs example output: https://rpubs.com/sserbin/spectratrait_ex3 <br>
 
-2) Fresh leaf spectra to estimate LMA over NEON domains in eastern United States <br>
+3) Fresh leaf spectra to estimate LMA over NEON domains in eastern United States <br>
 Target variable: LMA <br>
 EcoSIS URL: https://ecosis.org/package/fresh-leaf-spectra-to-estimate-lma-over-neon-domains-in-eastern-united-states <br>
 EcoSIS ID: 5617da17-c925-49fb-b395-45a51291bd2d <br>
 DOI: https://doi.org/doi:10.21232/9831-rq60 <br>
-Rpubs example output: https://rpubs.com/sserbin/736820 <br>
-Rpubs example showing Serbin et al. (2019) applied to NEON data: https://rpubs.com/sserbin/736893 <br>
+Rpubs example output: https://rpubs.com/sserbin/spectratrait_ex4 <br>
+Rpubs example showing Serbin et al. (2019) applied to NEON data: https://rpubs.com/sserbin/spectratrait_ex9 <br>
 
-3) Leaf spectra of 36 species growing in Rosa rugosa invaded coastal grassland communities in Belgium <br>
-Target variable: LMA, leaf nitrogen <br>
-EcoSIS URL: https://ecosis.org/package/leaf-spectra-of-36-species-growing-in-rosa-rugosa-invaded-coastal-grassland-communities-in-belgium <br>
-EcoSIS ID: 9db4c5a2-7eac-4e1e-8859-009233648e89 <br>
-DOI: https://doi.org/doi:10.21232/9nr6-sq54 <br>
-Rpubs LMA example output: https://rpubs.com/sserbin/736861 <br>
-Rpubs LeafN example output: https://rpubs.com/sserbin/736852 <br>
-Rpubs LeafN bootstrap example output: https://rpubs.com/sserbin/736843 <br>
-
-4) Leaf spectra, structural and biochemical leaf traits of eight crop species <br>
-EcoSIS URL: https://ecosis.org/package/leaf-spectra--structural-and-biochemical-leaf-traits-of-eight-crop-species <br>
-EcoSIS ID: 25770ad9-d47c-428b-bf99-d1543a4b0ec9 <br>
-DOI: https://doi.org/doi:10.21232/C2GM2Z <br>
-Rpubs LeafN bootstrap example output: https://rpubs.com/sserbin/736795 <br>
-
-5) Canopy spectra to map foliar functional traits over NEON domains in eastern United States <br>
+4) Canopy spectra to map foliar functional traits over NEON domains in eastern United States <br>
 Target variable: leaf nitrogen <br>
 EcoSIS URL: https://ecosis.org/package/canopy-spectra-to-map-foliar-functional-traits-over-neon-domains-in-eastern-united-states <br>
 EcoSIS ID: b9dbf3db-5b9c-4ab2-88c2-26c8b39d0903 <br>
 DOI: https://doi.org/doi:10.21232/e2jt-5209 <br>
-Rpubs leaf nitrogen example output: https://rpubs.com/sserbin/736801
+Rpubs leaf nitrogen example output: https://rpubs.com/sserbin/spectratrait_ex5 <br>
+
+5) Leaf spectra of 36 species growing in Rosa rugosa invaded coastal grassland communities in Belgium <br>
+Target variable: LMA, leaf nitrogen <br>
+EcoSIS URL: https://ecosis.org/package/leaf-spectra-of-36-species-growing-in-rosa-rugosa-invaded-coastal-grassland-communities-in-belgium <br>
+EcoSIS ID: 9db4c5a2-7eac-4e1e-8859-009233648e89 <br>
+DOI: https://doi.org/doi:10.21232/9nr6-sq54 <br>
+Rpubs LeafN example output: https://rpubs.com/sserbin/spectratrait_ex6 <br>
+Rpubs LeafN bootstrap example output: https://rpubs.com/sserbin/spectratrait_ex7 <br>
+Rpubs LMA example output: https://rpubs.com/sserbin/spectratrait_ex8 <br>

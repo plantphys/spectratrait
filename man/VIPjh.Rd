@@ -6,6 +6,13 @@
 \usage{
 VIPjh(object, j, h)
 }
+\arguments{
+\item{object}{fitted pls::plsr object}
+
+\item{j}{which variable in the fitted pls::plsr object}
+
+\item{h}{the number of components in the fitted pls::plsr object to calculate the VIP}
+}
 \description{
 VIPjh returns the VIP of variable j with h components
 }
