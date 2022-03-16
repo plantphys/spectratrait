@@ -1,0 +1,63 @@
+name: R-CMD-check weekly
+
+on:
+  # every Monday at 4:30 AM
+    schedule:
+    - cron: '30 4 * * 1'
+
+env:
+  R_LIBS_USER: /usr/local/lib/R/site-library
+  LC_ALL: en_US.UTF-8
+  NCPUS: 2
+  CI: true
+
+jobs:
+  R-CMD-check:
+    runs-on: ${{ matrix.config.os }}
+
+    name: ${{ matrix.config.os }} (${{ matrix.config.r }})  
+  
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+          - {os: macOS-latest,   r: 'release'}
+
+          - {os: windows-2022, r: 'release'}
+          # Use 3.6 to trigger usage of RTools35
+          - {os: windows-2022, r: '3.6'}
+
+          # Use older ubuntu to maximise backward compatibility
+          - {os: ubuntu-18.04,   r: 'devel', http-user-agent: 'release'}
+          - {os: ubuntu-18.04,   r: 'release'}
+          - {os: ubuntu-18.04,   r: 'oldrel-1'}
+          - {os: ubuntu-18.04,   r: 'oldrel-2'}
+          - {os: ubuntu-18.04,   r: 'oldrel-3'}
+          - {os: ubuntu-18.04,   r: 'oldrel-4'}
+  
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      R_KEEP_PKG_SOURCE: yes
+      R_REMOTES_NO_ERRORS_FROM_WARNINGS: true
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: r-lib/actions/setup-pandoc@v2
+
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          r-version: ${{ matrix.config.r }}
+          http-user-agent: ${{ matrix.config.http-user-agent }}
+          use-public-rspm: true
+          
+      - name: Install dependencies
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          extra-packages: any::rcmdcheck
+          needs: check
+
+      - name: Check Package
+      - uses: r-lib/actions/check-r-package@v2
+        with:
+          upload-snapshots: true

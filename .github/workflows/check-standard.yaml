@@ -19,13 +19,13 @@ jobs:
       fail-fast: false
       matrix:
         config:
-          - {os: macOS-latest,   r: 'oldrel-1'}
-          - {os: macOS-latest,   r: 'release'}
-          - {os: windows-2022, r: 'oldrel-1'}
-          - {os: windows-2022, r: 'release'}
-          - {os: ubuntu-latest,   r: 'oldrel-1'}
-          - {os: ubuntu-latest,   r: 'release'}
-          - {os: ubuntu-latest,   r: 'devel', http-user-agent: 'release'}
+          - {os: macOS-latest,  r: 'oldrel-1'}
+          - {os: macOS-latest,  r: 'release'}
+          - {os: windows-2022,  r: 'oldrel-1'}
+          - {os: windows-2022,  r: 'release'}
+          - {os: ubuntu-latest, r: 'oldrel-1'}
+          - {os: ubuntu-latest, r: 'release'}
+          - {os: ubuntu-latest, r: 'devel', http-user-agent: 'release'}
           
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
@@ -63,8 +63,8 @@ jobs:
         with:
           extra-packages: any::rcmdcheck
           needs: check
-#          run: rcmdcheck::rcmdcheck(args = c("--no-manual", "--no-build-vignettes"), error_on = "error", check_dir = "check")
-
+          
+      - name: Check Package
       - uses: r-lib/actions/check-r-package@v2
         with:
           upload-snapshots: true
