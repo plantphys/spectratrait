@@ -42,6 +42,9 @@ Finally, to complete the installation you will also need to install the spectrat
 # to install the master branch version
 devtools::install_github(repo = "TESTgroup-BNL/spectratrait", dependencies=TRUE)
 
+# to install the master branch version - with Vignettes (though slower)
+devtools::install_github(repo = "TESTgroup-BNL/spectratrait", dependencies=TRUE, build_vignettes = TRUE)
+
 # to install a specific release, for example release 1.0.5
 devtools::install_github(repo = "TESTgroup-BNL/spectratrait@v1.0.5", dependencies=TRUE)
 
