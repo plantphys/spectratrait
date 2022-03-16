@@ -1,4 +1,4 @@
-name: R-CMD-check weekly
+name: R-CMD-check-Weekly
 
 on:
   # every Monday at 4:30 AM
