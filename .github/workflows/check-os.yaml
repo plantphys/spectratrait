@@ -35,7 +35,6 @@ jobs:
       RSPM: ${{ matrix.config.rspm }}
 
     steps:
-      - name: Check out source code and get dependencies
       - uses: actions/checkout@v2
 
       - uses: r-lib/actions/setup-pandoc@v2
