@@ -35,6 +35,7 @@ jobs:
       RSPM: ${{ matrix.config.rspm }}
 
     steps:
+      - name: Check out source code and get dependencies
       - uses: actions/checkout@v2
 
       - uses: r-lib/actions/setup-pandoc@v2
@@ -56,13 +57,8 @@ jobs:
         with:
           extra-packages: any::rcmdcheck
           needs: check
-      
-      # use default check options - building vignettes breaking CI
-#      - uses: r-lib/actions/check-r-package@v2
-#        with:
-#          upload-snapshots: true
 
-      # do not build vignettes
+      # rcmdcheck but do not build vignettes
       - name: Build Check Across OS & R Releases
         run: rcmdcheck::rcmdcheck(args = c("--no-manual", "--no-build-vignettes"), build_args = c("--no-manual", "--no-build-vignettes"), error_on = "error")
         shell: Rscript {0}

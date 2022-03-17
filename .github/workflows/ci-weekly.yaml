@@ -12,7 +12,7 @@ jobs:
   R-CMD-check:
     runs-on: ${{ matrix.config.os }}
 
-    name: ${{ matrix.config.os }} (${{ matrix.config.r }})  
+    name: ${{ matrix.config.os }} (${{ matrix.config.r }})
   
     strategy:
       fail-fast: false
@@ -47,11 +47,7 @@ jobs:
           extra-packages: any::rcmdcheck
           needs: check
 
-#      - uses: r-lib/actions/check-r-package@v2
-#        with:
-#          upload-snapshots: true
-
-      # do not build vignettes
+      # rcmdcheck but do not build vignettes
       - name: Build Check Across OS & R Releases
         run: rcmdcheck::rcmdcheck(args = c("--no-manual", "--no-build-vignettes"), build_args = c("--no-manual", "--no-build-vignettes"), error_on = "error")
         shell: Rscript {0}
