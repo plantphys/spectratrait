@@ -1,16 +1,16 @@
+# CI to test package on different versions of R, rel-1, rel, rel+1
 on:
   push:
     branches: [main, master]
   pull_request:
     branches: [main, master]
 
-name: R-CMD-check
+name: R-CMD-check-R-release
 
 env:
   R_LIBS_USER: /usr/local/lib/R/site-library
   LC_ALL: en_US.UTF-8
   NCPUS: 2
-  CI: true
 
 jobs:
   R-CMD-check:
@@ -41,6 +41,14 @@ jobs:
           extra-packages: any::rcmdcheck
           needs: check
 
+      # rcmdcheck but do not build vignettes
       - name: Run Fast Build Check Across R Releases
-        run: rcmdcheck::rcmdcheck(args = c("--no-manual", "--ignore-vignettes", "--no-build-vignettes"), build_args = c("--no-manual", "--ignore-vignettes", "--no-build-vignettes"), error_on = "error")
+        run: rcmdcheck::rcmdcheck(args = c("--no-manual", "--no-build-vignettes"), build_args = c("--no-manual", "--no-build-vignettes"), error_on = "error")
         shell: Rscript {0}
+        
+      - name: Upload check results
+        if: failure()
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ runner.os }}-r${{ matrix.config.r }}-results
+          path: check

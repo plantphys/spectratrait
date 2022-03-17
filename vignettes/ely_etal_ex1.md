@@ -3,7 +3,7 @@ content (Narea, g/m2) data from eight different crop species growing in
 a glasshouse at Brookhaven National Laboratory
 ================
 Shawn P. Serbin, Julien Lamour, & Jeremiah Anderson
-2022-03-14
+2022-03-17
 
 ### Overview
 
@@ -27,6 +27,8 @@ invisible(lapply(list.of.packages, library, character.only = TRUE))
     ## The following object is masked from 'package:stats':
     ## 
     ##     loadings
+
+    ## Warning: package 'dplyr' was built under R version 4.0.5
 
     ## 
     ## Attaching package: 'dplyr'
@@ -101,7 +103,7 @@ inVar <- "N_g_m2"
 
 ### Set working directory (scratch space)
 
-    ## [1] "/private/var/folders/xp/h3k9vf3n2jx181ts786_yjrn9c2gjq/T/Rtmp6TSCWg"
+    ## [1] "/private/var/folders/xp/h3k9vf3n2jx181ts786_yjrn9c2gjq/T/RtmpP2S4KY"
 
 ### Full PLSR dataset
 
@@ -752,7 +754,7 @@ write.csv(out.jk.coefs,file=file.path(outdir,paste0(inVar,
 print(paste("Output directory: ", outdir))
 ```
 
-    ## [1] "Output directory:  /var/folders/xp/h3k9vf3n2jx181ts786_yjrn9c2gjq/T//Rtmp6TSCWg"
+    ## [1] "Output directory:  /var/folders/xp/h3k9vf3n2jx181ts786_yjrn9c2gjq/T//RtmpP2S4KY"
 
 ``` r
 # Observed versus predicted

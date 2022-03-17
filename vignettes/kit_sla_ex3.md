@@ -3,7 +3,7 @@ area (SLA) data from more than 40 species grassland species comprising
 both herbs and graminoids
 ================
 Shawn P. Serbin, Julien Lamour, & Jeremiah Anderson
-2022-03-16
+2022-03-17
 
 ### Overview
 
@@ -31,6 +31,8 @@ invisible(lapply(list.of.packages, library, character.only = TRUE))
     ## The following object is masked from 'package:stats':
     ## 
     ##     loadings
+
+    ## Warning: package 'dplyr' was built under R version 4.0.5
 
     ## 
     ## Attaching package: 'dplyr'
@@ -84,7 +86,7 @@ output_dir <- "tempdir"
 
 ### Set working directory (scratch space)
 
-    ## [1] "Output directory: /private/var/folders/xp/h3k9vf3n2jx181ts786_yjrn9c2gjq/T/Rtmp83RkYg"
+    ## [1] "Output directory: /private/var/folders/xp/h3k9vf3n2jx181ts786_yjrn9c2gjq/T/Rtmp2EY9wO"
 
 ### Grab data from EcoSIS
 

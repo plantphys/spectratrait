@@ -4,7 +4,7 @@ invaded coastal grassland communities in Belgium. Bootstrap validation
 example
 ================
 Shawn P. Serbin, Julien Lamour, & Jeremiah Anderson
-2022-03-15
+2022-03-17
 
 ### Overview
 
@@ -28,6 +28,8 @@ invisible(lapply(list.of.packages, library, character.only = TRUE))
     ## The following object is masked from 'package:stats':
     ## 
     ##     loadings
+
+    ## Warning: package 'dplyr' was built under R version 4.0.5
 
     ## 
     ## Attaching package: 'dplyr'
@@ -81,7 +83,7 @@ output_dir <- "tempdir"
 
 ### Set working directory (scratch space)
 
-    ## [1] "/private/var/folders/xp/h3k9vf3n2jx181ts786_yjrn9c2gjq/T/RtmpvqmQPe"
+    ## [1] "/private/var/folders/xp/h3k9vf3n2jx181ts786_yjrn9c2gjq/T/Rtmp7T2QBK"
 
 ### Grab data from EcoSIS
 
@@ -846,7 +848,7 @@ write.csv(out.jk.coefs,file=file.path(outdir,paste0(inVar,
 print(paste("Output directory: ", outdir))
 ```
 
-    ## [1] "Output directory:  /var/folders/xp/h3k9vf3n2jx181ts786_yjrn9c2gjq/T//RtmpvqmQPe"
+    ## [1] "Output directory:  /var/folders/xp/h3k9vf3n2jx181ts786_yjrn9c2gjq/T//Rtmp7T2QBK"
 
 ``` r
 # Observed versus predicted

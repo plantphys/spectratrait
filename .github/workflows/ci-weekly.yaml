@@ -1,4 +1,4 @@
-name: R-CMD-check weekly
+name: R-CMD-check-Weekly
 
 on:
   # every Monday at 4:30 AM
@@ -6,34 +6,25 @@ on:
     - cron: '30 4 * * 1'
 
 env:
-  R_LIBS_USER: /usr/local/lib/R/site-library
-  LC_ALL: en_US.UTF-8
   NCPUS: 2
-  CI: true
 
 jobs:
   R-CMD-check:
     runs-on: ${{ matrix.config.os }}
 
-    name: ${{ matrix.config.os }} (${{ matrix.config.r }})  
+    name: ${{ matrix.config.os }} (${{ matrix.config.r }})
   
     strategy:
       fail-fast: false
       matrix:
         config:
-          - {os: macOS-latest,   r: 'release'}
-
-          - {os: windows-2022, r: 'release'}
-          # Use 3.6 to trigger usage of RTools35
-          - {os: windows-2022, r: '3.6'}
-
-          # Use older ubuntu to maximise backward compatibility
-          - {os: ubuntu-18.04,   r: 'devel', http-user-agent: 'release'}
-          - {os: ubuntu-18.04,   r: 'release'}
-          - {os: ubuntu-18.04,   r: 'oldrel-1'}
-          - {os: ubuntu-18.04,   r: 'oldrel-2'}
-          - {os: ubuntu-18.04,   r: 'oldrel-3'}
-          - {os: ubuntu-18.04,   r: 'oldrel-4'}
+          - {os: macOS-latest,  r: 'oldrel-1'}
+          - {os: macOS-latest,  r: 'release'}
+          - {os: windows-2022,  r: 'oldrel-1'}
+          - {os: windows-2022,  r: 'release'}
+          - {os: ubuntu-latest, r: 'oldrel-1'}
+          - {os: ubuntu-latest, r: 'release'}
+          - {os: ubuntu-latest, r: 'devel', http-user-agent: 'release'}
   
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
@@ -56,6 +47,14 @@ jobs:
           extra-packages: any::rcmdcheck
           needs: check
 
-      - uses: r-lib/actions/check-r-package@v2
+      # rcmdcheck but do not build vignettes
+      - name: Build Check Across OS & R Releases
+        run: rcmdcheck::rcmdcheck(args = c("--no-manual", "--no-build-vignettes"), build_args = c("--no-manual", "--no-build-vignettes"), error_on = "error")
+        shell: Rscript {0}
+
+      - name: Upload check results
+        if: failure()
+        uses: actions/upload-artifact@v2
         with:
-          upload-snapshots: true
+          name: ${{ runner.os }}-r${{ matrix.config.r }}-results
+          path: check

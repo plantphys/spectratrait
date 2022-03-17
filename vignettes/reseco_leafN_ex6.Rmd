@@ -7,6 +7,7 @@ output:
   html_notebook: default
   html_document:
     df_print: paged
+    keep_md: true
   rmarkdown: html_vignette
   pdf_document: default
 vignette: >

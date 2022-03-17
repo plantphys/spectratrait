@@ -8,6 +8,7 @@ output:
   html_notebook: default
   html_document:
     df_print: paged
+    keep_md: true
   rmarkdown: html_vignette
 vignette: >
   %\VignetteIndexEntry{Spectra-trait PLSR example using leaf-level spectra and leaf nitrogen content (Narea, g/m2) data from eight different crop species growing in a glasshouse at Brookhaven National Laboratory}

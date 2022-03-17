@@ -3,11 +3,12 @@ title: Spectra-trait PLSR example using leaf-level spectra and leaf mass per are
 author: "Shawn P. Serbin, Julien Lamour, & Jeremiah Anderson"
 date: "`r Sys.Date()`"
 output:
-  pdf_document: default
+  github_document: default
   html_document:
     df_print: paged
+    keep_md: true
   html_notebook: default
-  github_document: default
+  pdf_document: default
   rmarkdown: html_vignette
 vignette: >
   %\VignetteIndexEntry{Spectra-trait PLSR example using leaf-level spectra and leaf mass per area (LMA) data from CONUS NEON sites}

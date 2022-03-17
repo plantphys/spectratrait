@@ -1,13 +1,13 @@
+# Check OS and R releases
 on:
   push:
     branches: [main, master]
   pull_request:
     branches: [main, master]
 
-name: R-CMD-check
+name: R-CMD-check-OS-R
 
 env:
-  R_LIBS_USER: /usr/local/lib/R/site-library
   NCPUS: 2
 
 jobs:
@@ -52,19 +52,19 @@ jobs:
           writeLines(sprintf("R-%i.%i", getRversion()$major, getRversion()$minor), ".github/R-version")
         shell: Rscript {0}
 
-      - name: Cache R packages
-        if: runner.os != 'Windows'
-        uses: actions/cache@v2
-        with:
-          path: ${{ env.R_LIBS_USER }}
-          key: ${{ runner.os }}-rversion-${{ matrix.config.r }}-${{ hashFiles('.github/depends.Rds') }}
-          restore-keys: ${{ runner.os }}-r-${{ matrix.config.r }}-
-      
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
           extra-packages: any::rcmdcheck
           needs: check
-          
-      - uses: r-lib/actions/check-r-package@v2
+
+      # rcmdcheck but do not build vignettes
+      - name: Build Check Across OS & R Releases
+        run: rcmdcheck::rcmdcheck(args = c("--no-manual", "--no-build-vignettes"), build_args = c("--no-manual", "--no-build-vignettes"), error_on = "error")
+        shell: Rscript {0}
+
+      - name: Upload check results
+        if: failure()
+        uses: actions/upload-artifact@v2
         with:
-          upload-snapshots: true
+          name: ${{ runner.os }}-r${{ matrix.config.r }}-results
+          path: check
