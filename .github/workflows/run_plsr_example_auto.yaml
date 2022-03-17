@@ -1,9 +1,8 @@
-name: run_PLSR_example
-
-# Controls when the action will run. In this case midnight every 5 days
 on:
   schedule:
     - cron:  '0 0 */2 * *'
+
+name: run_PLSR_example-auto
 
 env:
   R_LIBS_USER: /usr/local/lib/R/site-library
