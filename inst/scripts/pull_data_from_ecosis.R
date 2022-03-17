@@ -25,9 +25,7 @@ invisible(lapply(list.of.packages, library, character.only = TRUE))
 
 
 #--------------------------------------------------------------------------------------------------#
-### Setup other functions and options
-# not in
-`%notin%` <- Negate(`%in%`)
+### Setup options
 
 # What is the source dataset from EcoSIS?
 ecosis_id <- "960dbb0c-144e-4563-8117-9e23d14f4aa9"
@@ -107,10 +105,10 @@ trait_data <- sample_info %>%
 head(trait_data)        
 
 # Prepare data for ggplot
-trait_data <- melt(data = trait_data, id.vars = "USDA_Species_Code", measure.vars = c("LMA_g_m2",
-                                                                                      "Cmass_g_g",
-                                                                                      "Nmass_g_g",
-                                                                                      "CN_Ratio"))
+trait_data <- reshape2::melt(data = trait_data, id.vars = "USDA_Species_Code", measure.vars = c("LMA_g_m2",
+                                                                                                "Cmass_g_g",
+                                                                                                "Nmass_g_g",
+                                                                                                "CN_Ratio"))
 head(trait_data)
 
 # Graph the trait data and save a file to the scratch space

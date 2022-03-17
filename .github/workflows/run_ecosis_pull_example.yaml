@@ -1,9 +1,8 @@
-name: run_PLSR_example
+name: run_ecosis_pull_example
 
-# Controls when the action will run. In this case midnight every 5 days
 on:
   schedule:
-    - cron:  '0 0 */2 * *'
+    - cron:  '15 1 */5 * *'
 
 env:
   R_LIBS_USER: /usr/local/lib/R/site-library
@@ -19,15 +18,7 @@ jobs:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
       R_KEEP_PKG_SOURCE: yes
       R_REMOTES_NO_ERRORS_FROM_WARNINGS: true
-      
-    strategy:
-      fail-fast: false
-      matrix:
-        R:
-          - "3.6"
-          - "4.0"
-          - "4.1"
- 
+
     steps:
       #check out source code
       - uses: actions/checkout@v2
@@ -50,7 +41,7 @@ jobs:
           Rscript -e 'remotes::install_github(repo="TESTgroup-BNL/spectratrait", dependencies=TRUE)'
 
       # Run R script
-      - name: Run Ely et al. (2019) PLSR Example
+      - name: Run EcoSIS API Pull Example
         run: |
-          source("inst/scripts/spectra-trait_ely_leafN_plsr_bootstrap_example.R")
+          source("inst/scripts/pull_data_from_ecosis.R")
         shell: Rscript {0}

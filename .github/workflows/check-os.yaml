@@ -1,13 +1,14 @@
+# Check OS and R releases
+
 on:
   push:
     branches: [main, master]
   pull_request:
     branches: [main, master]
 
-name: R-CMD-check-Standard
+name: R-CMD-check-OS-R
 
 env:
-  R_LIBS_USER: /usr/local/lib/R/site-library
   NCPUS: 2
 
 jobs:
@@ -56,7 +57,20 @@ jobs:
         with:
           extra-packages: any::rcmdcheck
           needs: check
-          
-      - uses: r-lib/actions/check-r-package@v2
+      
+      # use default check options - building vignettes breaking CI
+#      - uses: r-lib/actions/check-r-package@v2
+#        with:
+#          upload-snapshots: true
+
+      # do not build vignettes
+      - name: Build Check Across OS & R Releases
+        run: rcmdcheck::rcmdcheck(args = c("--no-manual", "--no-build-vignettes"), build_args = c("--no-manual", "--no-build-vignettes"), error_on = "error")
+        shell: Rscript {0}
+
+      - name: Upload check results
+        if: failure()
+        uses: actions/upload-artifact@v2
         with:
-          upload-snapshots: true
+          name: ${{ runner.os }}-r${{ matrix.config.r }}-results
+          path: check

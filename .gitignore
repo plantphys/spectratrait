@@ -44,3 +44,5 @@ rsconnect/
 # MacOSX
 *.DS*
 *._*
+/doc/
+/Meta/

@@ -3,7 +3,17 @@ title: An example showing how to apply an existing PLSR model to new data. In th
 author: "Shawn P. Serbin, Julien Lamour, & Jeremiah Anderson"
 date: "`r Sys.Date()`"
 output:
+  github_document: default
   html_notebook: default
+  pdf_document: default
+  html_document:
+    df_print: paged
+    keep_md: true
+  rmarkdown: html_vignette
+vignette: >
+  %\VignetteIndexEntry{An example showing how to apply an existing PLSR model to new data. In this case applying the LMA model from Serbin et al., (2019; DOI - 10.1111/nph.16123) to a dataset collected at CONUS NEON field sites}
+  %\usepackage[utf8]{inputenc}
+  %\VignetteEngine{knitr::knitr}
 ---
 
 ```{r setup, include=FALSE, echo=FALSE}
@@ -168,7 +178,7 @@ expr[[1]] <- bquote(R^2==.(r2))
 expr[[2]] <- bquote(RMSEP==.(round(RMSEP,2)))
 expr[[3]] <- bquote("%RMSEP"==.(round(perc_RMSEP,2)))
 rng_vals <- c(min(LeafLMA.PLSR.dataset$LPI), max(LeafLMA.PLSR.dataset$UPI))
-par(mfrow=c(1,1), mar=c(4.2,5.3,1,0.4), oma=c(0, 0.1, 0, 0.2))
+par(mfrow=c(1,1), mar=c(4,5.3,1,0.4), oma=c(0.1, 0.1, 0.1, 0.2))
 plotrix::plotCI(LeafLMA.PLSR.dataset$PLSR_LMA_gDW_m2,LeafLMA.PLSR.dataset[,inVar], 
                 li=LeafLMA.PLSR.dataset$LPI, ui=LeafLMA.PLSR.dataset$UPI, gap=0.009,sfrac=0.000, 
                 lwd=1.6, xlim=c(rng_vals[1], rng_vals[2]), ylim=c(rng_vals[1], rng_vals[2]), 
