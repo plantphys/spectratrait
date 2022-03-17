@@ -107,4 +107,6 @@ CI run PLSR example:
 CI OS and R Release Checks:
 [![R-CMD-check-OS-R](https://github.com/TESTgroup-BNL/spectratrait/actions/workflows/check-os.yaml/badge.svg?branch=master)](https://github.com/TESTgroup-BNL/spectratrait/actions/workflows/check-os.yaml) <br>
 Weekly CI Checks:
-[![R-CMD-check-Weekly](https://github.com/TESTgroup-BNL/spectratrait/actions/workflows/ci-weekly.yaml/badge.svg?branch=master)](https://github.com/TESTgroup-BNL/spectratrait/actions/workflows/ci-weekly.yaml)
+[![R-CMD-check-Weekly](https://github.com/TESTgroup-BNL/spectratrait/actions/workflows/ci-weekly.yaml/badge.svg?branch=master)](https://github.com/TESTgroup-BNL/spectratrait/actions/workflows/ci-weekly.yaml) <br>
+EcoSIS API Check:
+[![run_ecosis_pull_example](https://github.com/TESTgroup-BNL/spectratrait/actions/workflows/run_ecosis_pull_example.yaml/badge.svg?branch=master)](https://github.com/TESTgroup-BNL/spectratrait/actions/workflows/run_ecosis_pull_example.yaml)
