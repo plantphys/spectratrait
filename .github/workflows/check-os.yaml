@@ -1,5 +1,4 @@
 # Check OS and R releases
-
 on:
   push:
     branches: [main, master]
