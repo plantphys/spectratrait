@@ -5,9 +5,9 @@
 # ------ Setup R 
 # R version: 4, 4.1, 4.0, 4.2
 ARG VARIANT="4.1"
-#FROM rocker/tidyverse:${VARIANT}
+FROM rocker/tidyverse:${VARIANT}
 # Includes packages: devtools tidyverse tidymodels glmnet randomForest xgboost 
-FROM rocker/r-ver:${VARIANT}
+#FROM rocker/r-ver:${VARIANT}
 # simpler, non full tidyverse install
 
 # ------ Configure all additional options ------
@@ -93,13 +93,13 @@ RUN echo 'source(file.path(Sys.getenv("HOME"), ".vscode-R", "init.R"))' >> ${HOM
 #    && export DEBIAN_FRONTEND=noninteractive \
 #    && apt-get -y install --no-install-recommends libzmq3-dev \
 #    && install2.r --error --skipinstalled --ncpus -1 IRkernel \
-#    && python3 -m pip --no-cache-dir install jupyter \
+#   && python3 -m pip --no-cache-dir install jupyter \
 #    && R --vanilla -s -e 'IRkernel::installspec(user = FALSE)'
 
 # Expose Rstudio port. Log in with rstudio/rstudio
 EXPOSE 8787
 
-# Expose Jupyter port
-EXPOSE 8888
+# Expose Jupyter port - NOT needed without Jupyter installed
+#EXPOSE 8888
 
 CMD ["/init"]
