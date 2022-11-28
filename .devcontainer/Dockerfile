@@ -36,26 +36,26 @@ RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
     && apt-get autoremove -y && apt-get clean -y && rm -rf /var/lib/apt/lists/* /tmp/library-scripts \
     && python3 -m pip --no-cache-dir install radian \
     && install2.r --error --skipinstalled --ncpus -1 \
-        devtools (>= 2.3.1) \
-        here (>= 0.1) \
-        ggplot2 (>= 3.3.2) \
-        gridExtra (>= 2.3) \
-        remotes (>= 2.2.0) \
+        devtools \
+        here \
+        ggplot2 \
+        gridExtra \
+        remotes \
         data.table \
-        readr (>= 1.3.1) \
-        RCurl (>= 1.98-1.2) \
-        httr (>= 1.4.2) \
-        dplyr (>= 1.0.1) \
-        magrittr (>= 2.0.1) \
-        plotrix (>= 3.7-8) \
-        scales (>= 1.1.1) \
-        reshape2 (>= 1.4.4) \
-        pls (>= 2.7-2) \
-        knitr (>= 1.37) \
+        readr \
+        RCurl \
+        httr \
+        dplyr \
+        magrittr \
+        plotrix \
+        scales \
+        reshape2 \
+        pls \
+        knitr \
         markdown \
         rmarkdown \
         roxygen2 \
-        testthat (>= 3.1.2) \
+        testthat \
     && rm -rf /tmp/downloaded_packages
 
 ## Install summarytools and load some R package off the bat
