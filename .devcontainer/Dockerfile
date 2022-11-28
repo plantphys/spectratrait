@@ -68,6 +68,7 @@ RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
 ## Install spectratrait and load specific R packages
 # or should we leave out most of the packages above and rely on this dependency build to work for the dev env?
 RUN R -e "devtools::install_github(repo = 'TESTgroup-BNL/spectratrait', dependencies=TRUE)"
+RUN R -e "library(spectratrait)"
 RUN R -e "library(here)"
 
 # VSCode R Debugger dependency. Install the latest release version from GitHub without using GitHub API.
