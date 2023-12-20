@@ -22,7 +22,7 @@ f.plot.spec <- function(
 ){
   if(mean(as.matrix(Z),na.rm=TRUE)>1){Z=Z/100} ## Check if the spectra are in pc [0,100] or in [0,1]
   if(is.null(xlim)){xlim=c(min(wv),max(wv))}
-  mean_spec <- colMeans(Z)
+  mean_spec <- colMeans(Z,na.rm=TRUE)
   spectra_quantiles <- apply(Z,2,quantile,na.rm=T,probs=c(0,0.025,0.05,0.5,0.95,0.975,1))
   
   plot(x=NULL,y=NULL,ylim=c(0,100),xlim=xlim,xlab="Wavelength (nm)",
