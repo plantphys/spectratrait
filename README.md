@@ -40,16 +40,16 @@ Finally, to complete the installation you will also need to install the spectrat
 
 ``` r
 # to install the master branch version
-devtools::install_github(repo = "TESTgroup-BNL/spectratrait", dependencies=TRUE)
+devtools::install_github(repo = "plantphys/spectratrait", dependencies=TRUE)
 
 # to install the master branch version - with Vignettes (though slower)
-devtools::install_github(repo = "TESTgroup-BNL/spectratrait", dependencies=TRUE, build_vignettes = TRUE)
+devtools::install_github(repo = "plantphys/spectratrait", dependencies=TRUE, build_vignettes = TRUE)
 
 # to install a specific release, for example release 1.0.5
-devtools::install_github(repo = "TESTgroup-BNL/spectratrait@v1.0.5", dependencies=TRUE)
+devtools::install_github(repo = "plantphys/spectratrait@v1.0.5", dependencies=TRUE)
 
 # or a specific branch, e.g. a branch named devbranch
-devtools::install_github(repo = "TESTgroup-BNL/spectratrait", ref = "devbranch", dependencies=TRUE)
+devtools::install_github(repo = "plantphys/spectratrait", ref = "devbranch", dependencies=TRUE)
 ```
 
 ## Contains:
