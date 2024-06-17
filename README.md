@@ -5,7 +5,7 @@ This repository contains example scripts illustrating best-practices for fitting
 Burnett AC, Anderson J, Davidson KD, Ely KS, Lamour J, Li Q, Morrison BD, Yang D, Rogers A, Serbin SP (2021) A best-practice guide to predicting plant traits from leaf-level hyperspectral data using partial least squares regression. Journal of Experimental Botany. https://doi.org/10.1093/jxb/erab295
 
 ### Source code citation:
-[![DOI](https://zenodo.org/badge/222699149.svg)](https://zenodo.org/badge/latestdoi/222699149)
+[![DOI](https://zenodo.org/badge/222699149.svg)](https://zenodo.org/doi/10.5281/zenodo.4330119)
 
 ### EcoSML
 https://ecosml.org/package/github/TESTgroup-BNL/spectratrait
