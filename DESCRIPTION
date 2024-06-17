@@ -1,21 +1,21 @@
 Package: spectratrait
-Title: A simple add-on package to aid in the fitting of leaf-level spectra-trait PLSR models
-Version: 1.2.1
+Title: A simple add-on package to aid in the fitting of leaf or canopy scale spectra-trait PLSR models
+Version: 1.2.5
 Authors@R:
   c(person(given = "Julien",
            family = "Lamour",
            role = c("aut", "ctb"),
-           email = "jlamour@bnl.gov",
+           email = "jlamour.sci@gmail.com",
            comment = c(ORCID = "0000-0002-4410-507X")),
     person(given = "Jeremiah",
            family = "Anderson",
            role = "ctb",
-           email = "jeanderson@bnl.gov",
+           email = "jeremiah.a.anderson@nasa.gov",
            comment = c(ORCID = "0000-0001-8925-5226")),
     person(given = "Kenneth",
            family = "Davidson",
            role = "ctb",
-           email = "kdavidson@bnl.gov",
+           email = "kdavidson@americanforests.org",
            comment = c(ORCID = "0000-0001-5745-9689")),
     person(given = "Kim",
            family = "Ely",
@@ -25,15 +25,15 @@ Authors@R:
     person(given = "Shawn",
            family = "Serbin",
            role = c("aut", "cre", "ctb"),
-           email = "sserbin@bnl.gov",
+           email = "shawn.p.serbin@nasa.gov",
            comment = c(ORCID = "0000-0003-4136-8971")))
-Maintainer: Shawn P. Serbin <sserbin@bnl.gov>
+Maintainer: Shawn P. Serbin <shawn.p.serbin@nasa.gov>
 Description: This package provides functions to conduct standardized spectra-trait PLSR model fitting, including uncertainty analysis that follows DOI: https://doi.org/10.1111/nph.16123
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.1.2
+RoxygenNote: 7.3.1
 Imports: 
     httr (>= 1.4.2),
     readr (>= 1.3.1),
@@ -55,6 +55,6 @@ Suggests:
     markdown,
     rmarkdown
 Depends:
-    R (>= 2.10)
+    R (>= 3.6)
 VignetteBuilder: knitr
 NeedsCompilation: no
