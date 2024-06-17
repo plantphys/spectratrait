@@ -3,7 +3,7 @@ content (Narea, g/m2) data from 36 species growing in Rosa rugosa
 invaded coastal grassland communities in Belgium
 ================
 Shawn P. Serbin, Julien Lamour, & Jeremiah Anderson
-2022-03-17
+2024-06-17
 
 ### Overview
 
@@ -21,6 +21,8 @@ list.of.packages <- c("pls","dplyr","here","plotrix","ggplot2","gridExtra","spec
 invisible(lapply(list.of.packages, library, character.only = TRUE))
 ```
 
+    ## Warning: package 'pls' was built under R version 4.3.1
+
     ## 
     ## Attaching package: 'pls'
 
@@ -28,7 +30,7 @@ invisible(lapply(list.of.packages, library, character.only = TRUE))
     ## 
     ##     loadings
 
-    ## Warning: package 'dplyr' was built under R version 4.0.5
+    ## Warning: package 'dplyr' was built under R version 4.3.1
 
     ## 
     ## Attaching package: 'dplyr'
@@ -41,7 +43,11 @@ invisible(lapply(list.of.packages, library, character.only = TRUE))
     ## 
     ##     intersect, setdiff, setequal, union
 
-    ## here() starts at /Users/sserbin/Data/GitHub/spectratrait
+    ## here() starts at /Users/sserbin/Library/CloudStorage/OneDrive-NASA/Data/Github/spectratrait
+
+    ## Warning: package 'plotrix' was built under R version 4.3.1
+
+    ## Warning: package 'ggplot2' was built under R version 4.3.1
 
     ## 
     ## Attaching package: 'gridExtra'
@@ -82,7 +88,7 @@ output_dir <- "tempdir"
 
 ### Set working directory (scratch space)
 
-    ## [1] "/private/var/folders/xp/h3k9vf3n2jx181ts786_yjrn9c2gjq/T/RtmpJx6SqV"
+    ## [1] "/private/var/folders/th/fpt_z3417gn8xgply92pvy6r0000gq/T/RtmpjBm0Ly"
 
 ### Grab data from EcoSIS
 
@@ -90,7 +96,7 @@ output_dir <- "tempdir"
 print(paste0("Output directory: ",getwd()))  # check wd
 ```
 
-    ## [1] "Output directory: /Users/sserbin/Data/GitHub/spectratrait/vignettes"
+    ## [1] "Output directory: /Users/sserbin/Library/CloudStorage/OneDrive-NASA/Data/Github/spectratrait/vignettes"
 
 ``` r
 dat_raw <- spectratrait::get_ecosis_data(ecosis_id = ecosis_id)
@@ -115,21 +121,21 @@ head(dat_raw)
 ```
 
     ## # A tibble: 6 × 2,164
-    ##   `Cw/EWT (cm3/cm2)` `Latin Species`       `Leaf area (mm2)` `Leaf calcium con…`
-    ##                <dbl> <chr>                             <dbl>               <dbl>
-    ## 1            0.00887 Arrhenatherum elatius              696.              0.0291
-    ## 2            0.00824 Bromus sterilis                    447.              0.0230
-    ## 3            0.0280  Jacobaea vulgaris                 2418.              0.0950
-    ## 4            0.0106  Rubus caesius                     5719.              0.0700
-    ## 5            0.00851 Arrhenatherum elatius              671.              0.0286
-    ## 6            0.0153  Crepis capillaris                 1401.              0.0470
-    ## # … with 2,160 more variables:
+    ##   `Cw/EWT (cm3/cm2)` `Latin Species`    `Leaf area (mm2)` Leaf calcium content…¹
+    ##                <dbl> <chr>                          <dbl>                  <dbl>
+    ## 1            0.00887 Arrhenatherum ela…              696.                 0.0291
+    ## 2            0.00824 Bromus sterilis                 447.                 0.0230
+    ## 3            0.0280  Jacobaea vulgaris              2418.                 0.0950
+    ## 4            0.0106  Rubus caesius                  5719.                 0.0700
+    ## 5            0.00851 Arrhenatherum ela…              671.                 0.0286
+    ## 6            0.0153  Crepis capillaris              1401.                 0.0470
+    ## # ℹ abbreviated name: ¹​`Leaf calcium content per leaf area (mg/mm2)`
+    ## # ℹ 2,160 more variables:
     ## #   `Leaf magnesium content per leaf area (mg/mm2)` <dbl>,
     ## #   `Leaf mass per area (g/cm2)` <dbl>,
     ## #   `Leaf nitrogen content per leaf area (mg/mm2)` <dbl>,
     ## #   `Leaf phosphorus content per leaf area (mg/mm2)` <dbl>,
-    ## #   `Leaf potassium content per leaf area (mg/mm2)` <dbl>,
-    ## #   `Plant height vegetative (cm)` <dbl>, ids <chr>, `plot code` <chr>, …
+    ## #   `Leaf potassium content per leaf area (mg/mm2)` <dbl>, …
 
 ``` r
 names(dat_raw)[1:40]
@@ -190,16 +196,16 @@ head(sample_info)
 ```
 
     ## # A tibble: 6 × 13
-    ##   `Cw/EWT (cm3/cm2)` `Latin Species`       `Leaf area (mm2)` `Leaf calcium con…`
-    ##                <dbl> <chr>                             <dbl>               <dbl>
-    ## 1            0.00887 Arrhenatherum elatius              696.              0.0291
-    ## 2            0.00824 Bromus sterilis                    447.              0.0230
-    ## 3            0.0280  Jacobaea vulgaris                 2418.              0.0950
-    ## 4            0.0106  Rubus caesius                     5719.              0.0700
-    ## 5            0.00851 Arrhenatherum elatius              671.              0.0286
-    ## 6            0.0153  Crepis capillaris                 1401.              0.0470
-    ## # … with 9 more variables:
-    ## #   `Leaf magnesium content per leaf area (mg/mm2)` <dbl>,
+    ##   `Cw/EWT (cm3/cm2)` `Latin Species`    `Leaf area (mm2)` Leaf calcium content…¹
+    ##                <dbl> <chr>                          <dbl>                  <dbl>
+    ## 1            0.00887 Arrhenatherum ela…              696.                 0.0291
+    ## 2            0.00824 Bromus sterilis                 447.                 0.0230
+    ## 3            0.0280  Jacobaea vulgaris              2418.                 0.0950
+    ## 4            0.0106  Rubus caesius                  5719.                 0.0700
+    ## 5            0.00851 Arrhenatherum ela…              671.                 0.0286
+    ## 6            0.0153  Crepis capillaris              1401.                 0.0470
+    ## # ℹ abbreviated name: ¹​`Leaf calcium content per leaf area (mg/mm2)`
+    ## # ℹ 9 more variables: `Leaf magnesium content per leaf area (mg/mm2)` <dbl>,
     ## #   `Leaf mass per area (g/cm2)` <dbl>,
     ## #   `Leaf nitrogen content per leaf area (mg/mm2)` <dbl>,
     ## #   `Leaf phosphorus content per leaf area (mg/mm2)` <dbl>,
@@ -316,6 +322,14 @@ cal_hist_plot <- qplot(cal.plsr.data[,paste0(inVar)],geom="histogram",
                        main = paste0("Cal. Histogram for ",inVar),
                        xlab = paste0(inVar),ylab = "Count",fill=I("grey50"),col=I("black"),
                        alpha=I(.7))
+```
+
+    ## Warning: `qplot()` was deprecated in ggplot2 3.4.0.
+    ## This warning is displayed once every 8 hours.
+    ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
+    ## generated.
+
+``` r
 val_hist_plot <- qplot(val.plsr.data[,paste0(inVar)],geom="histogram",
                        main = paste0("Val. Histogram for ",inVar),
                        xlab = paste0(inVar),ylab = "Count",fill=I("grey50"),col=I("black"),
@@ -587,7 +601,21 @@ cal_scatter_plot <- ggplot(cal.plsr.output, aes(x=PLSR_CV_Predicted, y=get(inVar
         axis.title=element_text(size=20, face="bold"), 
         axis.text.x = element_text(angle = 0,vjust = 0.5),
         panel.border = element_rect(linetype = "solid", fill = NA, size=1.5))
+```
 
+    ## Warning: Using `size` aesthetic for lines was deprecated in ggplot2 3.4.0.
+    ## ℹ Please use `linewidth` instead.
+    ## This warning is displayed once every 8 hours.
+    ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
+    ## generated.
+
+    ## Warning: The `size` argument of `element_rect()` is deprecated as of ggplot2 3.4.0.
+    ## ℹ Please use the `linewidth` argument instead.
+    ## This warning is displayed once every 8 hours.
+    ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
+    ## generated.
+
+``` r
 cal_resid_histogram <- ggplot(cal.plsr.output, aes(x=PLSR_CV_Residuals)) +
   geom_histogram(alpha=.5, position="identity") + 
   geom_vline(xintercept = 0, color="black", 
@@ -626,8 +654,11 @@ scatterplots <- grid.arrange(cal_scatter_plot, val_scatter_plot, cal_resid_histo
                              val_resid_histogram, nrow=2,ncol=2)
 ```
 
-    ## Warning: Removed 2 rows containing missing values (geom_point).
-    ## Removed 2 rows containing missing values (geom_point).
+    ## Warning: Removed 2 rows containing missing values or values outside the scale range
+    ## (`geom_point()`).
+
+    ## Warning: Removed 2 rows containing missing values or values outside the scale range
+    ## (`geom_point()`).
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
@@ -846,7 +877,7 @@ write.csv(out.jk.coefs,file=file.path(outdir,
 print(paste("Output directory: ", outdir))
 ```
 
-    ## [1] "Output directory:  /var/folders/xp/h3k9vf3n2jx181ts786_yjrn9c2gjq/T//RtmpJx6SqV"
+    ## [1] "Output directory:  /var/folders/th/fpt_z3417gn8xgply92pvy6r0000gq/T//RtmpjBm0Ly"
 
 ``` r
 # Observed versus predicted

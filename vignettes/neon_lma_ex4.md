@@ -2,7 +2,7 @@ Spectra-trait PLSR example using leaf-level spectra and leaf mass per
 area (LMA) data from CONUS NEON sites
 ================
 Shawn P. Serbin, Julien Lamour, & Jeremiah Anderson
-2022-03-17
+2024-06-17
 
 ### Overview
 
@@ -20,6 +20,8 @@ list.of.packages <- c("pls","dplyr","here","plotrix","ggplot2","gridExtra","spec
 invisible(lapply(list.of.packages, library, character.only = TRUE))
 ```
 
+    ## Warning: package 'pls' was built under R version 4.3.1
+
     ## 
     ## Attaching package: 'pls'
 
@@ -27,7 +29,7 @@ invisible(lapply(list.of.packages, library, character.only = TRUE))
     ## 
     ##     loadings
 
-    ## Warning: package 'dplyr' was built under R version 4.0.5
+    ## Warning: package 'dplyr' was built under R version 4.3.1
 
     ## 
     ## Attaching package: 'dplyr'
@@ -40,7 +42,11 @@ invisible(lapply(list.of.packages, library, character.only = TRUE))
     ## 
     ##     intersect, setdiff, setequal, union
 
-    ## here() starts at /Users/sserbin/Data/GitHub/spectratrait
+    ## here() starts at /Users/sserbin/Library/CloudStorage/OneDrive-NASA/Data/Github/spectratrait
+
+    ## Warning: package 'plotrix' was built under R version 4.3.1
+
+    ## Warning: package 'ggplot2' was built under R version 4.3.1
 
     ## 
     ## Attaching package: 'gridExtra'
@@ -81,7 +87,7 @@ output_dir <- "tempdir"
 
 ### Set working directory (scratch space)
 
-    ## [1] "/private/var/folders/xp/h3k9vf3n2jx181ts786_yjrn9c2gjq/T/RtmpniosdI"
+    ## [1] "/private/var/folders/th/fpt_z3417gn8xgply92pvy6r0000gq/T/RtmpOGEASM"
 
 ### Grab data from EcoSIS
 
@@ -91,7 +97,7 @@ output_dir <- "tempdir"
 print(paste0("Output directory: ",getwd()))  # check wd
 ```
 
-    ## [1] "Output directory: /Users/sserbin/Data/GitHub/spectratrait/vignettes"
+    ## [1] "Output directory: /Users/sserbin/Library/CloudStorage/OneDrive-NASA/Data/Github/spectratrait/vignettes"
 
 ``` r
 ### Get source dataset from EcoSIS
@@ -125,7 +131,7 @@ head(dat_raw)
     ## 4 University of Wiscon… black walnut  D02    broadleaf        60.8 Juglans      
     ## 5 University of Wiscon… black walnut  D02    broadleaf        85.9 Juglans      
     ## 6 University of Wiscon… black walnut  D02    broadleaf        85.9 Juglans      
-    ## # … with 2,156 more variables: `Latin Species` <chr>, PI <chr>, Project <chr>,
+    ## # ℹ 2,156 more variables: `Latin Species` <chr>, PI <chr>, Project <chr>,
     ## #   Sample_ID <chr>, `USDA Symbol` <chr>, `350` <dbl>, `351` <dbl>,
     ## #   `352` <dbl>, `353` <dbl>, `354` <dbl>, `355` <dbl>, `356` <dbl>,
     ## #   `357` <dbl>, `358` <dbl>, `359` <dbl>, `360` <dbl>, `361` <dbl>,
@@ -170,7 +176,7 @@ head(sample_info)
     ## 4 University of Wiscon… black walnut  D02    broadleaf        60.8 Juglans      
     ## 5 University of Wiscon… black walnut  D02    broadleaf        85.9 Juglans      
     ## 6 University of Wiscon… black walnut  D02    broadleaf        85.9 Juglans      
-    ## # … with 5 more variables: `Latin Species` <chr>, PI <chr>, Project <chr>,
+    ## # ℹ 5 more variables: `Latin Species` <chr>, PI <chr>, Project <chr>,
     ## #   Sample_ID <chr>, `USDA Symbol` <chr>
 
 ``` r
@@ -270,6 +276,14 @@ cal_hist_plot <- qplot(cal.plsr.data[,paste0(inVar)],geom="histogram",
                        main = paste0("Cal. Histogram for ",inVar),
                        xlab = paste0(inVar),ylab = "Count",fill=I("grey50"),
                        col=I("black"),alpha=I(.7))
+```
+
+    ## Warning: `qplot()` was deprecated in ggplot2 3.4.0.
+    ## This warning is displayed once every 8 hours.
+    ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
+    ## generated.
+
+``` r
 val_hist_plot <- qplot(val.plsr.data[,paste0(inVar)],geom="histogram",
                        main = paste0("Val. Histogram for ",inVar),
                        xlab = paste0(inVar),ylab = "Count",fill=I("grey50"),
@@ -431,11 +445,11 @@ pls::RMSEP(plsr.out, newdata = val.plsr.data)
 ```
 
     ## (Intercept)      1 comps      2 comps      3 comps      4 comps      5 comps  
-    ##      29.372       18.664       18.166       16.187       12.760       12.149  
+    ##      29.174       18.644       18.115       15.657       12.508       11.978  
     ##     6 comps      7 comps      8 comps      9 comps     10 comps     11 comps  
-    ##      12.004       11.465       11.144       10.389       10.063        9.732  
+    ##      11.766       11.220       10.941       10.226        9.934        9.580  
     ##    12 comps  
-    ##       9.633
+    ##       9.453
 
 ``` r
 plot(pls::RMSEP(plsr.out,estimate=c("test"),newdata = val.plsr.data), 
@@ -448,11 +462,11 @@ pls::R2(plsr.out, newdata = val.plsr.data)
 ```
 
     ## (Intercept)      1 comps      2 comps      3 comps      4 comps      5 comps  
-    ##   -0.001908     0.595475     0.616770     0.695732     0.810908     0.828593  
+    ##   -0.002151     0.590718     0.613614     0.711350     0.815784     0.831077  
     ##     6 comps      7 comps      8 comps      9 comps     10 comps     11 comps  
-    ##    0.832656     0.847338     0.855775     0.874647     0.882410     0.890000  
+    ##    0.836995     0.851779     0.859055     0.876874     0.883790     0.891931  
     ##    12 comps  
-    ##    0.892247
+    ##    0.894776
 
 ``` r
 plot(pls::R2(plsr.out,estimate=c("test"),newdata = val.plsr.data), main="MODEL R2",
@@ -480,19 +494,19 @@ head(cal.plsr.output)
 ```
 
     ##   Domain Functional_type Sample_ID USDA_Species_Code LMA_gDW_m2 PLSR_Predicted
-    ## 1    D08       broadleaf     L2644              ACBA      44.18       53.00773
-    ## 2    D08       broadleaf     L2646              ACBA      41.71       44.02712
-    ## 3    D08       broadleaf     L2645              ACBA      40.66       46.76972
-    ## 4    D08       broadleaf     P2639              ACBA      44.18       49.62804
-    ## 5    D03       broadleaf     P0614              ACFL      52.91       64.78900
-    ## 6    D03       broadleaf     L0609              ACFL      81.67       96.85291
+    ## 1    D08       broadleaf     L2644              ACBA      44.18       53.09004
+    ## 2    D08       broadleaf     L2646              ACBA      41.71       44.34166
+    ## 3    D08       broadleaf     L2645              ACBA      40.66       46.80029
+    ## 4    D08       broadleaf     P2639              ACBA      44.18       50.07397
+    ## 5    D03       broadleaf     P0614              ACFL      52.91       64.87644
+    ## 6    D03       broadleaf     L0609              ACFL      81.67       96.80924
     ##   PLSR_CV_Predicted PLSR_CV_Residuals
-    ## 1          53.03952          8.859523
-    ## 2          44.03282          2.322823
-    ## 3          46.90528          6.245280
-    ## 4          49.80084          5.620843
-    ## 5          64.98964         12.079641
-    ## 6          96.86039         15.190390
+    ## 1          53.10616          8.926162
+    ## 2          44.39206          2.682061
+    ## 3          46.80108          6.141077
+    ## 4          50.16964          5.989638
+    ## 5          65.06744         12.157436
+    ## 6          96.86793         15.197935
 
 ``` r
 cal.R2 <- round(pls::R2(plsr.out,intercept=F)[[1]][nComps],2)
@@ -508,19 +522,19 @@ head(val.plsr.output)
 ```
 
     ##    Domain Functional_type Sample_ID USDA_Species_Code LMA_gDW_m2 PLSR_Predicted
-    ## 3     D02       broadleaf     P0002              JUNI      60.77       63.90905
-    ## 12    D02       broadleaf     L0006              JUNI      42.54       41.54133
-    ## 13    D02       broadleaf     P0007              QUVE     106.57       99.99662
-    ## 19    D02       broadleaf     P0010              PRSE      78.82       89.03078
-    ## 21    D02       broadleaf     P0011              PRSE      86.09       85.17273
-    ## 28    D02       broadleaf     L0014              PRSE      67.11       67.95549
+    ## 3     D02       broadleaf     P0002              JUNI      60.77       64.26860
+    ## 12    D02       broadleaf     L0006              JUNI      42.54       41.53156
+    ## 13    D02       broadleaf     P0007              QUVE     106.57       99.94629
+    ## 19    D02       broadleaf     P0010              PRSE      78.82       89.09997
+    ## 21    D02       broadleaf     P0011              PRSE      86.09       84.86398
+    ## 28    D02       broadleaf     L0014              PRSE      67.11       67.88234
     ##    PLSR_Residuals
-    ## 3       3.1390459
-    ## 12     -0.9986720
-    ## 13     -6.5733831
-    ## 19     10.2107788
-    ## 21     -0.9172668
-    ## 28      0.8454930
+    ## 3       3.4986044
+    ## 12     -1.0084424
+    ## 13     -6.6237126
+    ## 19     10.2799665
+    ## 21     -1.2260190
+    ## 28      0.7723426
 
 ``` r
 val.R2 <- round(pls::R2(plsr.out,newdata=val.plsr.data,intercept=F)[[1]][nComps],2)
@@ -545,7 +559,21 @@ cal_scatter_plot <- ggplot(cal.plsr.output, aes(x=PLSR_CV_Predicted,
         axis.text.x = element_text(angle = 0,vjust = 0.5),
         panel.border = element_rect(linetype = "solid", 
                                     fill = NA, size=1.5))
+```
 
+    ## Warning: Using `size` aesthetic for lines was deprecated in ggplot2 3.4.0.
+    ## ℹ Please use `linewidth` instead.
+    ## This warning is displayed once every 8 hours.
+    ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
+    ## generated.
+
+    ## Warning: The `size` argument of `element_rect()` is deprecated as of ggplot2 3.4.0.
+    ## ℹ Please use the `linewidth` argument instead.
+    ## This warning is displayed once every 8 hours.
+    ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
+    ## generated.
+
+``` r
 cal_resid_histogram <- ggplot(cal.plsr.output, 
                               aes(x=PLSR_CV_Residuals)) +
   geom_histogram(alpha=.5, position="identity") + 
@@ -592,9 +620,11 @@ scatterplots <- grid.arrange(cal_scatter_plot, val_scatter_plot, cal_resid_histo
                              val_resid_histogram, nrow=2, ncol=2)
 ```
 
-    ## Warning: Removed 21 rows containing missing values (geom_point).
+    ## Warning: Removed 22 rows containing missing values or values outside the scale range
+    ## (`geom_point()`).
 
-    ## Warning: Removed 8 rows containing missing values (geom_point).
+    ## Warning: Removed 8 rows containing missing values or values outside the scale range
+    ## (`geom_point()`).
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
@@ -683,19 +713,19 @@ head(val.plsr.output)
 ```
 
     ##    Domain Functional_type Sample_ID USDA_Species_Code LMA_gDW_m2 PLSR_Predicted
-    ## 3     D02       broadleaf     P0002              JUNI      60.77       63.90905
-    ## 12    D02       broadleaf     L0006              JUNI      42.54       41.54133
-    ## 13    D02       broadleaf     P0007              QUVE     106.57       99.99662
-    ## 19    D02       broadleaf     P0010              PRSE      78.82       89.03078
-    ## 21    D02       broadleaf     P0011              PRSE      86.09       85.17273
-    ## 28    D02       broadleaf     L0014              PRSE      67.11       67.95549
+    ## 3     D02       broadleaf     P0002              JUNI      60.77       64.26860
+    ## 12    D02       broadleaf     L0006              JUNI      42.54       41.53156
+    ## 13    D02       broadleaf     P0007              QUVE     106.57       99.94629
+    ## 19    D02       broadleaf     P0010              PRSE      78.82       89.09997
+    ## 21    D02       broadleaf     P0011              PRSE      86.09       84.86398
+    ## 28    D02       broadleaf     L0014              PRSE      67.11       67.88234
     ##    PLSR_Residuals      LCI       UCI      LPI       UPI
-    ## 3       3.1390459 63.75673  64.12043 45.02836  82.78973
-    ## 12     -0.9986720 41.42248  41.69728 22.66069  60.42196
-    ## 13     -6.5733831 99.88029 100.11962 81.11612 118.87712
-    ## 19     10.2107788 88.83274  89.21623 70.14949 107.91207
-    ## 21     -0.9172668 85.02330  85.32067 66.29194 104.05353
-    ## 28      0.8454930 67.82558  68.15298 49.07457  86.83642
+    ## 3       3.4986044 64.14006  64.47482 45.75155  82.78566
+    ## 12     -1.0084424 41.40129  41.67150 23.01456  60.04855
+    ## 13     -6.6237126 99.82564 100.08886 81.42930 118.46328
+    ## 19     10.2799665 88.89305  89.27985 70.58206 107.61787
+    ## 21     -1.2260190 84.71755  85.02180 66.34672 103.38124
+    ## 28      0.7723426 67.76659  68.07148 49.36518  86.39950
 
 ### Jackknife coefficient plot
 
@@ -778,12 +808,12 @@ head(out.jk.coefs)[1:6]
 ```
 
     ##       Iteration Intercept Wave_500 Wave_501 Wave_502 Wave_503
-    ## Seg 1         1  69.44171 5.796399 6.112194 6.482897 6.814518
-    ## Seg 2         2  69.36719 6.316698 6.662910 7.031691 7.382632
-    ## Seg 3         3  68.73866 6.729135 7.031912 7.372056 7.650510
-    ## Seg 4         4  69.09350 5.899933 6.199538 6.614751 6.975426
-    ## Seg 5         5  69.12959 5.355288 5.701339 6.043622 6.383870
-    ## Seg 6         6  68.67202 5.615024 5.968986 6.358249 6.654510
+    ## Seg 1         1  68.80319 7.963544 8.372048 8.732315 8.996706
+    ## Seg 2         2  68.33966 9.007372 9.404730 9.711349 9.942219
+    ## Seg 3         3  67.96783 7.809066 8.218030 8.589660 8.855073
+    ## Seg 4         4  68.56866 7.924350 8.269938 8.602341 8.843661
+    ## Seg 5         5  68.06364 7.682055 8.080012 8.388390 8.653853
+    ## Seg 6         6  67.73588 7.989043 8.385246 8.743061 8.962190
 
 ``` r
 write.csv(out.jk.coefs,file=file.path(outdir, 
@@ -798,7 +828,7 @@ write.csv(out.jk.coefs,file=file.path(outdir,
 print(paste("Output directory: ", getwd()))
 ```
 
-    ## [1] "Output directory:  /Users/sserbin/Data/GitHub/spectratrait/vignettes"
+    ## [1] "Output directory:  /Users/sserbin/Library/CloudStorage/OneDrive-NASA/Data/Github/spectratrait/vignettes"
 
 ``` r
 # Observed versus predicted

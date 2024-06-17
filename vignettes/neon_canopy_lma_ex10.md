@@ -2,7 +2,7 @@ Spectra-trait PLSR example using NEON AOP pixel spectra and
 field-sampled leaf nitrogen content from CONUS NEON sites
 ================
 Shawn P. Serbin, Julien Lamour, & Jeremiah Anderson
-2023-03-10
+2024-06-17
 
 ### Overview
 
@@ -22,12 +22,16 @@ list.of.packages <- c("pls","dplyr","here","plotrix","ggplot2","gridExtra","spec
 invisible(lapply(list.of.packages, library, character.only = TRUE))
 ```
 
+    ## Warning: package 'pls' was built under R version 4.3.1
+
     ## 
     ## Attaching package: 'pls'
 
     ## The following object is masked from 'package:stats':
     ## 
     ##     loadings
+
+    ## Warning: package 'dplyr' was built under R version 4.3.1
 
     ## 
     ## Attaching package: 'dplyr'
@@ -40,7 +44,11 @@ invisible(lapply(list.of.packages, library, character.only = TRUE))
     ## 
     ##     intersect, setdiff, setequal, union
 
-    ## here() starts at /Users/sserbin/Data/GitHub/spectratrait
+    ## here() starts at /Users/sserbin/Library/CloudStorage/OneDrive-NASA/Data/Github/spectratrait
+
+    ## Warning: package 'plotrix' was built under R version 4.3.1
+
+    ## Warning: package 'ggplot2' was built under R version 4.3.1
 
     ## 
     ## Attaching package: 'gridExtra'
@@ -81,7 +89,7 @@ output_dir <- "tempdir"
 
 ### Set working directory (scratch space)
 
-    ## [1] "/private/var/folders/7n/zjnfnyqx1_n5fmyz0_g37rn00000gr/T/RtmpEQ6HOk"
+    ## [1] "/private/var/folders/th/fpt_z3417gn8xgply92pvy6r0000gq/T/RtmpQQQH6k"
 
 ### Grab data from EcoSIS
 
@@ -89,7 +97,7 @@ output_dir <- "tempdir"
 print(paste0("Output directory: ",getwd()))  # check wd
 ```
 
-    ## [1] "Output directory: /Users/sserbin/Data/GitHub/spectratrait/vignettes"
+    ## [1] "Output directory: /Users/sserbin/Library/CloudStorage/OneDrive-NASA/Data/Github/spectratrait/vignettes"
 
 ``` r
 dat_raw <- spectratrait::get_ecosis_data(ecosis_id = ecosis_id)
@@ -114,21 +122,21 @@ head(dat_raw)
 ```
 
     ## # A tibble: 6 × 459
-    ##   Affili…¹  Boron Calcium Carbon Carot…² Carot…³ Cellu…⁴ Chlor…⁵ Chlor…⁶  Copper
-    ##   <chr>     <dbl>   <dbl>  <dbl>   <dbl>   <dbl>   <dbl>   <dbl>   <dbl>   <dbl>
-    ## 1 Univers… 0.0420   24.2    463.    9.19    1.18    221.    45.6    5.94 0.00861
-    ## 2 Univers… 0.0361    6.90   558.   10.8     1.17    183.    59.5    6.58 0.00840
-    ## 3 Univers… 0.0407   16.7    532.   12.2     1.52    133.    67.0    8.63 0.00912
-    ## 4 Univers… 0.0461   13.9    461.    9.16    1.50    220.    46.5    7.72 0.00927
-    ## 5 Univers… 0.0401   13.7    510.   11.0     1.53    101.    58.6    8.39 0.00711
-    ## 6 Univers… 0.0456   14.5    557.    8.90    1.24    214.    45.2    6.33 0.00839
-    ## # … with 449 more variables: EWT <dbl>, Fiber <dbl>, Flavonoids <dbl>,
-    ## #   LMA <dbl>, Lignin <dbl>, Magnesium <dbl>, Manganese <dbl>, NSC <dbl>,
-    ## #   Nitrogen <dbl>, PI <chr>, Phenolics <dbl>, Phosphorus <dbl>, Plot_ID <chr>,
+    ##   Affiliation   Boron Calcium Carbon Carotenoids_area Carotenoids_mass Cellulose
+    ##   <chr>         <dbl>   <dbl>  <dbl>            <dbl>            <dbl>     <dbl>
+    ## 1 University … 0.0420   24.2    463.             9.19             1.18      221.
+    ## 2 University … 0.0361    6.90   558.            10.8              1.17      183.
+    ## 3 University … 0.0407   16.7    532.            12.2              1.52      133.
+    ## 4 University … 0.0461   13.9    461.             9.16             1.50      220.
+    ## 5 University … 0.0401   13.7    510.            11.0              1.53      101.
+    ## 6 University … 0.0456   14.5    557.             8.90             1.24      214.
+    ## # ℹ 452 more variables: Chlorophylls_area <dbl>, Chlorophylls_mass <dbl>,
+    ## #   Copper <dbl>, EWT <dbl>, Fiber <dbl>, Flavonoids <dbl>, LMA <dbl>,
+    ## #   Lignin <dbl>, Magnesium <dbl>, Manganese <dbl>, NSC <dbl>, Nitrogen <dbl>,
+    ## #   PI <chr>, Phenolics <dbl>, Phosphorus <dbl>, Plot_ID <chr>,
     ## #   Potassium <dbl>, Project <chr>, SLA <dbl>, Sample_Year <dbl>, Starch <dbl>,
     ## #   Sugar <dbl>, Sulfur <dbl>, Water <dbl>, d13C <dbl>, d15N <dbl>,
-    ## #   `384` <dbl>, `389` <dbl>, `394` <dbl>, `399` <dbl>, `404` <dbl>,
-    ## #   `409` <dbl>, `414` <dbl>, `419` <dbl>, `424` <dbl>, `429` <dbl>, …
+    ## #   `384` <dbl>, `389` <dbl>, `394` <dbl>, `399` <dbl>, `404` <dbl>, …
 
 ``` r
 names(dat_raw)[1:40]
@@ -158,21 +166,20 @@ head(sample_info)
 ```
 
     ## # A tibble: 6 × 33
-    ##   Affili…¹  Boron Calcium Carbon Carot…² Carot…³ Cellu…⁴ Chlor…⁵ Chlor…⁶  Copper
-    ##   <chr>     <dbl>   <dbl>  <dbl>   <dbl>   <dbl>   <dbl>   <dbl>   <dbl>   <dbl>
-    ## 1 Univers… 0.0420   24.2    463.    9.19    1.18    221.    45.6    5.94 0.00861
-    ## 2 Univers… 0.0361    6.90   558.   10.8     1.17    183.    59.5    6.58 0.00840
-    ## 3 Univers… 0.0407   16.7    532.   12.2     1.52    133.    67.0    8.63 0.00912
-    ## 4 Univers… 0.0461   13.9    461.    9.16    1.50    220.    46.5    7.72 0.00927
-    ## 5 Univers… 0.0401   13.7    510.   11.0     1.53    101.    58.6    8.39 0.00711
-    ## 6 Univers… 0.0456   14.5    557.    8.90    1.24    214.    45.2    6.33 0.00839
-    ## # … with 23 more variables: EWT <dbl>, Fiber <dbl>, Flavonoids <dbl>,
-    ## #   LMA <dbl>, Lignin <dbl>, Magnesium <dbl>, Manganese <dbl>, NSC <dbl>,
-    ## #   Nitrogen <dbl>, PI <chr>, Phenolics <dbl>, Phosphorus <dbl>, Plot_ID <chr>,
+    ##   Affiliation   Boron Calcium Carbon Carotenoids_area Carotenoids_mass Cellulose
+    ##   <chr>         <dbl>   <dbl>  <dbl>            <dbl>            <dbl>     <dbl>
+    ## 1 University … 0.0420   24.2    463.             9.19             1.18      221.
+    ## 2 University … 0.0361    6.90   558.            10.8              1.17      183.
+    ## 3 University … 0.0407   16.7    532.            12.2              1.52      133.
+    ## 4 University … 0.0461   13.9    461.             9.16             1.50      220.
+    ## 5 University … 0.0401   13.7    510.            11.0              1.53      101.
+    ## 6 University … 0.0456   14.5    557.             8.90             1.24      214.
+    ## # ℹ 26 more variables: Chlorophylls_area <dbl>, Chlorophylls_mass <dbl>,
+    ## #   Copper <dbl>, EWT <dbl>, Fiber <dbl>, Flavonoids <dbl>, LMA <dbl>,
+    ## #   Lignin <dbl>, Magnesium <dbl>, Manganese <dbl>, NSC <dbl>, Nitrogen <dbl>,
+    ## #   PI <chr>, Phenolics <dbl>, Phosphorus <dbl>, Plot_ID <chr>,
     ## #   Potassium <dbl>, Project <chr>, SLA <dbl>, Sample_Year <dbl>, Starch <dbl>,
-    ## #   Sugar <dbl>, Sulfur <dbl>, Water <dbl>, d13C <dbl>, d15N <dbl>, and
-    ## #   abbreviated variable names ¹​Affiliation, ²​Carotenoids_area,
-    ## #   ³​Carotenoids_mass, ⁴​Cellulose, ⁵​Chlorophylls_area, ⁶​Chlorophylls_mass
+    ## #   Sugar <dbl>, Sulfur <dbl>, Water <dbl>, d13C <dbl>, d15N <dbl>
 
 ``` r
 # spectra matrix
@@ -312,6 +319,9 @@ cal_hist_plot <- qplot(cal.plsr.data[,paste0(inVar)],geom="histogram",
 ```
 
     ## Warning: `qplot()` was deprecated in ggplot2 3.4.0.
+    ## This warning is displayed once every 8 hours.
+    ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
+    ## generated.
 
 ``` r
 val_hist_plot <- qplot(val.plsr.data[,paste0(inVar)],geom="histogram",
@@ -592,9 +602,15 @@ cal_scatter_plot <- ggplot(cal.plsr.output, aes(x=PLSR_CV_Predicted, y=get(inVar
 
     ## Warning: Using `size` aesthetic for lines was deprecated in ggplot2 3.4.0.
     ## ℹ Please use `linewidth` instead.
+    ## This warning is displayed once every 8 hours.
+    ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
+    ## generated.
 
     ## Warning: The `size` argument of `element_rect()` is deprecated as of ggplot2 3.4.0.
     ## ℹ Please use the `linewidth` argument instead.
+    ## This warning is displayed once every 8 hours.
+    ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
+    ## generated.
 
 ``` r
 cal_resid_histogram <- ggplot(cal.plsr.output, aes(x=PLSR_CV_Residuals)) +
@@ -635,9 +651,11 @@ scatterplots <- grid.arrange(cal_scatter_plot, val_scatter_plot, cal_resid_histo
                              val_resid_histogram, nrow=2,ncol=2)
 ```
 
-    ## Warning: Removed 22 rows containing missing values (`geom_point()`).
+    ## Warning: Removed 22 rows containing missing values or values outside the scale range
+    ## (`geom_point()`).
 
-    ## Warning: Removed 8 rows containing missing values (`geom_point()`).
+    ## Warning: Removed 8 rows containing missing values or values outside the scale range
+    ## (`geom_point()`).
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
@@ -817,7 +835,7 @@ write.csv(out.jk.coefs,file=file.path(outdir,paste0(inVar,'_Bootstrap_PLSR_Coeff
 print(paste("Output directory: ", getwd()))
 ```
 
-    ## [1] "Output directory:  /Users/sserbin/Data/GitHub/spectratrait/vignettes"
+    ## [1] "Output directory:  /Users/sserbin/Library/CloudStorage/OneDrive-NASA/Data/Github/spectratrait/vignettes"
 
 ``` r
 # Observed versus predicted

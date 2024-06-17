@@ -2,7 +2,7 @@ Spectra-trait PLSR example using NEON AOP pixel spectra and
 field-sampled leaf nitrogen content from CONUS NEON sites
 ================
 Shawn P. Serbin, Julien Lamour, & Jeremiah Anderson
-2022-03-17
+2024-06-17
 
 ### Overview
 
@@ -22,6 +22,8 @@ list.of.packages <- c("pls","dplyr","here","plotrix","ggplot2","gridExtra","spec
 invisible(lapply(list.of.packages, library, character.only = TRUE))
 ```
 
+    ## Warning: package 'pls' was built under R version 4.3.1
+
     ## 
     ## Attaching package: 'pls'
 
@@ -29,7 +31,7 @@ invisible(lapply(list.of.packages, library, character.only = TRUE))
     ## 
     ##     loadings
 
-    ## Warning: package 'dplyr' was built under R version 4.0.5
+    ## Warning: package 'dplyr' was built under R version 4.3.1
 
     ## 
     ## Attaching package: 'dplyr'
@@ -42,7 +44,11 @@ invisible(lapply(list.of.packages, library, character.only = TRUE))
     ## 
     ##     intersect, setdiff, setequal, union
 
-    ## here() starts at /Users/sserbin/Data/GitHub/spectratrait
+    ## here() starts at /Users/sserbin/Library/CloudStorage/OneDrive-NASA/Data/Github/spectratrait
+
+    ## Warning: package 'plotrix' was built under R version 4.3.1
+
+    ## Warning: package 'ggplot2' was built under R version 4.3.1
 
     ## 
     ## Attaching package: 'gridExtra'
@@ -83,7 +89,7 @@ output_dir <- "tempdir"
 
 ### Set working directory (scratch space)
 
-    ## [1] "/private/var/folders/xp/h3k9vf3n2jx181ts786_yjrn9c2gjq/T/Rtmp4LIZez"
+    ## [1] "/private/var/folders/th/fpt_z3417gn8xgply92pvy6r0000gq/T/RtmpPp6bS4"
 
 ### Grab data from EcoSIS
 
@@ -91,7 +97,7 @@ output_dir <- "tempdir"
 print(paste0("Output directory: ",getwd()))  # check wd
 ```
 
-    ## [1] "Output directory: /Users/sserbin/Data/GitHub/spectratrait/vignettes"
+    ## [1] "Output directory: /Users/sserbin/Library/CloudStorage/OneDrive-NASA/Data/Github/spectratrait/vignettes"
 
 ``` r
 dat_raw <- spectratrait::get_ecosis_data(ecosis_id = ecosis_id)
@@ -124,7 +130,7 @@ head(dat_raw)
     ## 4 University … 0.0461   13.9    461.             9.16             1.50      220.
     ## 5 University … 0.0401   13.7    510.            11.0              1.53      101.
     ## 6 University … 0.0456   14.5    557.             8.90             1.24      214.
-    ## # … with 452 more variables: Chlorophylls_area <dbl>, Chlorophylls_mass <dbl>,
+    ## # ℹ 452 more variables: Chlorophylls_area <dbl>, Chlorophylls_mass <dbl>,
     ## #   Copper <dbl>, EWT <dbl>, Fiber <dbl>, Flavonoids <dbl>, LMA <dbl>,
     ## #   Lignin <dbl>, Magnesium <dbl>, Manganese <dbl>, NSC <dbl>, Nitrogen <dbl>,
     ## #   PI <chr>, Phenolics <dbl>, Phosphorus <dbl>, Plot_ID <chr>,
@@ -168,7 +174,7 @@ head(sample_info)
     ## 4 University … 0.0461   13.9    461.             9.16             1.50      220.
     ## 5 University … 0.0401   13.7    510.            11.0              1.53      101.
     ## 6 University … 0.0456   14.5    557.             8.90             1.24      214.
-    ## # … with 26 more variables: Chlorophylls_area <dbl>, Chlorophylls_mass <dbl>,
+    ## # ℹ 26 more variables: Chlorophylls_area <dbl>, Chlorophylls_mass <dbl>,
     ## #   Copper <dbl>, EWT <dbl>, Fiber <dbl>, Flavonoids <dbl>, LMA <dbl>,
     ## #   Lignin <dbl>, Magnesium <dbl>, Manganese <dbl>, NSC <dbl>, Nitrogen <dbl>,
     ## #   PI <chr>, Phenolics <dbl>, Phosphorus <dbl>, Plot_ID <chr>,
@@ -309,6 +315,14 @@ cal_hist_plot <- qplot(cal.plsr.data[,paste0(inVar)],geom="histogram",
                        main = paste0("Cal. Histogram for ",inVar),
                        xlab = paste0(inVar),ylab = "Count",fill=I("grey50"),col=I("black"),
                        alpha=I(.7))
+```
+
+    ## Warning: `qplot()` was deprecated in ggplot2 3.4.0.
+    ## This warning is displayed once every 8 hours.
+    ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
+    ## generated.
+
+``` r
 val_hist_plot <- qplot(val.plsr.data[,paste0(inVar)],geom="histogram",
                        main = paste0("Val. Histogram for ",inVar),
                        xlab = paste0(inVar),ylab = "Count",fill=I("grey50"),col=I("black"),
@@ -583,7 +597,21 @@ cal_scatter_plot <- ggplot(cal.plsr.output, aes(x=PLSR_CV_Predicted, y=get(inVar
         axis.title=element_text(size=20, face="bold"), 
         axis.text.x = element_text(angle = 0,vjust = 0.5),
         panel.border = element_rect(linetype = "solid", fill = NA, size=1.5))
+```
 
+    ## Warning: Using `size` aesthetic for lines was deprecated in ggplot2 3.4.0.
+    ## ℹ Please use `linewidth` instead.
+    ## This warning is displayed once every 8 hours.
+    ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
+    ## generated.
+
+    ## Warning: The `size` argument of `element_rect()` is deprecated as of ggplot2 3.4.0.
+    ## ℹ Please use the `linewidth` argument instead.
+    ## This warning is displayed once every 8 hours.
+    ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
+    ## generated.
+
+``` r
 cal_resid_histogram <- ggplot(cal.plsr.output, aes(x=PLSR_CV_Residuals)) +
   geom_histogram(alpha=.5, position="identity") + 
   geom_vline(xintercept = 0, color="black", 
@@ -622,9 +650,11 @@ scatterplots <- grid.arrange(cal_scatter_plot, val_scatter_plot, cal_resid_histo
                              val_resid_histogram, nrow=2,ncol=2)
 ```
 
-    ## Warning: Removed 5 rows containing missing values (geom_point).
+    ## Warning: Removed 5 rows containing missing values or values outside the scale range
+    ## (`geom_point()`).
 
-    ## Warning: Removed 2 rows containing missing values (geom_point).
+    ## Warning: Removed 2 rows containing missing values or values outside the scale range
+    ## (`geom_point()`).
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
@@ -804,7 +834,7 @@ write.csv(out.jk.coefs,file=file.path(outdir,paste0(inVar,'_Bootstrap_PLSR_Coeff
 print(paste("Output directory: ", getwd()))
 ```
 
-    ## [1] "Output directory:  /Users/sserbin/Data/GitHub/spectratrait/vignettes"
+    ## [1] "Output directory:  /Users/sserbin/Library/CloudStorage/OneDrive-NASA/Data/Github/spectratrait/vignettes"
 
 ``` r
 # Observed versus predicted

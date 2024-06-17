@@ -3,8 +3,8 @@ title: Spectra-trait PLSR example using leaf-level spectra and specific leaf are
 author: "Shawn P. Serbin, Julien Lamour, & Jeremiah Anderson"
 date: "`r Sys.Date()`"
 output:
-  github_document: default
   pdf_document: default
+  github_document: default
   html_notebook: default
   html_document:
     df_print: paged
@@ -145,12 +145,10 @@ write.csv(val.plsr.data,file=file.path(outdir,paste0(inVar,'_Val_PLSR_Dataset.cs
 cal_spec <- as.matrix(cal.plsr.data[, which(names(cal.plsr.data) %in% paste0("Wave_",wv))])
 cal.plsr.data <- data.frame(cal.plsr.data[, which(names(cal.plsr.data) %notin% paste0("Wave_",wv))],
                             Spectra=I(cal_spec))
-head(cal.plsr.data)[1:5]
 
 val_spec <- as.matrix(val.plsr.data[, which(names(val.plsr.data) %in% paste0("Wave_",wv))])
 val.plsr.data <- data.frame(val.plsr.data[, which(names(val.plsr.data) %notin% paste0("Wave_",wv))],
                             Spectra=I(val_spec))
-head(val.plsr.data)[1:5]
 ```
 
 ### plot cal and val spectra

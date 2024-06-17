@@ -4,11 +4,11 @@ author: "Shawn P. Serbin, Julien Lamour, & Jeremiah Anderson"
 date: "`r Sys.Date()`"
 output:
   github_document: default
-  pdf_document: default
-  html_notebook: default
   html_document:
     df_print: paged
     keep_md: true
+  pdf_document: default
+  html_notebook: default
   rmarkdown: html_vignette
 vignette: >
   %\VignetteIndexEntry{Spectra-trait PLSR example using leaf-level spectra and leaf nitrogen content (Narea, g/m2) data from eight different crop species growing in a glasshouse at Brookhaven National Laboratory}
