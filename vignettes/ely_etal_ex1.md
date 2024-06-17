@@ -3,13 +3,13 @@ content (Narea, g/m2) data from eight different crop species growing in
 a glasshouse at Brookhaven National Laboratory
 ================
 Shawn P. Serbin, Julien Lamour, & Jeremiah Anderson
-2022-03-17
+2024-06-17
 
 ### Overview
 
 This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook to
-illustrate how to load an internal dataset (“ely\_plsr\_data”), choose
-the “optimal” number of plsr components, and fit a plsr model for leaf
+illustrate how to load an internal dataset (“ely_plsr_data”), choose the
+“optimal” number of plsr components, and fit a plsr model for leaf
 nitrogen content (Narea, g/m2)
 
 ### Getting Started
@@ -21,6 +21,8 @@ list.of.packages <- c("pls","dplyr","here","plotrix","ggplot2","gridExtra","spec
 invisible(lapply(list.of.packages, library, character.only = TRUE))
 ```
 
+    ## Warning: package 'pls' was built under R version 4.3.1
+
     ## 
     ## Attaching package: 'pls'
 
@@ -28,7 +30,7 @@ invisible(lapply(list.of.packages, library, character.only = TRUE))
     ## 
     ##     loadings
 
-    ## Warning: package 'dplyr' was built under R version 4.0.5
+    ## Warning: package 'dplyr' was built under R version 4.3.1
 
     ## 
     ## Attaching package: 'dplyr'
@@ -41,7 +43,11 @@ invisible(lapply(list.of.packages, library, character.only = TRUE))
     ## 
     ##     intersect, setdiff, setequal, union
 
-    ## here() starts at /Users/sserbin/Data/GitHub/spectratrait
+    ## here() starts at /Users/sserbin/Library/CloudStorage/OneDrive-NASA/Data/Github/spectratrait
+
+    ## Warning: package 'plotrix' was built under R version 4.3.1
+
+    ## Warning: package 'ggplot2' was built under R version 4.3.1
 
     ## 
     ## Attaching package: 'gridExtra'
@@ -103,7 +109,7 @@ inVar <- "N_g_m2"
 
 ### Set working directory (scratch space)
 
-    ## [1] "/private/var/folders/xp/h3k9vf3n2jx181ts786_yjrn9c2gjq/T/RtmpP2S4KY"
+    ## [1] "/private/var/folders/th/fpt_z3417gn8xgply92pvy6r0000gq/T/RtmpJ3BBUV"
 
 ### Full PLSR dataset
 
@@ -219,6 +225,14 @@ cal_hist_plot <- qplot(cal.plsr.data[,paste0(inVar)],geom="histogram",
                        main = paste0("Cal. Histogram for ",inVar),
                        xlab = paste0(inVar),ylab = "Count",fill=I("grey50"),col=I("black"),
                        alpha=I(.7))
+```
+
+    ## Warning: `qplot()` was deprecated in ggplot2 3.4.0.
+    ## This warning is displayed once every 8 hours.
+    ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
+    ## generated.
+
+``` r
 val_hist_plot <- qplot(val.plsr.data[,paste0(inVar)],geom="histogram",
                        main = paste0("Val. Histogram for ",inVar),
                        xlab = paste0(inVar),ylab = "Count",fill=I("grey50"),col=I("black"),
@@ -495,7 +509,21 @@ cal_scatter_plot <- ggplot(cal.plsr.output, aes(x=PLSR_CV_Predicted, y=get(inVar
         axis.title=element_text(size=20, face="bold"), 
         axis.text.x = element_text(angle = 0,vjust = 0.5),
         panel.border = element_rect(linetype = "solid", fill = NA, size=1.5))
+```
 
+    ## Warning: Using `size` aesthetic for lines was deprecated in ggplot2 3.4.0.
+    ## ℹ Please use `linewidth` instead.
+    ## This warning is displayed once every 8 hours.
+    ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
+    ## generated.
+
+    ## Warning: The `size` argument of `element_rect()` is deprecated as of ggplot2 3.4.0.
+    ## ℹ Please use the `linewidth` argument instead.
+    ## This warning is displayed once every 8 hours.
+    ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
+    ## generated.
+
+``` r
 cal_resid_histogram <- ggplot(cal.plsr.output, aes(x=PLSR_CV_Residuals)) +
   geom_histogram(alpha=.5, position="identity") + 
   geom_vline(xintercept = 0, color="black", 
@@ -534,8 +562,11 @@ scatterplots <- grid.arrange(cal_scatter_plot, val_scatter_plot, cal_resid_histo
                              val_resid_histogram, nrow=2,ncol=2)
 ```
 
-    ## Warning: Removed 3 rows containing missing values (geom_point).
-    ## Removed 3 rows containing missing values (geom_point).
+    ## Warning: Removed 3 rows containing missing values or values outside the scale range
+    ## (`geom_point()`).
+
+    ## Warning: Removed 3 rows containing missing values or values outside the scale range
+    ## (`geom_point()`).
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
@@ -754,7 +785,7 @@ write.csv(out.jk.coefs,file=file.path(outdir,paste0(inVar,
 print(paste("Output directory: ", outdir))
 ```
 
-    ## [1] "Output directory:  /var/folders/xp/h3k9vf3n2jx181ts786_yjrn9c2gjq/T//RtmpP2S4KY"
+    ## [1] "Output directory:  /var/folders/th/fpt_z3417gn8xgply92pvy6r0000gq/T//RtmpJ3BBUV"
 
 ``` r
 # Observed versus predicted

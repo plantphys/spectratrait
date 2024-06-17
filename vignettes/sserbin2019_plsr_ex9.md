@@ -3,7 +3,7 @@ this case applying the LMA model from Serbin et al., (2019; DOI -
 10.1111/nph.16123) to a dataset collected at CONUS NEON field sites
 ================
 Shawn P. Serbin, Julien Lamour, & Jeremiah Anderson
-2022-03-17
+2024-06-17
 
 ### Getting Started
 
@@ -15,6 +15,8 @@ list.of.packages <- c("pls","dplyr","reshape2","here","plotrix","ggplot2","gridE
 invisible(lapply(list.of.packages, library, character.only = TRUE))
 ```
 
+    ## Warning: package 'pls' was built under R version 4.3.1
+
     ## 
     ## Attaching package: 'pls'
 
@@ -22,7 +24,7 @@ invisible(lapply(list.of.packages, library, character.only = TRUE))
     ## 
     ##     loadings
 
-    ## Warning: package 'dplyr' was built under R version 4.0.5
+    ## Warning: package 'dplyr' was built under R version 4.3.1
 
     ## 
     ## Attaching package: 'dplyr'
@@ -35,7 +37,11 @@ invisible(lapply(list.of.packages, library, character.only = TRUE))
     ## 
     ##     intersect, setdiff, setequal, union
 
-    ## here() starts at /Users/sserbin/Data/GitHub/spectratrait
+    ## here() starts at /Users/sserbin/Library/CloudStorage/OneDrive-NASA/Data/Github/spectratrait
+
+    ## Warning: package 'plotrix' was built under R version 4.3.1
+
+    ## Warning: package 'ggplot2' was built under R version 4.3.1
 
     ## 
     ## Attaching package: 'gridExtra'
@@ -76,7 +82,7 @@ output_dir <- "tempdir"
 
 ### Set working directory (scratch space)
 
-    ## [1] "/private/var/folders/xp/h3k9vf3n2jx181ts786_yjrn9c2gjq/T/RtmpfDvF7M"
+    ## [1] "/private/var/folders/th/fpt_z3417gn8xgply92pvy6r0000gq/T/RtmpJ7r53R"
 
 ### Grab PLSR Coefficients from GitHub
 
@@ -129,7 +135,7 @@ head(dat_raw)
     ## 4 University of Wiscon… black walnut  D02    broadleaf        60.8 Juglans      
     ## 5 University of Wiscon… black walnut  D02    broadleaf        85.9 Juglans      
     ## 6 University of Wiscon… black walnut  D02    broadleaf        85.9 Juglans      
-    ## # … with 2,156 more variables: `Latin Species` <chr>, PI <chr>, Project <chr>,
+    ## # ℹ 2,156 more variables: `Latin Species` <chr>, PI <chr>, Project <chr>,
     ## #   Sample_ID <chr>, `USDA Symbol` <chr>, `350` <dbl>, `351` <dbl>,
     ## #   `352` <dbl>, `353` <dbl>, `354` <dbl>, `355` <dbl>, `356` <dbl>,
     ## #   `357` <dbl>, `358` <dbl>, `359` <dbl>, `360` <dbl>, `361` <dbl>,
@@ -192,7 +198,7 @@ head(sample_info)
     ## 4 University of Wiscon… black walnut  D02    broadleaf        60.8 Juglans      
     ## 5 University of Wiscon… black walnut  D02    broadleaf        85.9 Juglans      
     ## 6 University of Wiscon… black walnut  D02    broadleaf        85.9 Juglans      
-    ## # … with 5 more variables: `Latin Species` <chr>, PI <chr>, Project <chr>,
+    ## # ℹ 5 more variables: `Latin Species` <chr>, PI <chr>, Project <chr>,
     ## #   Sample_ID <chr>, `USDA Symbol` <chr>
 
 ``` r
@@ -411,7 +417,7 @@ dev.off();
 print(paste("Output directory: ", outdir))
 ```
 
-    ## [1] "Output directory:  /var/folders/xp/h3k9vf3n2jx181ts786_yjrn9c2gjq/T//RtmpfDvF7M"
+    ## [1] "Output directory:  /var/folders/th/fpt_z3417gn8xgply92pvy6r0000gq/T//RtmpJ7r53R"
 
 ``` r
 # Observed versus predicted
