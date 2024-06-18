@@ -7,6 +7,8 @@ on:
 
 name: R-CMD-check-OS-R
 
+permissions: read-all
+
 env:
   NCPUS: 2
 
@@ -20,13 +22,13 @@ jobs:
       fail-fast: false
       matrix:
         config:
-          - {os: macOS-latest,  r: 'oldrel-1'}
-          - {os: macOS-latest,  r: 'release'}
-          - {os: windows-2022,  r: 'oldrel-1'}
-          - {os: windows-2022,  r: 'release'}
-          - {os: ubuntu-latest, r: 'oldrel-1'}
-          - {os: ubuntu-latest, r: 'release'}
-          - {os: ubuntu-latest, r: 'devel', http-user-agent: 'release'}
+          - {os: macos-latest,   r: 'release'}
+          - {os: windows-latest, r: 'release'}
+          # use 4.1 to check with rtools40's older compiler
+          - {os: windows-latest, r: '4.1'}
+          - {os: ubuntu-latest,   r: 'devel', http-user-agent: 'release'}
+          - {os: ubuntu-latest,   r: 'release'}
+          - {os: ubuntu-latest,   r: 'oldrel-1'}
           
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
@@ -35,7 +37,7 @@ jobs:
       RSPM: ${{ matrix.config.rspm }}
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@4
 
       - uses: r-lib/actions/setup-pandoc@v2
 
