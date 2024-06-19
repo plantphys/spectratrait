@@ -191,7 +191,8 @@ cal.RMSEP <- round(sqrt(mean(plsr_data.output$PLSR_CV_Residuals^2)),2)
 rng_quant <- quantile(plsr_data.output[,inVar], probs = c(0.001, 0.999))
 cal_scatter_plot <- ggplot(plsr_data.output, aes(x=PLSR_CV_Predicted, y=get(inVar))) + 
   theme_bw() + geom_point() + geom_abline(intercept = 0, slope = 1, color="dark grey", 
-                                          linetype="dashed", size=1.5) + xlim(rng_quant[1], rng_quant[2]) + 
+                                          linetype="dashed", linewidth=1.5) + 
+  xlim(rng_quant[1], rng_quant[2]) + 
   ylim(rng_quant[1], rng_quant[2]) +
   labs(x=paste0("Predicted ", paste(inVar), " (units)"),
        y=paste0("Observed ", paste(inVar), " (units)"),
@@ -199,16 +200,16 @@ cal_scatter_plot <- ggplot(plsr_data.output, aes(x=PLSR_CV_Predicted, y=get(inVa
   theme(axis.text=element_text(size=18), legend.position="none",
         axis.title=element_text(size=20, face="bold"), 
         axis.text.x = element_text(angle = 0,vjust = 0.5),
-        panel.border = element_rect(linetype = "solid", fill = NA, size=1.5))
+        panel.border = element_rect(linetype = "solid", fill = NA, linewidth=1.5))
 
 cal_resid_histogram <- ggplot(plsr_data.output, aes(x=PLSR_CV_Residuals)) +
   geom_histogram(alpha=.5, position="identity") + 
   geom_vline(xintercept = 0, color="black", 
-             linetype="dashed", size=1) + theme_bw() + 
+             linetype="dashed", linewidth=1) + theme_bw() + 
   theme(axis.text=element_text(size=18), legend.position="none",
         axis.title=element_text(size=20, face="bold"), 
         axis.text.x = element_text(angle = 0,vjust = 0.5),
-        panel.border = element_rect(linetype = "solid", fill = NA, size=1.5))
+        panel.border = element_rect(linetype = "solid", fill = NA, linewidth=1.5))
 
 # plot cal/val side-by-side
 scatterplots <- grid.arrange(cal_scatter_plot, cal_resid_histogram, nrow=2, ncol=1)
