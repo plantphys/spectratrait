@@ -157,14 +157,16 @@ rm(split_data)
 print(paste("Cal observations: ",dim(cal.plsr.data)[1],sep=""))
 print(paste("Val observations: ",dim(val.plsr.data)[1],sep=""))
 
-cal_hist_plot <- qplot(cal.plsr.data[,paste0(inVar)],geom="histogram",
-                       main = paste0("Cal. Histogram for ",inVar),
-                       xlab = paste0(inVar),ylab = "Count",fill=I("grey50"),col=I("black"),
-                       alpha=I(.7))
-val_hist_plot <- qplot(val.plsr.data[,paste0(inVar)],geom="histogram",
-                       main = paste0("Val. Histogram for ",inVar),
-                       xlab = paste0(inVar),ylab = "Count",fill=I("grey50"),col=I("black"),
-                       alpha=I(.7))
+cal_hist_plot <- ggplot(data = cal.plsr.data, 
+                        aes(x = cal.plsr.data[,paste0(inVar)])) + 
+  geom_histogram(fill=I("grey50"),col=I("black"),alpha=I(.7)) + 
+  labs(title=paste0("Calibration Histogram for ",inVar), x = paste0(inVar), 
+       y = "Count")
+val_hist_plot <- ggplot(data = val.plsr.data, 
+                        aes(x = val.plsr.data[,paste0(inVar)])) +
+  geom_histogram(fill=I("grey50"),col=I("black"),alpha=I(.7)) + 
+  labs(title=paste0("Validation Histogram for ",inVar), x = paste0(inVar), 
+       y = "Count")
 histograms <- grid.arrange(cal_hist_plot, val_hist_plot, ncol=2)
 ggsave(filename = file.path(outdir,paste0(inVar,"_Cal_Val_Histograms.png")), plot = histograms, 
        device="png", width = 30, 
@@ -288,8 +290,8 @@ val.RMSEP <- round(sqrt(mean(val.plsr.output$PLSR_Residuals^2)),2)
 rng_quant <- quantile(cal.plsr.output[,inVar], probs = c(0.001, 0.999))
 cal_scatter_plot <- ggplot(cal.plsr.output, aes(x=PLSR_CV_Predicted, y=get(inVar))) + 
   theme_bw() + geom_point() + geom_abline(intercept = 0, slope = 1, color="dark grey", 
-                                          linetype="dashed", size=1.5) + xlim(rng_quant[1], 
-                                                                              rng_quant[2]) + 
+                                          linetype="dashed", linewidth=1.5) + 
+  xlim(rng_quant[1], rng_quant[2]) + 
   ylim(rng_quant[1], rng_quant[2]) +
   labs(x=paste0("Predicted ", paste(inVar), " (units)"),
        y=paste0("Observed ", paste(inVar), " (units)"),
@@ -298,22 +300,22 @@ cal_scatter_plot <- ggplot(cal.plsr.output, aes(x=PLSR_CV_Predicted, y=get(inVar
   theme(axis.text=element_text(size=18), legend.position="none",
         axis.title=element_text(size=20, face="bold"), 
         axis.text.x = element_text(angle = 0,vjust = 0.5),
-        panel.border = element_rect(linetype = "solid", fill = NA, size=1.5))
+        panel.border = element_rect(linetype = "solid", fill = NA, linewidth=1.5))
 
 cal_resid_histogram <- ggplot(cal.plsr.output, aes(x=PLSR_CV_Residuals)) +
   geom_histogram(alpha=.5, position="identity") + 
   geom_vline(xintercept = 0, color="black", 
-             linetype="dashed", size=1) + theme_bw() + 
+             linetype="dashed", linewidth=1) + theme_bw() + 
   theme(axis.text=element_text(size=18), legend.position="none",
         axis.title=element_text(size=20, face="bold"), 
         axis.text.x = element_text(angle = 0,vjust = 0.5),
-        panel.border = element_rect(linetype = "solid", fill = NA, size=1.5))
+        panel.border = element_rect(linetype = "solid", fill = NA, linewidth=1.5))
 
 rng_quant <- quantile(val.plsr.output[,inVar], probs = c(0.001, 0.999))
 val_scatter_plot <- ggplot(val.plsr.output, aes(x=PLSR_Predicted, y=get(inVar))) + 
   theme_bw() + geom_point() + geom_abline(intercept = 0, slope = 1, color="dark grey", 
-                                          linetype="dashed", size=1.5) + xlim(rng_quant[1], 
-                                                                              rng_quant[2]) + 
+                                          linetype="dashed", linewidth=1.5) + 
+  xlim(rng_quant[1], rng_quant[2]) + 
   ylim(rng_quant[1], rng_quant[2]) +
   labs(x=paste0("Predicted ", paste(inVar), " (units)"),
        y=paste0("Observed ", paste(inVar), " (units)"),
@@ -322,16 +324,16 @@ val_scatter_plot <- ggplot(val.plsr.output, aes(x=PLSR_Predicted, y=get(inVar)))
   theme(axis.text=element_text(size=18), legend.position="none",
         axis.title=element_text(size=20, face="bold"), 
         axis.text.x = element_text(angle = 0,vjust = 0.5),
-        panel.border = element_rect(linetype = "solid", fill = NA, size=1.5))
+        panel.border = element_rect(linetype = "solid", fill = NA, linewidth=1.5))
 
 val_resid_histogram <- ggplot(val.plsr.output, aes(x=PLSR_Residuals)) +
   geom_histogram(alpha=.5, position="identity") + 
   geom_vline(xintercept = 0, color="black", 
-             linetype="dashed", size=1) + theme_bw() + 
+             linetype="dashed", linewidth=1) + theme_bw() + 
   theme(axis.text=element_text(size=18), legend.position="none",
         axis.title=element_text(size=20, face="bold"), 
         axis.text.x = element_text(angle = 0,vjust = 0.5),
-        panel.border = element_rect(linetype = "solid", fill = NA, size=1.5))
+        panel.border = element_rect(linetype = "solid", fill = NA, linewidth=1.5))
 
 # plot cal/val side-by-side
 scatterplots <- grid.arrange(cal_scatter_plot, val_scatter_plot, cal_resid_histogram, 
