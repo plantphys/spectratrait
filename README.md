@@ -101,12 +101,12 @@ Rpubs LMA example output: https://rpubs.com/sserbin/spectratrait_ex8 <br>
 
 ## Build status
 Auto-run PLSR example:
-[![run_PLSR_example-auto](https://github.com/TESTgroup-BNL/spectratrait/actions/workflows/run_plsr_example_auto.yaml/badge.svg?branch=master)](https://github.com/TESTgroup-BNL/spectratrait/actions/workflows/run_plsr_example_auto.yaml) <br>
+[![.github/workflows/run_plsr_example_auto.yaml](https://github.com/plantphys/spectratrait/actions/workflows/run_plsr_example_auto.yaml/badge.svg?branch=main)](https://github.com/plantphys/spectratrait/actions/workflows/run_plsr_example_auto.yaml) <br>
 CI run PLSR example:
-[![ci-run_PLSR_example](https://github.com/TESTgroup-BNL/spectratrait/actions/workflows/ci-run_plsr_example.yaml/badge.svg?branch=master)](https://github.com/TESTgroup-BNL/spectratrait/actions/workflows/ci-run_plsr_example.yaml) <br>
+[![ci-run_PLSR_example](https://github.com/plantphys/spectratrait/actions/workflows/ci-run_plsr_example.yaml/badge.svg?branch=main)](https://github.com/plantphys/spectratrait/actions/workflows/ci-run_plsr_example.yaml) <br>
 CI OS and R Release Checks:
-[![R-CMD-check-OS-R](https://github.com/TESTgroup-BNL/spectratrait/actions/workflows/check-os.yaml/badge.svg?branch=master)](https://github.com/TESTgroup-BNL/spectratrait/actions/workflows/check-os.yaml) <br>
+[![R-CMD-check-OS-R](https://github.com/plantphys/spectratrait/actions/workflows/check-os.yaml/badge.svg?branch=main)](https://github.com/plantphys/spectratrait/actions/workflows/check-os.yaml) <br>
 Weekly CI Checks:
-[![R-CMD-check-Weekly](https://github.com/TESTgroup-BNL/spectratrait/actions/workflows/ci-weekly.yaml/badge.svg?branch=master)](https://github.com/TESTgroup-BNL/spectratrait/actions/workflows/ci-weekly.yaml) <br>
+[![R-CMD-check-Weekly](https://github.com/plantphys/spectratrait/actions/workflows/ci-weekly.yaml/badge.svg?branch=main)](https://github.com/plantphys/spectratrait/actions/workflows/ci-weekly.yaml) <br>
 EcoSIS API Check:
-[![run_ecosis_pull_example](https://github.com/TESTgroup-BNL/spectratrait/actions/workflows/run_ecosis_pull_example.yaml/badge.svg?branch=master)](https://github.com/TESTgroup-BNL/spectratrait/actions/workflows/run_ecosis_pull_example.yaml)
+[![run_ecosis_pull_example](https://github.com/plantphys/spectratrait/actions/workflows/run_ecosis_pull_example.yaml/badge.svg?branch=main)](https://github.com/plantphys/spectratrait/actions/workflows/run_ecosis_pull_example.yaml)
