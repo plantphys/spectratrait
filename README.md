@@ -38,19 +38,31 @@ Or 2) you can also run or source the "install_dependencies.R" script located in 
 
 Finally, to complete the installation you will also need to install the spectratrait package itself.  You can do this by copying and pasting the command below into your R or RStudio (preferred) terminal.
 
+#### To install the main (default) branch version
 ``` r
-# to install the main (default) branch version
 devtools::install_github(repo = "plantphys/spectratrait", dependencies=TRUE)
+```
+<br>
 
-# to install the main branch version - with Vignettes (though slower)
+#### To install the main branch version - with Vignettes (though slower)
+``` r
 devtools::install_github(repo = "plantphys/spectratrait", dependencies=TRUE, build_vignettes = TRUE)
+```
+<br>
 
-# to install a specific release, for example release 1.0.5
+#### To install a specific release, for example release 1.0.5
+``` r
 devtools::install_github(repo = "plantphys/spectratrait@v1.0.5", dependencies=TRUE)
+```
 
-# or a specific branch, e.g. a branch named devbranch
+<br>
+
+#### Or install a specific branch, e.g. a branch named devbranch
+``` r
 devtools::install_github(repo = "plantphys/spectratrait", ref = "devbranch", dependencies=TRUE)
 ```
+
+<br>
 
 ## Contains:
 1. Core package functions are located in the in the main "R" folder
