@@ -1,15 +1,15 @@
 Spectra-trait PLSR example using NEON AOP pixel spectra and
-field-sampled leaf nitrogen content from CONUS NEON sites
+field-sampled leaf mass area (LMA) from CONUS NEON sites
 ================
 Shawn P. Serbin, Julien Lamour, & Jeremiah Anderson
-2024-06-19
+2025-10-29
 
 ### Overview
 
 This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook to
 illustrate how to develop pixel-scale spectra-trait PLSR models. This
 example uses image data from NEON AOP and associated field measurements
-of leaf nitrogen content collected across a range of CONUS NEON sites.
+of leaf mass area (LMA) collected across a range of CONUS NEON sites.
 For more information refer to the dataset EcoSIS page:
 <https://ecosis.org/package/canopy-spectra-to-map-foliar-functional-traits-over-neon-domains-in-eastern-united-states>
 
@@ -22,16 +22,12 @@ list.of.packages <- c("pls","dplyr","here","plotrix","ggplot2","gridExtra","spec
 invisible(lapply(list.of.packages, library, character.only = TRUE))
 ```
 
-    ## Warning: package 'pls' was built under R version 4.3.1
-
     ## 
     ## Attaching package: 'pls'
 
     ## The following object is masked from 'package:stats':
     ## 
     ##     loadings
-
-    ## Warning: package 'dplyr' was built under R version 4.3.1
 
     ## 
     ## Attaching package: 'dplyr'
@@ -44,11 +40,7 @@ invisible(lapply(list.of.packages, library, character.only = TRUE))
     ## 
     ##     intersect, setdiff, setequal, union
 
-    ## here() starts at /Users/sserbin/Library/CloudStorage/OneDrive-NASA/Data/Github/spectratrait
-
-    ## Warning: package 'plotrix' was built under R version 4.3.1
-
-    ## Warning: package 'ggplot2' was built under R version 4.3.1
+    ## here() starts at /Users/sserbin/Data/Github/spectratrait
 
     ## 
     ## Attaching package: 'gridExtra'
@@ -89,7 +81,7 @@ output_dir <- "tempdir"
 
 ### Set working directory (scratch space)
 
-    ## [1] "/private/var/folders/th/fpt_z3417gn8xgply92pvy6r0000gq/T/Rtmprf8pzl"
+    ## [1] "/private/var/folders/tq/tydmhlwn1bdf_0pmpcq70r2c0000gn/T/RtmpK5lpjI"
 
 ### Grab data from EcoSIS
 
@@ -97,7 +89,7 @@ output_dir <- "tempdir"
 print(paste0("Output directory: ",getwd()))  # check wd
 ```
 
-    ## [1] "Output directory: /Users/sserbin/Library/CloudStorage/OneDrive-NASA/Data/Github/spectratrait/vignettes"
+    ## [1] "Output directory: /Users/sserbin/Data/Github/spectratrait/vignettes"
 
 ``` r
 dat_raw <- spectratrait::get_ecosis_data(ecosis_id = ecosis_id)
@@ -828,7 +820,7 @@ write.csv(out.jk.coefs,file=file.path(outdir,paste0(inVar,'_Bootstrap_PLSR_Coeff
 print(paste("Output directory: ", getwd()))
 ```
 
-    ## [1] "Output directory:  /Users/sserbin/Library/CloudStorage/OneDrive-NASA/Data/Github/spectratrait/vignettes"
+    ## [1] "Output directory:  /Users/sserbin/Data/Github/spectratrait/vignettes"
 
 ``` r
 # Observed versus predicted

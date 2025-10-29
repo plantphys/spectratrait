@@ -1,11 +1,11 @@
+name: R-CMD-check-R-release
+
 # CI to test package on different versions of R, rel-1, rel, rel+1
 on:
   push:
     branches: [main, master]
   pull_request:
     branches: [main, master]
-
-name: R-CMD-check-R-release
 
 env:
   R_LIBS_USER: /usr/local/lib/R/site-library

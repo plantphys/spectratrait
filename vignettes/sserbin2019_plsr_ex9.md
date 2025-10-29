@@ -3,7 +3,7 @@ this case applying the LMA model from Serbin et al., (2019; DOI -
 10.1111/nph.16123) to a dataset collected at CONUS NEON field sites
 ================
 Shawn P. Serbin, Julien Lamour, & Jeremiah Anderson
-2024-06-17
+2025-10-29
 
 ### Getting Started
 
@@ -15,16 +15,12 @@ list.of.packages <- c("pls","dplyr","reshape2","here","plotrix","ggplot2","gridE
 invisible(lapply(list.of.packages, library, character.only = TRUE))
 ```
 
-    ## Warning: package 'pls' was built under R version 4.3.1
-
     ## 
     ## Attaching package: 'pls'
 
     ## The following object is masked from 'package:stats':
     ## 
     ##     loadings
-
-    ## Warning: package 'dplyr' was built under R version 4.3.1
 
     ## 
     ## Attaching package: 'dplyr'
@@ -37,11 +33,7 @@ invisible(lapply(list.of.packages, library, character.only = TRUE))
     ## 
     ##     intersect, setdiff, setequal, union
 
-    ## here() starts at /Users/sserbin/Library/CloudStorage/OneDrive-NASA/Data/Github/spectratrait
-
-    ## Warning: package 'plotrix' was built under R version 4.3.1
-
-    ## Warning: package 'ggplot2' was built under R version 4.3.1
+    ## here() starts at /Users/sserbin/Data/Github/spectratrait
 
     ## 
     ## Attaching package: 'gridExtra'
@@ -82,7 +74,7 @@ output_dir <- "tempdir"
 
 ### Set working directory (scratch space)
 
-    ## [1] "/private/var/folders/th/fpt_z3417gn8xgply92pvy6r0000gq/T/RtmpJ7r53R"
+    ## [1] "/private/var/folders/tq/tydmhlwn1bdf_0pmpcq70r2c0000gn/T/RtmpyEgmZw"
 
 ### Grab PLSR Coefficients from GitHub
 
@@ -417,7 +409,7 @@ dev.off();
 print(paste("Output directory: ", outdir))
 ```
 
-    ## [1] "Output directory:  /var/folders/th/fpt_z3417gn8xgply92pvy6r0000gq/T//RtmpJ7r53R"
+    ## [1] "Output directory:  /var/folders/tq/tydmhlwn1bdf_0pmpcq70r2c0000gn/T//RtmpyEgmZw"
 
 ``` r
 # Observed versus predicted

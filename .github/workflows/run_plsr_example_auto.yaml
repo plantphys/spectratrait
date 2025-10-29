@@ -1,8 +1,8 @@
+name: run_PLSR_example-auto
+
 on:
   schedule:
     - cron:  '0 0 */2 * *'
-
-name: run_PLSR_example-auto
 
 env:
   R_LIBS_USER: /usr/local/lib/R/site-library

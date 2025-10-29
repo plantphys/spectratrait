@@ -1,17 +1,17 @@
 ---
-title: Spectra-trait PLSR example using NEON AOP pixel spectra and field-sampled leaf nitrogen content from CONUS NEON sites
+title: Spectra-trait PLSR example using NEON AOP pixel spectra and field-sampled leaf mass area (LMA) from CONUS NEON sites
 author: "Shawn P. Serbin, Julien Lamour, & Jeremiah Anderson"
 date: "`r Sys.Date()`"
 output:
-  pdf_document: default
+  github_document: default
   html_notebook: default
   html_document:
     df_print: paged
     keep_md: true
   rmarkdown: html_vignette
-  github_document: default
+  pdf_document: default
 vignette: >
-  %\VignetteIndexEntry{Spectra-trait PLSR example using NEON AOP pixel spectra and field-sampled leaf nitrogen content from CONUS NEON sites}
+  %\VignetteIndexEntry{Spectra-trait PLSR example using NEON AOP pixel spectra and field-sampled leaf mass area (LMA) from CONUS NEON sites}
   %\usepackage[utf8]{inputenc}
   %\VignetteEngine{knitr::knitr}
 ---
@@ -22,7 +22,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ### Overview
 This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook to illustrate how to develop
-pixel-scale spectra-trait PLSR models. This example uses image data from NEON AOP and associated field measurements of leaf nitrogen content collected across a range of CONUS NEON sites.  For more information refer to the dataset EcoSIS page:
+pixel-scale spectra-trait PLSR models. This example uses image data from NEON AOP and associated field measurements of leaf mass area (LMA) collected across a range of CONUS NEON sites.  For more information refer to the dataset EcoSIS page:
 https://ecosis.org/package/canopy-spectra-to-map-foliar-functional-traits-over-neon-domains-in-eastern-united-states
 
 ### Getting Started

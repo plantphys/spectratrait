@@ -1,11 +1,11 @@
+name: R-CMD-check-OS-R
+
 # Check OS and R releases
 on:
   push:
     branches: [main, master]
   pull_request:
     branches: [main, master]
-
-name: R-CMD-check-OS-R
 
 permissions: read-all
 
@@ -22,6 +22,7 @@ jobs:
       fail-fast: false
       matrix:
         config:
+          - {os: macOS-latest,  r: 'oldrel-1'}
           - {os: macos-latest,   r: 'release'}
           - {os: windows-latest, r: 'release'}
           # use 4.1 to check with rtools40's older compiler

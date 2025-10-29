@@ -1,10 +1,10 @@
+name: ci-run_PLSR_example
+
 on:
   push:
     branches: [main, master]
   pull_request:
     branches: [main, master]
-
-name: ci-run_PLSR_example
 
 env:
   R_LIBS_USER: /usr/local/lib/R/site-library

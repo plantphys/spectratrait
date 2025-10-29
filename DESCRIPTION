@@ -1,6 +1,6 @@
 Package: spectratrait
 Title: A simple add-on package to aid in the fitting of leaf or canopy scale spectra-trait PLSR models
-Version: 1.2.5
+Version: 1.2.6
 Authors@R:
   c(person(given = "Julien",
            family = "Lamour",
@@ -55,6 +55,6 @@ Suggests:
     markdown,
     rmarkdown
 Depends:
-    R (>= 3.6)
+    R (>= 4.0)
 VignetteBuilder: knitr
 NeedsCompilation: no

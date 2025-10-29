@@ -6,11 +6,13 @@
 ##' @param position Position of the legend (see base function legend for help)
 ##' @param type Name of the y axis and of the legend. E.g. Reflectance, Transmittance
 ##' @param plot_label optional plot label to include with the figure
+##' @param CI Desired confidence interval for the spectra plot. Options are: 95
+##' or 90. Default is: 95
 ##' 
 ##' @importFrom stats quantile
 ##' @importFrom graphics polygon lines legend box
 ##' 
-##' @author Julien Lamour, Shawn P. Serbin
+##' @author Julien Lamour, Shawn P. Serbin, Andrés Baresch
 ##' @export
 f.plot.spec <- function(
   Z,                  ## Spectra matrix with each row corresponding to a spectra and wavelength in columns
@@ -28,7 +30,9 @@ f.plot.spec <- function(
   
   plot(x=NULL,y=NULL,ylim=c(0,100),xlim=xlim,xlab="Wavelength (nm)",
        ylab=paste0(type," (%)"),main=plot_label)
-       
+  
+  #TODO: update this syntax to match the quantile function in R and allow for
+  # any CI option, not just hard-coded options like below
   if(CI==95){
   	ci_text="95% CI"     
   polygon(c(wv ,rev(wv)),c(spectra_quantiles[6,]*100, rev(spectra_quantiles[2,]*100)),

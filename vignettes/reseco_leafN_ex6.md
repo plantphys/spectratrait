@@ -3,7 +3,7 @@ content (Narea, g/m2) data from 36 species growing in Rosa rugosa
 invaded coastal grassland communities in Belgium
 ================
 Shawn P. Serbin, Julien Lamour, & Jeremiah Anderson
-2024-06-19
+2025-10-29
 
 ### Overview
 
@@ -21,16 +21,12 @@ list.of.packages <- c("pls","dplyr","here","plotrix","ggplot2","gridExtra","spec
 invisible(lapply(list.of.packages, library, character.only = TRUE))
 ```
 
-    ## Warning: package 'pls' was built under R version 4.3.1
-
     ## 
     ## Attaching package: 'pls'
 
     ## The following object is masked from 'package:stats':
     ## 
     ##     loadings
-
-    ## Warning: package 'dplyr' was built under R version 4.3.1
 
     ## 
     ## Attaching package: 'dplyr'
@@ -43,11 +39,7 @@ invisible(lapply(list.of.packages, library, character.only = TRUE))
     ## 
     ##     intersect, setdiff, setequal, union
 
-    ## here() starts at /Users/sserbin/Library/CloudStorage/OneDrive-NASA/Data/Github/spectratrait
-
-    ## Warning: package 'plotrix' was built under R version 4.3.1
-
-    ## Warning: package 'ggplot2' was built under R version 4.3.1
+    ## here() starts at /Users/sserbin/Data/Github/spectratrait
 
     ## 
     ## Attaching package: 'gridExtra'
@@ -88,7 +80,7 @@ output_dir <- "tempdir"
 
 ### Set working directory (scratch space)
 
-    ## [1] "/private/var/folders/th/fpt_z3417gn8xgply92pvy6r0000gq/T/RtmpP2TT60"
+    ## [1] "/private/var/folders/tq/tydmhlwn1bdf_0pmpcq70r2c0000gn/T/RtmpjuTbED"
 
 ### Grab data from EcoSIS
 
@@ -96,7 +88,7 @@ output_dir <- "tempdir"
 print(paste0("Output directory: ",getwd()))  # check wd
 ```
 
-    ## [1] "Output directory: /Users/sserbin/Library/CloudStorage/OneDrive-NASA/Data/Github/spectratrait/vignettes"
+    ## [1] "Output directory: /Users/sserbin/Data/Github/spectratrait/vignettes"
 
 ``` r
 dat_raw <- spectratrait::get_ecosis_data(ecosis_id = ecosis_id)
@@ -856,7 +848,7 @@ write.csv(out.jk.coefs,file=file.path(outdir,
 print(paste("Output directory: ", outdir))
 ```
 
-    ## [1] "Output directory:  /var/folders/th/fpt_z3417gn8xgply92pvy6r0000gq/T//RtmpP2TT60"
+    ## [1] "Output directory:  /var/folders/tq/tydmhlwn1bdf_0pmpcq70r2c0000gn/T//RtmpjuTbED"
 
 ``` r
 # Observed versus predicted

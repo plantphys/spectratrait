@@ -10,7 +10,8 @@ f.plot.spec(
   xlim = NULL,
   position = "topright",
   type = "Reflectance",
-  plot_label = NULL
+  plot_label = NULL,
+  CI = 95
 )
 }
 \arguments{
@@ -25,10 +26,13 @@ f.plot.spec(
 \item{type}{Name of the y axis and of the legend. E.g. Reflectance, Transmittance}
 
 \item{plot_label}{optional plot label to include with the figure}
+
+\item{CI}{Desired confidence interval for the spectra plot. Options are: 95
+or 90. Default is: 95}
 }
 \description{
 f.plot.spec
 }
 \author{
-Julien Lamour, Shawn P. Serbin
+Julien Lamour, Shawn P. Serbin, Andrés Baresch
 }
