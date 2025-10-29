@@ -39,10 +39,10 @@ Or 2) you can also run or source the "install_dependencies.R" script located in 
 Finally, to complete the installation you will also need to install the spectratrait package itself.  You can do this by copying and pasting the command below into your R or RStudio (preferred) terminal.
 
 ``` r
-# to install the master branch version
+# to install the main (default) branch version
 devtools::install_github(repo = "plantphys/spectratrait", dependencies=TRUE)
 
-# to install the master branch version - with Vignettes (though slower)
+# to install the main branch version - with Vignettes (though slower)
 devtools::install_github(repo = "plantphys/spectratrait", dependencies=TRUE, build_vignettes = TRUE)
 
 # to install a specific release, for example release 1.0.5
